@@ -2,25 +2,36 @@ import { getAIConfig } from "@/lib/ai/config";
 import type { AIMode } from "@/lib/ai/types";
 import {
   runMockFollowUpBullet,
+  runMockPerfectionPlan,
   runMockRegenerateOptimizedItems,
   runMockResumeAnalysis,
 } from "@/services/ai/resumeAgent.mock";
 import {
   runLLMFollowUpBullet,
+  runLLMPerfectionPlan,
   runLLMRegenerateOptimizedItems,
   runLLMResumeAnalysis,
 } from "@/services/ai/resumeAgent.llm";
-import type { AnalysisResult, OptimizeStyle, UserInput } from "@/types/resume";
+import type {
+  AnalysisResult,
+  FollowUpQuestion,
+  MatchItem,
+  OptimizeStyle,
+  PerfectionPlan,
+  ResumeDiagnosis,
+  UserInput,
+} from "@/types/resume";
 
-function currentMode(): AIMode {
-  return getAIConfig().mode;
+function currentMode(forceMock = false): AIMode {
+  return forceMock ? "mock" : getAIConfig().mode;
 }
 
 export async function analyzeResumeServer(
   input: UserInput,
-  optimizeStyle: OptimizeStyle = "ai-product"
+  optimizeStyle: OptimizeStyle = "ai-product",
+  forceMock = false
 ): Promise<{ result: AnalysisResult; mode: AIMode }> {
-  const mode = currentMode();
+  const mode = currentMode(forceMock);
 
   if (mode === "llm") {
     const result = await runLLMResumeAnalysis(input, optimizeStyle);
@@ -33,26 +44,40 @@ export async function analyzeResumeServer(
 
 export async function regenerateOptimizedItemsServer(
   input: UserInput,
-  style: OptimizeStyle
-): Promise<{ optimizedItems: AnalysisResult["optimizedItems"]; mode: AIMode }> {
-  const mode = currentMode();
+  style: OptimizeStyle,
+  diagnosis: ResumeDiagnosis,
+  followUpQuestions: FollowUpQuestion[] = [],
+  forceMock = false
+): Promise<{
+  optimizedItems: AnalysisResult["optimizedItems"];
+  finalResume: AnalysisResult["finalResume"];
+  finalResumeScore: number;
+  mode: AIMode;
+}> {
+  const mode = currentMode(forceMock);
 
   if (mode === "llm") {
-    const optimizedItems = await runLLMRegenerateOptimizedItems(input, style);
-    return { optimizedItems, mode };
+    const result = await runLLMRegenerateOptimizedItems(
+      input,
+      style,
+      diagnosis,
+      followUpQuestions
+    );
+    return { ...result, mode };
   }
 
-  const optimizedItems = await runMockRegenerateOptimizedItems(style);
-  return { optimizedItems, mode };
+  const result = await runMockRegenerateOptimizedItems(input, style);
+  return { ...result, mode };
 }
 
 export async function generateFollowUpBulletServer(
   input: UserInput,
   question: string,
   purpose: string,
-  userAnswer: string
+  userAnswer: string,
+  forceMock = false
 ): Promise<{ bullet: string; mode: AIMode }> {
-  const mode = currentMode();
+  const mode = currentMode(forceMock);
 
   if (mode === "llm") {
     const bullet = await runLLMFollowUpBullet(input, question, purpose, userAnswer);
@@ -61,4 +86,22 @@ export async function generateFollowUpBulletServer(
 
   const bullet = await runMockFollowUpBullet(purpose, userAnswer);
   return { bullet, mode };
+}
+
+export async function generatePerfectionPlanServer(
+  input: UserInput,
+  diagnosis: ResumeDiagnosis,
+  matchItems: MatchItem[],
+  followUpQuestions: FollowUpQuestion[] = [],
+  forceMock = false
+): Promise<{ plan: PerfectionPlan; mode: AIMode }> {
+  const mode = currentMode(forceMock);
+
+  if (mode === "llm") {
+    const plan = await runLLMPerfectionPlan(input, diagnosis, matchItems, followUpQuestions);
+    return { plan, mode };
+  }
+
+  const plan = await runMockPerfectionPlan(input, diagnosis, matchItems);
+  return { plan, mode };
 }

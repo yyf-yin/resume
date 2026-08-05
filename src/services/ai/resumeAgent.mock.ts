@@ -1,7 +1,10 @@
 import { delay } from "@/lib/utils";
 import type {
   AnalysisResult,
+  MatchItem,
   OptimizeStyle,
+  PerfectionPlan,
+  ResumeDiagnosis,
   UserInput,
 } from "@/types/resume";
 
@@ -249,9 +252,55 @@ function buildFollowUpQuestions(): AnalysisResult["followUpQuestions"] {
 }
 
 function buildOptimizedItems(
-  style: OptimizeStyle = "ai-product"
+  style: OptimizeStyle = "ai-product",
+  input?: UserInput
 ): AnalysisResult["optimizedItems"] {
   const styleNote = STYLE_LABELS[style];
+
+  if (input?.jobStage === "校招") {
+    return [
+      {
+        id: "opt-1",
+        section: "教育背景",
+        before: "某大学，信息管理与信息系统专业，本科",
+        after: "某大学｜信息管理与信息系统｜本科｜2021-2025",
+        reason: "校招模板优先展示教育背景，并统一关键信息格式",
+        riskWarning: "学校、专业和时间需与真实信息一致",
+      },
+      {
+        id: "opt-2",
+        section: "实习经历",
+        before: "参与知识库产品需求整理和原型设计",
+        after: "参与企业知识库产品需求分析，整理 20+ 条用户反馈并协助确定迭代优先级",
+        reason: `按「${styleNote}」方向补充个人行动和可验证范围`,
+        riskWarning: "反馈数量和个人职责需可核实",
+      },
+      {
+        id: "opt-3",
+        section: "项目经历",
+        before: "做过校园知识问答项目",
+        after: "基于公开校园资料设计知识问答 Demo，完成需求分析、原型设计和 Prompt 调试",
+        reason: "将课程或个人项目改写为完整的实践证据",
+        riskWarning: "明确标注为校园或个人项目，不包装成商业经历",
+      },
+      {
+        id: "opt-4",
+        section: "校园经历",
+        before: "负责学生会新媒体工作",
+        after: "协调 6 名成员完成校园活动内容策划与发布，建立选题和复盘机制",
+        reason: "突出校园经历中的组织协调和结果意识",
+        riskWarning: "成员数量和职责范围需与实际一致",
+      },
+      {
+        id: "opt-5",
+        section: "技能工具",
+        before: "Axure、Figma、SQL、Excel",
+        after: "产品：Axure、Figma｜数据：SQL、Excel｜AI：Prompt Engineering、LLM 应用基础",
+        reason: "按目标岗位整理专业技能，避免使用职业摘要填充校招简历",
+        riskWarning: "仅保留真实学习或使用过的工具和知识",
+      },
+    ];
+  }
 
   return [
     {
@@ -313,7 +362,68 @@ function buildOptimizedItems(
 }
 
 function buildFinalResume(input: UserInput): AnalysisResult["finalResume"] {
+  if (input.jobStage === "校招") {
+    return {
+      template: "campus",
+      personalInfo: {
+        name: "李然",
+        email: "liran@email.com",
+        phone: "138****1234",
+        location: "杭州",
+      },
+      jobIntent: `${input.targetRole} | ${input.industry}`,
+      summary: "",
+      coreSkills: [
+        "需求分析与产品原型",
+        "数据分析与 SQL",
+        "用户调研与竞品分析",
+        "Prompt 设计与 LLM 应用基础",
+      ],
+      workExperience: [
+        {
+          company: "某科技公司",
+          role: "产品实习生",
+          period: "2024.07 - 2024.10",
+          bullets: [
+            "参与企业知识库产品需求分析，整理 20+ 条用户反馈并协助确定迭代优先级",
+            "完成核心问答流程原型与需求说明，配合研发完成测试及上线验收",
+          ],
+        },
+      ],
+      projectExperience: [
+        {
+          name: "校园知识问答助手",
+          role: "项目负责人",
+          period: "2024.03 - 2024.06",
+          bullets: [
+            "基于公开校园资料设计知识问答 Demo，完成需求分析、原型设计和 Prompt 调试",
+            "组织 15 名同学试用并收集反馈，归纳高频问题并完成两轮交互优化",
+          ],
+        },
+      ],
+      campusExperience: [
+        {
+          organization: "校学生会新媒体中心",
+          role: "项目组负责人",
+          period: "2022.09 - 2023.06",
+          bullets: [
+            "协调 6 名成员完成校园活动内容策划与发布，建立选题和复盘机制",
+            "结合阅读数据优化内容方向，单篇平均阅读量较前期提升 35%",
+          ],
+        },
+      ],
+      awardsAndCertificates: ["校级二等奖学金", "全国大学生市场调查大赛省级三等奖"],
+      skillsAndTools: ["Axure", "Figma", "SQL", "Excel", "Python 基础", "Prompt Engineering"],
+      education: {
+        school: "某大学",
+        degree: "信息管理与信息系统 | 本科",
+        period: "2021 - 2025",
+      },
+    };
+  }
+
   return {
+    template: "experienced",
     personalInfo: {
       name: "张明",
       email: "zhangming@email.com",
@@ -375,6 +485,8 @@ function buildFinalResume(input: UserInput): AnalysisResult["finalResume"] {
         ],
       },
     ],
+    campusExperience: [],
+    awardsAndCertificates: [],
     skillsAndTools: [
       "Axure",
       "Figma",
@@ -490,17 +602,23 @@ export async function runMockResumeAnalysis(
     diagnosis: buildDiagnosis(),
     matchItems: buildMatchItems(),
     followUpQuestions: buildFollowUpQuestions(),
-    optimizedItems: buildOptimizedItems(optimizeStyle),
+    optimizedItems: buildOptimizedItems(optimizeStyle, input),
     finalResume: buildFinalResume(input),
+    finalResumeScore: input.jobStage === "校招" ? 76 : 78,
     interviewPrep: buildInterviewPrep(),
   };
 }
 
 export async function runMockRegenerateOptimizedItems(
+  input: UserInput,
   style: OptimizeStyle
-): Promise<AnalysisResult["optimizedItems"]> {
+): Promise<Pick<AnalysisResult, "optimizedItems" | "finalResume" | "finalResumeScore">> {
   await delay(800);
-  return buildOptimizedItems(style);
+  return {
+    optimizedItems: buildOptimizedItems(style, input),
+    finalResume: buildFinalResume(input),
+    finalResumeScore: input.jobStage === "校招" ? 76 : 78,
+  };
 }
 
 export async function runMockFollowUpBullet(
@@ -509,6 +627,83 @@ export async function runMockFollowUpBullet(
 ): Promise<string> {
   await delay(400);
   return `基于${purpose.replace(/[？?]/g, "")}，${userAnswer.trim().replace(/[。.!！]$/, "")}，体现 AI 产品落地能力与业务理解深度。`;
+}
+
+export async function runMockPerfectionPlan(
+  input: UserInput,
+  _diagnosis: ResumeDiagnosis,
+  matchItems: MatchItem[]
+): Promise<PerfectionPlan> {
+  await delay(900);
+
+  const gaps = matchItems
+    .filter(
+      (item) =>
+        item.needsSupplement || item.evidenceStrength === "weak" || item.evidenceStrength === "none"
+    )
+    .map((item) => item.jdRequirement);
+  const primaryGap = gaps[0] || `${input.targetRole}实战证据`;
+  const secondaryGap = gaps[1] || "效果评估与数据验证";
+
+  return {
+    summary: `以下建议围绕当前较弱的“${primaryGap}”等匹配点提供，仅供参考，由你自行决定是否采纳。`,
+    recommendations: [
+      {
+        id: "recommendation-1",
+        title: `${input.targetRole}核心场景原型`,
+        category: "项目实践",
+        targetGap: primaryGap,
+        suggestion: "可以考虑选择一个公开且边界清晰的真实场景，独立制作可操作原型或最小可用 Demo，并保留需求分析和验证证据。",
+        priority: "high",
+        reason: "该方向与当前最弱的岗位匹配点直接相关，可将概念性描述转化为可展示、可验证的实践证据。",
+      },
+      {
+        id: "recommendation-2",
+        title: "岗位能力评估与数据看板",
+        category: "项目实践",
+        targetGap: secondaryGap,
+        suggestion: "可以考虑围绕目标场景设计指标体系，并利用合规的公开或模拟数据制作可视化看板。",
+        priority: "high",
+        reason: "量化评估证据有助于展示指标设计、数据分析和结果解释能力，能直接回应当前证据不足。",
+      },
+      {
+        id: "recommendation-3",
+        title: "目标岗位公开案例拆解",
+        category: "项目实践",
+        targetGap: "行业理解与结构化表达",
+        suggestion: "可以考虑选择与目标 JD 高相关的公开案例，从用户、场景、问题、方案和指标角度进行结构化拆解。",
+        priority: "medium",
+        reason: "公开案例分析能够补充行业判断和结构化表达证据，但对核心实战差距的直接补强程度低于可操作项目。",
+      },
+      {
+        id: "recommendation-4",
+        title: primaryGap,
+        category: "知识学习",
+        targetGap: primaryGap,
+        suggestion: `可以考虑深化“${primaryGap}”相关的核心概念、常见工作方法及其在${input.targetRole}岗位中的应用边界。`,
+        priority: "high",
+        reason: "这是当前 JD 匹配中证据最弱的部分，补充理解深度有助于提高相关项目和面试表达的可信度。",
+      },
+      {
+        id: "recommendation-5",
+        title: "效果评估与实验设计",
+        category: "知识学习",
+        targetGap: secondaryGap,
+        suggestion: "可以考虑补充指标体系、基线对照和数据口径等效果评估知识。",
+        priority: "medium",
+        reason: "这些知识有助于将项目成果从主观描述转化为可验证证据，并增强量化表达的严谨性。",
+      },
+      {
+        id: "recommendation-6",
+        title: "补充现有实践的证据表达",
+        category: "证据补充",
+        targetGap: "成果呈现",
+        suggestion: "可以考虑为已有项目补充个人职责、关键决策依据、验证方式和真实结果，并明确个人项目与商业经历的边界。",
+        priority: "medium",
+        reason: "现有能力如果只缺少简历证据，补充真实细节通常比重复学习基础知识更能提升招聘方对经历的理解。",
+      },
+    ],
+  };
 }
 
 export { STYLE_LABELS };

@@ -39,9 +39,10 @@ cp .env.example .env.local
 2. 填写 API Key 与模型配置（支持 OpenAI 兼容接口）：
 
 ```env
-LLM_API_KEY=sk-xxx
-LLM_BASE_URL=https://api.openai.com/v1
-LLM_MODEL=gpt-4o-mini
+LLM_API_KEY=sk-your-deepseek-api-key-here
+LLM_BASE_URL=https://api.deepseek.com
+LLM_MODEL=deepseek-v4-flash
+LLM_PROVIDER=deepseek
 ```
 
 3. 重启开发服务器。顶部导航会显示 **AI 模式**；未配置 Key 时自动使用 **Mock 模式**。
@@ -51,7 +52,7 @@ LLM_MODEL=gpt-4o-mini
 | Provider | LLM_BASE_URL | LLM_MODEL |
 |----------|--------------|-----------|
 | OpenAI | https://api.openai.com/v1 | gpt-4o-mini |
-| DeepSeek | https://api.deepseek.com/v1 | deepseek-chat |
+| DeepSeek | https://api.deepseek.com | deepseek-v4-flash |
 | Moonshot | https://api.moonshot.cn/v1 | moonshot-v1-8k |
 
 ## 项目结构

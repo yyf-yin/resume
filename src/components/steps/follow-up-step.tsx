@@ -8,18 +8,25 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { EmptyState, SectionTitle } from "@/components/shared/ui-helpers";
-import { generateFollowUpBullet } from "@/services/ai/resumeAgent";
+import {
+  generateFollowUpBullet,
+  regenerateOptimizedItems,
+} from "@/services/ai/resumeAgent";
 import { useResumeStore } from "@/store/resume-store";
 
 export function FollowUpStep() {
   const {
     analysisResult,
     userInput,
+    optimizeStyle,
+    exampleMode,
     updateFollowUpAnswer,
     setFollowUpBullet,
+    setAnalysisResult,
     setCurrentStep,
   } = useResumeStore();
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [isSyncingFollowUps, setIsSyncingFollowUps] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   if (!analysisResult) {
@@ -39,13 +46,43 @@ export function FollowUpStep() {
         userInput,
         question.question,
         question.purpose,
-        question.userAnswer
+        question.userAnswer,
+        exampleMode
       );
       setFollowUpBullet(id, bullet);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Bullet 生成失败");
     } finally {
       setLoadingId(null);
+    }
+  };
+
+  const handleContinue = async () => {
+    const hasFollowUpEvidence = followUpQuestions.some(
+      (question) => question.userAnswer.trim() || question.generatedBullet.trim()
+    );
+
+    if (!hasFollowUpEvidence) {
+      setCurrentStep("optimize");
+      return;
+    }
+
+    setIsSyncingFollowUps(true);
+    setError(null);
+    try {
+      const { optimizedItems, finalResume, finalResumeScore } = await regenerateOptimizedItems(
+        userInput,
+        optimizeStyle,
+        analysisResult.diagnosis,
+        followUpQuestions,
+        exampleMode
+      );
+      setAnalysisResult({ ...analysisResult, optimizedItems, finalResume, finalResumeScore });
+      setCurrentStep("optimize");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "追问信息同步失败");
+    } finally {
+      setIsSyncingFollowUps(false);
     }
   };
 
@@ -121,9 +158,23 @@ export function FollowUpStep() {
       </div>
 
       <div className="flex justify-end">
-        <Button variant="outline" size="sm" onClick={() => setCurrentStep("optimize")}>
-          下一步：简历优化
-          <ChevronRight className="h-4 w-4" />
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={isSyncingFollowUps || loadingId !== null}
+          onClick={handleContinue}
+        >
+          {isSyncingFollowUps ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              正在同步追问信息...
+            </>
+          ) : (
+            <>
+              下一步：简历优化
+              <ChevronRight className="h-4 w-4" />
+            </>
+          )}
         </Button>
       </div>
     </div>

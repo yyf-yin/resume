@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Copy, Download, FileText } from "lucide-react";
+import { Check, ChevronRight, Copy, Download, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -18,7 +18,7 @@ import { useResumeStore } from "@/store/resume-store";
 import { copyToClipboard, formatResumeAsText } from "@/lib/utils";
 
 export function ExportStep() {
-  const { analysisResult, copied, setCopied } = useResumeStore();
+  const { analysisResult, copied, setCopied, setCurrentStep } = useResumeStore();
   const [dialogOpen, setDialogOpen] = useState(false);
 
   if (!analysisResult) {
@@ -138,6 +138,13 @@ export function ExportStep() {
           </div>
         </CardContent>
       </Card>
+
+      <div className="mt-6 flex justify-end">
+        <Button variant="outline" size="sm" onClick={() => setCurrentStep("perfection")}>
+          下一步：精益求精
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 }

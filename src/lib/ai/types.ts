@@ -17,11 +17,15 @@ export interface AIStatus {
 export interface AnalyzeRequestBody {
   input: import("@/types/resume").UserInput;
   optimizeStyle?: import("@/types/resume").OptimizeStyle;
+  exampleMode?: boolean;
 }
 
 export interface OptimizeRequestBody {
   input: import("@/types/resume").UserInput;
   style: import("@/types/resume").OptimizeStyle;
+  followUpQuestions?: import("@/types/resume").FollowUpQuestion[];
+  diagnosis: import("@/types/resume").ResumeDiagnosis;
+  exampleMode?: boolean;
 }
 
 export interface FollowUpBulletRequestBody {
@@ -29,6 +33,15 @@ export interface FollowUpBulletRequestBody {
   question: string;
   purpose: string;
   userAnswer: string;
+  exampleMode?: boolean;
+}
+
+export interface PerfectionRequestBody {
+  input: import("@/types/resume").UserInput;
+  diagnosis: import("@/types/resume").ResumeDiagnosis;
+  matchItems: import("@/types/resume").MatchItem[];
+  followUpQuestions?: import("@/types/resume").FollowUpQuestion[];
+  exampleMode?: boolean;
 }
 
 export interface APIErrorResponse {
@@ -42,10 +55,17 @@ export interface AnalyzeResponseBody {
 
 export interface OptimizeResponseBody {
   optimizedItems: import("@/types/resume").OptimizedItem[];
+  finalResume: import("@/types/resume").FinalResume;
+  finalResumeScore: number;
   mode: AIMode;
 }
 
 export interface FollowUpBulletResponseBody {
   bullet: string;
+  mode: AIMode;
+}
+
+export interface PerfectionResponseBody {
+  plan: import("@/types/resume").PerfectionPlan;
   mode: AIMode;
 }

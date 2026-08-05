@@ -29,6 +29,7 @@ export function InputStep() {
     setAnalysisResult,
     setAnalysisError,
     setCurrentStep,
+    exampleMode,
   } = useResumeStore();
 
   const handleAnalyze = async () => {
@@ -38,7 +39,7 @@ export function InputStep() {
     setAnalyzing(true);
     setAnalysisError(null);
     try {
-      const result = await runResumeAnalysis(userInput);
+      const result = await runResumeAnalysis(userInput, "ai-product", exampleMode);
       setAnalysisResult(result);
       setCurrentStep("jd-analysis");
     } catch (error) {
@@ -61,7 +62,7 @@ export function InputStep() {
       />
 
       <div className="mb-4 flex gap-2">
-        <Button variant="outline" size="sm" onClick={loadExampleData}>
+        <Button variant="outline" size="sm" onClick={loadExampleData} disabled={exampleMode}>
           <Wand2 className="h-3.5 w-3.5" />
           使用示例数据
         </Button>
@@ -99,6 +100,7 @@ export function InputStep() {
                 id="targetRole"
                 placeholder="如：AI 产品经理"
                 value={userInput.targetRole}
+                disabled={exampleMode}
                 onChange={(e) => setUserInput({ targetRole: e.target.value })}
               />
             </div>
@@ -108,6 +110,7 @@ export function InputStep() {
                 id="industry"
                 placeholder="如：企业服务 / SaaS"
                 value={userInput.industry}
+                disabled={exampleMode}
                 onChange={(e) => setUserInput({ industry: e.target.value })}
               />
             </div>
@@ -115,6 +118,7 @@ export function InputStep() {
               <Label>公司类型</Label>
               <Select
                 value={userInput.companyType}
+                disabled={exampleMode}
                 onValueChange={(v) => setUserInput({ companyType: v as CompanyType })}
               >
                 <SelectTrigger>
@@ -133,6 +137,7 @@ export function InputStep() {
               <Label>求职阶段</Label>
               <Select
                 value={userInput.jobStage}
+                disabled={exampleMode}
                 onValueChange={(v) => setUserInput({ jobStage: v as JobStage })}
               >
                 <SelectTrigger>
@@ -153,6 +158,7 @@ export function InputStep() {
                 id="highlightSkills"
                 placeholder="如：AI 产品规划、数据驱动、ToB 需求分析"
                 value={userInput.highlightSkills}
+                disabled={exampleMode}
                 onChange={(e) => setUserInput({ highlightSkills: e.target.value })}
               />
             </div>
@@ -169,6 +175,7 @@ export function InputStep() {
               className="min-h-[200px] font-mono text-xs leading-relaxed"
               placeholder="粘贴岗位 JD..."
               value={userInput.jobDescription}
+              disabled={exampleMode}
               onChange={(e) => setUserInput({ jobDescription: e.target.value })}
             />
           </CardContent>
@@ -182,8 +189,9 @@ export function InputStep() {
           <CardContent>
             <Textarea
               className="min-h-[240px] font-mono text-xs leading-relaxed"
-              placeholder="粘贴简历内容..."
+              placeholder={"粘贴简历内容...\n请粘贴单页简历，简历过长可能会导致信息丢失"}
               value={userInput.originalResume}
+              disabled={exampleMode}
               onChange={(e) => setUserInput({ originalResume: e.target.value })}
             />
           </CardContent>
@@ -199,6 +207,7 @@ export function InputStep() {
               className="min-h-[100px] text-sm"
               placeholder="补充 Agent 需要了解的信息..."
               value={userInput.additionalInfo}
+              disabled={exampleMode}
               onChange={(e) => setUserInput({ additionalInfo: e.target.value })}
             />
           </CardContent>

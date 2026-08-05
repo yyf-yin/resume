@@ -20,6 +20,24 @@ export async function copyToClipboard(text: string): Promise<boolean> {
 
 export function formatResumeAsText(resume: import("@/types/resume").FinalResume): string {
   const lines: string[] = [];
+  const isCampusTemplate = resume.template === "campus";
+  const pushEducation = () => {
+    lines.push("教育背景");
+    lines.push(`${resume.education.school} | ${resume.education.degree} | ${resume.education.period}`);
+    lines.push("");
+  };
+  const pushEntries = (
+    title: string,
+    entries: Array<{ name: string; role: string; period: string; bullets: string[] }>
+  ) => {
+    if (entries.length === 0) return;
+    lines.push(title);
+    entries.forEach((entry) => {
+      lines.push(`${entry.name} | ${entry.role} | ${entry.period}`);
+      entry.bullets.forEach((bullet) => lines.push(`  • ${bullet}`));
+      lines.push("");
+    });
+  };
 
   lines.push(resume.personalInfo.name);
   lines.push(
@@ -28,29 +46,42 @@ export function formatResumeAsText(resume: import("@/types/resume").FinalResume)
   lines.push("");
   lines.push(`求职意向：${resume.jobIntent}`);
   lines.push("");
-  lines.push("职业摘要");
-  lines.push(resume.summary);
-  lines.push("");
-  lines.push("核心能力");
+
+  if (isCampusTemplate) {
+    pushEducation();
+  } else if (resume.summary) {
+    lines.push("职业摘要");
+    lines.push(resume.summary);
+    lines.push("");
+  }
+
+  lines.push(isCampusTemplate ? "专业能力" : "核心能力");
   resume.coreSkills.forEach((s) => lines.push(`• ${s}`));
   lines.push("");
-  lines.push("工作经历");
-  resume.workExperience.forEach((w) => {
-    lines.push(`${w.company} | ${w.role} | ${w.period}`);
-    w.bullets.forEach((b) => lines.push(`  • ${b}`));
-    lines.push("");
-  });
-  lines.push("项目经历");
-  resume.projectExperience.forEach((p) => {
-    lines.push(`${p.name} | ${p.role} | ${p.period}`);
-    p.bullets.forEach((b) => lines.push(`  • ${b}`));
-    lines.push("");
-  });
+
+  pushEntries(
+    isCampusTemplate ? "实习经历" : "工作经历",
+    resume.workExperience.map((item) => ({ ...item, name: item.company }))
+  );
+  pushEntries("项目经历", resume.projectExperience);
+
+  if (isCampusTemplate) {
+    pushEntries(
+      "校园经历",
+      resume.campusExperience.map((item) => ({ ...item, name: item.organization }))
+    );
+    if (resume.awardsAndCertificates.length > 0) {
+      lines.push("获奖证书");
+      resume.awardsAndCertificates.forEach((award) => lines.push(`• ${award}`));
+      lines.push("");
+    }
+  }
+
   lines.push("技能工具");
   lines.push(resume.skillsAndTools.join(" · "));
   lines.push("");
-  lines.push("教育背景");
-  lines.push(`${resume.education.school} | ${resume.education.degree} | ${resume.education.period}`);
 
-  return lines.join("\n");
+  if (!isCampusTemplate) pushEducation();
+
+  return lines.join("\n").trim();
 }

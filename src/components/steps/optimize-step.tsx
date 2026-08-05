@@ -31,6 +31,7 @@ export function OptimizeStep() {
     analysisResult,
     userInput,
     optimizeStyle,
+    exampleMode,
     setOptimizeStyle,
     setAnalysisResult,
     setCurrentStep,
@@ -47,8 +48,14 @@ export function OptimizeStep() {
     setRegenerating(true);
     setOptimizeError(null);
     try {
-      const items = await regenerateOptimizedItems(userInput, style);
-      setAnalysisResult({ ...analysisResult, optimizedItems: items });
+      const { optimizedItems, finalResume, finalResumeScore } = await regenerateOptimizedItems(
+        userInput,
+        style,
+        analysisResult.diagnosis,
+        analysisResult.followUpQuestions,
+        exampleMode
+      );
+      setAnalysisResult({ ...analysisResult, optimizedItems, finalResume, finalResumeScore });
     } catch (error) {
       setOptimizeError(error instanceof Error ? error.message : "优化生成失败");
     } finally {

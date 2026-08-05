@@ -10,6 +10,7 @@ import {
   FileText,
   GitCompare,
   MessageSquare,
+  Rocket,
   Sparkles,
   Target,
 } from "lucide-react";
@@ -27,10 +28,21 @@ const STEPS: { id: StepId; label: string; icon: React.ElementType }[] = [
   { id: "final-resume", label: "最终简历", icon: ClipboardList },
   { id: "interview", label: "面试准备", icon: Brain },
   { id: "export", label: "导出结果", icon: Download },
+  { id: "perfection", label: "精益求精", icon: Rocket },
 ];
 
 export function StepSidebar() {
-  const { setCurrentStep, getStepStatus, analysisResult } = useResumeStore();
+  const { currentStep, setCurrentStep, getStepStatus, analysisResult } = useResumeStore();
+  const showFinalResumeScore = ["final-resume", "interview", "export", "perfection"].includes(
+    currentStep
+  );
+  const displayedScore =
+    analysisResult && showFinalResumeScore
+      ? analysisResult.finalResumeScore
+      : analysisResult?.diagnosis.overallScore;
+  const scoreImprovement = analysisResult
+    ? analysisResult.finalResumeScore - analysisResult.diagnosis.overallScore
+    : 0;
 
   return (
     <aside className="flex w-56 shrink-0 flex-col border-r border-neutral-200 bg-white">
@@ -76,11 +88,27 @@ export function StepSidebar() {
       </nav>
       {analysisResult && (
         <div className="border-t border-neutral-200 p-3">
-          <p className="text-xs text-neutral-400">整体匹配度</p>
+          <p className="text-xs text-neutral-400">
+            {showFinalResumeScore ? "优化后匹配度" : "整体匹配度"}
+          </p>
           <p className="text-2xl font-semibold tabular-nums text-neutral-900">
-            {analysisResult.diagnosis.overallScore}
+            {displayedScore}
             <span className="text-sm font-normal text-neutral-400">/100</span>
           </p>
+          {showFinalResumeScore && (
+            <p className="mt-1 text-xs tabular-nums text-neutral-400">
+              原始 {analysisResult.diagnosis.overallScore}
+              <span
+                className={cn(
+                  "ml-2",
+                  scoreImprovement > 0 && "text-emerald-600",
+                  scoreImprovement < 0 && "text-red-500"
+                )}
+              >
+                {scoreImprovement > 0 ? `提升 +${scoreImprovement}` : `变化 ${scoreImprovement}`}
+              </span>
+            </p>
+          )}
         </div>
       )}
     </aside>

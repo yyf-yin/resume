@@ -8,6 +8,7 @@ export type StepId =
   | "follow-up"
   | "optimize"
   | "final-resume"
+  | "perfection"
   | "interview"
   | "export";
 
@@ -103,7 +104,17 @@ export interface ProjectExperience {
   bullets: string[];
 }
 
+export interface CampusExperience {
+  organization: string;
+  role: string;
+  period: string;
+  bullets: string[];
+}
+
+export type ResumeTemplate = "experienced" | "campus";
+
 export interface FinalResume {
+  template: ResumeTemplate;
   personalInfo: {
     name: string;
     email: string;
@@ -115,6 +126,8 @@ export interface FinalResume {
   coreSkills: string[];
   workExperience: WorkExperience[];
   projectExperience: ProjectExperience[];
+  campusExperience: CampusExperience[];
+  awardsAndCertificates: string[];
   skillsAndTools: string[];
   education: {
     school: string;
@@ -137,6 +150,24 @@ export interface InterviewPrep {
   selfIntroduction: string;
 }
 
+export type RecommendationCategory = "项目实践" | "知识学习" | "证据补充";
+export type RecommendationPriority = "high" | "medium" | "low";
+
+export interface PerfectionRecommendation {
+  id: string;
+  title: string;
+  category: RecommendationCategory;
+  targetGap: string;
+  suggestion: string;
+  priority: RecommendationPriority;
+  reason: string;
+}
+
+export interface PerfectionPlan {
+  summary: string;
+  recommendations: PerfectionRecommendation[];
+}
+
 export interface AnalysisResult {
   jdAnalysis: JDAnalysis;
   diagnosis: ResumeDiagnosis;
@@ -144,6 +175,7 @@ export interface AnalysisResult {
   followUpQuestions: FollowUpQuestion[];
   optimizedItems: OptimizedItem[];
   finalResume: FinalResume;
+  finalResumeScore: number;
   interviewPrep: InterviewPrep;
 }
 

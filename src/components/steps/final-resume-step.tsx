@@ -8,6 +8,81 @@ import { Separator } from "@/components/ui/separator";
 import { EmptyState, SectionTitle } from "@/components/shared/ui-helpers";
 import { useResumeStore } from "@/store/resume-store";
 
+interface ResumeEntry {
+  name: string;
+  role: string;
+  period: string;
+  bullets: string[];
+}
+
+function EntrySection({ title, entries }: { title: string; entries: ResumeEntry[] }) {
+  if (entries.length === 0) return null;
+
+  return (
+    <section className="mb-5">
+      <h4 className="mb-3 text-xs font-medium uppercase tracking-wider text-neutral-400">
+        {title}
+      </h4>
+      <div className="space-y-4">
+        {entries.map((entry) => (
+          <div key={`${entry.name}-${entry.period}`}>
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <p className="text-sm font-medium">
+                {entry.name} · {entry.role}
+              </p>
+              <span className="text-xs text-neutral-400">{entry.period}</span>
+            </div>
+            <ul className="mt-2 space-y-1">
+              {entry.bullets.map((bullet, index) => (
+                <li key={index} className="flex gap-2 text-sm text-neutral-600">
+                  <span className="text-neutral-300">•</span>
+                  <span>{bullet}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function EducationSection({
+  education,
+}: {
+  education: { school: string; degree: string; period: string };
+}) {
+  return (
+    <section className="mb-5">
+      <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-neutral-400">
+        教育背景
+      </h4>
+      <p className="text-sm">
+        {education.school} · {education.degree} · {education.period}
+      </p>
+    </section>
+  );
+}
+
+function SkillsSection({ title, skills }: { title: string; skills: string[] }) {
+  if (skills.length === 0) return null;
+
+  return (
+    <section className="mb-5">
+      <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-neutral-400">
+        {title}
+      </h4>
+      <div className="flex flex-wrap gap-1.5">
+        {skills.map((skill) => (
+          <Badge key={skill} variant="secondary" className="font-normal">
+            {skill}
+          </Badge>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export function FinalResumeStep() {
   const { analysisResult, setCurrentStep } = useResumeStore();
 
@@ -17,6 +92,25 @@ export function FinalResumeStep() {
 
   const { finalResume } = analysisResult;
   const { personalInfo } = finalResume;
+  const isCampusTemplate = finalResume.template === "campus";
+  const workEntries = finalResume.workExperience.map((item) => ({
+    name: item.company,
+    role: item.role,
+    period: item.period,
+    bullets: item.bullets,
+  }));
+  const projectEntries = finalResume.projectExperience.map((item) => ({
+    name: item.name,
+    role: item.role,
+    period: item.period,
+    bullets: item.bullets,
+  }));
+  const campusEntries = finalResume.campusExperience.map((item) => ({
+    name: item.organization,
+    role: item.role,
+    period: item.period,
+    bullets: item.bullets,
+  }));
 
   return (
     <div>
@@ -43,77 +137,46 @@ export function FinalResumeStep() {
             <p className="text-sm">{finalResume.jobIntent}</p>
           </section>
 
-          <section className="mb-5">
-            <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-neutral-400">
-              职业摘要
-            </h4>
-            <p className="text-sm leading-relaxed text-neutral-700">{finalResume.summary}</p>
-          </section>
+          {isCampusTemplate && <EducationSection education={finalResume.education} />}
 
-          <section className="mb-5">
-            <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-neutral-400">
-              核心能力
-            </h4>
-            <div className="flex flex-wrap gap-1.5">
-              {finalResume.coreSkills.map((s) => (
-                <Badge key={s} variant="secondary" className="font-normal">
-                  {s}
-                </Badge>
-              ))}
-            </div>
-          </section>
+          {!isCampusTemplate && finalResume.summary && (
+            <section className="mb-5">
+              <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-neutral-400">
+                职业摘要
+              </h4>
+              <p className="text-sm leading-relaxed text-neutral-700">{finalResume.summary}</p>
+            </section>
+          )}
 
-          <section className="mb-5">
-            <h4 className="mb-3 text-xs font-medium uppercase tracking-wider text-neutral-400">
-              工作经历
-            </h4>
-            <div className="space-y-4">
-              {finalResume.workExperience.map((w) => (
-                <div key={`${w.company}-${w.period}`}>
-                  <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <p className="text-sm font-medium">
-                      {w.company} · {w.role}
-                    </p>
-                    <span className="text-xs text-neutral-400">{w.period}</span>
-                  </div>
-                  <ul className="mt-2 space-y-1">
-                    {w.bullets.map((b, i) => (
-                      <li key={i} className="flex gap-2 text-sm text-neutral-600">
-                        <span className="text-neutral-300">•</span>
-                        <span>{b}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </section>
+          <SkillsSection
+            title={isCampusTemplate ? "专业能力" : "核心能力"}
+            skills={finalResume.coreSkills}
+          />
 
-          <section className="mb-5">
-            <h4 className="mb-3 text-xs font-medium uppercase tracking-wider text-neutral-400">
-              项目经历
-            </h4>
-            <div className="space-y-4">
-              {finalResume.projectExperience.map((p) => (
-                <div key={`${p.name}-${p.period}`}>
-                  <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <p className="text-sm font-medium">
-                      {p.name} · {p.role}
-                    </p>
-                    <span className="text-xs text-neutral-400">{p.period}</span>
-                  </div>
-                  <ul className="mt-2 space-y-1">
-                    {p.bullets.map((b, i) => (
-                      <li key={i} className="flex gap-2 text-sm text-neutral-600">
-                        <span className="text-neutral-300">•</span>
-                        <span>{b}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </section>
+          <EntrySection
+            title={isCampusTemplate ? "实习经历" : "工作经历"}
+            entries={workEntries}
+          />
+
+          <EntrySection title="项目经历" entries={projectEntries} />
+
+          {isCampusTemplate && <EntrySection title="校园经历" entries={campusEntries} />}
+
+          {isCampusTemplate && finalResume.awardsAndCertificates.length > 0 && (
+            <section className="mb-5">
+              <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-neutral-400">
+                获奖证书
+              </h4>
+              <ul className="space-y-1">
+                {finalResume.awardsAndCertificates.map((award) => (
+                  <li key={award} className="flex gap-2 text-sm text-neutral-600">
+                    <span className="text-neutral-300">•</span>
+                    <span>{award}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           <section className="mb-5">
             <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-neutral-400">
@@ -122,15 +185,7 @@ export function FinalResumeStep() {
             <p className="text-sm text-neutral-600">{finalResume.skillsAndTools.join(" · ")}</p>
           </section>
 
-          <section>
-            <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-neutral-400">
-              教育背景
-            </h4>
-            <p className="text-sm">
-              {finalResume.education.school} · {finalResume.education.degree} ·{" "}
-              {finalResume.education.period}
-            </p>
-          </section>
+          {!isCampusTemplate && <EducationSection education={finalResume.education} />}
         </CardContent>
       </Card>
 

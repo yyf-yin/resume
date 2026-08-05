@@ -2,6 +2,7 @@ import { create } from "zustand";
 import type {
   AnalysisResult,
   OptimizeStyle,
+  PerfectionPlan,
   StepId,
   StepStatus,
   UserInput,
@@ -18,6 +19,7 @@ const STEPS: StepId[] = [
   "final-resume",
   "interview",
   "export",
+  "perfection",
 ];
 
 interface ResumeStore {
@@ -26,7 +28,11 @@ interface ResumeStore {
   isAnalyzing: boolean;
   analysisResult: AnalysisResult | null;
   analysisError: string | null;
+  perfectionPlan: PerfectionPlan | null;
+  isGeneratingPerfection: boolean;
+  perfectionError: string | null;
   aiMode: AIMode | null;
+  exampleMode: boolean;
   optimizeStyle: OptimizeStyle;
   copied: boolean;
 
@@ -36,7 +42,11 @@ interface ResumeStore {
   setAnalyzing: (analyzing: boolean) => void;
   setAnalysisResult: (result: AnalysisResult) => void;
   setAnalysisError: (error: string | null) => void;
+  setPerfectionPlan: (plan: PerfectionPlan) => void;
+  setGeneratingPerfection: (generating: boolean) => void;
+  setPerfectionError: (error: string | null) => void;
   setAiMode: (mode: AIMode | null) => void;
+  setExampleMode: (enabled: boolean) => void;
   setOptimizeStyle: (style: OptimizeStyle) => void;
   updateFollowUpAnswer: (id: string, answer: string) => void;
   setFollowUpBullet: (id: string, bullet: string) => void;
@@ -61,7 +71,11 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
   isAnalyzing: false,
   analysisResult: null,
   analysisError: null,
+  perfectionPlan: null,
+  isGeneratingPerfection: false,
+  perfectionError: null,
   aiMode: null,
+  exampleMode: false,
   optimizeStyle: "ai-product",
   copied: false,
 
@@ -135,11 +149,36 @@ Axure、Figma、SQL、Jira、Confluence、数据分析
 
   setAnalyzing: (analyzing) => set({ isAnalyzing: analyzing }),
 
-  setAnalysisResult: (result) => set({ analysisResult: result, analysisError: null }),
+  setAnalysisResult: (result) =>
+    set({
+      analysisResult: result,
+      analysisError: null,
+      perfectionPlan: null,
+      perfectionError: null,
+    }),
 
   setAnalysisError: (error) => set({ analysisError: error }),
 
+  setPerfectionPlan: (plan) => set({ perfectionPlan: plan, perfectionError: null }),
+
+  setGeneratingPerfection: (generating) => set({ isGeneratingPerfection: generating }),
+
+  setPerfectionError: (error) => set({ perfectionError: error }),
+
   setAiMode: (mode) => set({ aiMode: mode }),
+
+  setExampleMode: (enabled) => {
+    if (enabled) get().loadExampleData();
+    set({
+      exampleMode: enabled,
+      currentStep: "input",
+      analysisResult: null,
+      analysisError: null,
+      perfectionPlan: null,
+      perfectionError: null,
+      copied: false,
+    });
+  },
 
   setOptimizeStyle: (style) => set({ optimizeStyle: style }),
 
@@ -153,6 +192,8 @@ Axure、Figma、SQL、Jira、Confluence、数据分析
             q.id === id ? { ...q, userAnswer: answer } : q
           ),
         },
+        perfectionPlan: null,
+        perfectionError: null,
       };
     }),
 
@@ -166,6 +207,8 @@ Axure、Figma、SQL、Jira、Confluence、数据分析
             q.id === id ? { ...q, generatedBullet: bullet } : q
           ),
         },
+        perfectionPlan: null,
+        perfectionError: null,
       };
     }),
 

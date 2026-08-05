@@ -2,8 +2,17 @@ import type {
   AnalyzeResponseBody,
   FollowUpBulletResponseBody,
   OptimizeResponseBody,
+  PerfectionResponseBody,
 } from "@/lib/ai/types";
-import type { AnalysisResult, OptimizeStyle, UserInput } from "@/types/resume";
+import type {
+  AnalysisResult,
+  FollowUpQuestion,
+  MatchItem,
+  OptimizeStyle,
+  PerfectionPlan,
+  ResumeDiagnosis,
+  UserInput,
+} from "@/types/resume";
 
 export { STYLE_LABELS } from "@/lib/ai/types";
 
@@ -45,31 +54,68 @@ export async function fetchAIStatus() {
 
 export async function runResumeAnalysis(
   input: UserInput,
-  optimizeStyle: OptimizeStyle = "ai-product"
+  optimizeStyle: OptimizeStyle = "ai-product",
+  exampleMode = false
 ): Promise<AnalysisResult> {
-  const data = await postJSON<AnalyzeResponseBody>("/api/analyze", { input, optimizeStyle });
+  const data = await postJSON<AnalyzeResponseBody>("/api/analyze", {
+    input,
+    optimizeStyle,
+    exampleMode,
+  });
   return data.result;
 }
 
 export async function regenerateOptimizedItems(
   input: UserInput,
-  style: OptimizeStyle
-): Promise<AnalysisResult["optimizedItems"]> {
-  const data = await postJSON<OptimizeResponseBody>("/api/optimize", { input, style });
-  return data.optimizedItems;
+  style: OptimizeStyle,
+  diagnosis: ResumeDiagnosis,
+  followUpQuestions: FollowUpQuestion[] = [],
+  exampleMode = false
+): Promise<Pick<AnalysisResult, "optimizedItems" | "finalResume" | "finalResumeScore">> {
+  const data = await postJSON<OptimizeResponseBody>("/api/optimize", {
+    input,
+    style,
+    followUpQuestions,
+    diagnosis,
+    exampleMode,
+  });
+  return {
+    optimizedItems: data.optimizedItems,
+    finalResume: data.finalResume,
+    finalResumeScore: data.finalResumeScore,
+  };
 }
 
 export async function generateFollowUpBullet(
   input: UserInput,
   question: string,
   purpose: string,
-  userAnswer: string
+  userAnswer: string,
+  exampleMode = false
 ): Promise<string> {
   const data = await postJSON<FollowUpBulletResponseBody>("/api/follow-up/bullet", {
     input,
     question,
     purpose,
     userAnswer,
+    exampleMode,
   });
   return data.bullet;
+}
+
+export async function generatePerfectionPlan(
+  input: UserInput,
+  diagnosis: ResumeDiagnosis,
+  matchItems: MatchItem[],
+  followUpQuestions: FollowUpQuestion[] = [],
+  exampleMode = false
+): Promise<PerfectionPlan> {
+  const data = await postJSON<PerfectionResponseBody>("/api/perfection", {
+    input,
+    diagnosis,
+    matchItems,
+    followUpQuestions,
+    exampleMode,
+  });
+  return data.plan;
 }
