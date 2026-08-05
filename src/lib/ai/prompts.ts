@@ -5,7 +5,13 @@ import type {
   OptimizeStyle,
   UserInput,
 } from "@/types/resume";
-import { STYLE_LABELS } from "@/lib/ai/types";
+
+const OPTIMIZATION_OBJECTIVE = `【唯一优化目标：更高匹配度、更强专业性】
+1. 优先强化与目标 JD 核心职责、硬性要求和高权重关键词直接相关的真实证据
+2. 使用准确、专业、简洁的岗位语言，突出个人行动、方法、业务场景和可核实结果
+3. 删除空泛、自评式、口语化和低相关表达，避免关键词堆砌与生硬技术植入
+4. 不得为提高匹配度虚构经历、职责、工具、数据或能力层级；缺失能力不得伪装成已有经验
+5. 优化后的内容应便于招聘者快速识别岗位匹配点，同时保持事实边界清晰`;
 
 const ANALYSIS_JSON_SCHEMA = `{
   "jdAnalysis": {
@@ -320,11 +326,11 @@ ${buildRequiredJsonRules([
 
 export function buildAnalyzeOutputPrompt(
   input: UserInput,
-  optimizeStyle: OptimizeStyle,
+  _optimizeStyle: OptimizeStyle,
   coreSummary: string
 ): string {
   return `请完成简历优化项（第三部分 A）。
-优化风格：${STYLE_LABELS[optimizeStyle]}
+${OPTIMIZATION_OBJECTIVE}
 
 ${buildInputContext(input)}
 
@@ -359,7 +365,7 @@ ${buildRequiredJsonRules([
 
 export function buildAnalyzeFinalResumePrompt(
   input: UserInput,
-  optimizeStyle: OptimizeStyle,
+  _optimizeStyle: OptimizeStyle,
   coreSummary: string,
   optimizedItems: AnalysisResult["optimizedItems"],
   followUpQuestions: FollowUpQuestion[] = []
@@ -387,7 +393,7 @@ export function buildAnalyzeFinalResumePrompt(
 7. 正文总长度控制在约 1200-1600 个中文字符`;
 
   return `请生成完整最终简历（第三部分 B）。
-优化风格：${STYLE_LABELS[optimizeStyle]}
+${OPTIMIZATION_OBJECTIVE}
 根据求职阶段“${input.jobStage}”，本次必须使用 ${template} 模板。
 
 ${buildInputContext(input)}
@@ -522,11 +528,33 @@ ${buildRequiredJsonRules(["overallScore（0-100 整数，核心必返字段）"]
 }`;
 }
 
-export function buildAnalyzeInterviewPrompt(input: UserInput, coreSummary: string): string {
+export function buildAnalyzeInterviewPrompt(
+  input: UserInput,
+  coreSummary: string,
+  finalResume: AnalysisResult["finalResume"],
+  optimizedItems: AnalysisResult["optimizedItems"],
+  followUpQuestions: FollowUpQuestion[] = []
+): string {
   return `请完成面试准备（第四部分）。
 ${buildInputContext(input)}
 
 ${coreSummary ? `【前序分析摘要】\n${coreSummary}\n` : ""}
+【优化后的最终简历——面试准备的唯一简历基准】
+${JSON.stringify(finalResume, null, 2)}
+
+【已采用的简历优化项与事实风险】
+${JSON.stringify(optimizedItems, null, 2)}
+
+${buildFollowUpEvidence(followUpQuestions)}
+
+【面试准备信息流约束】
+1. 所有面试问题、参考回答、自我介绍和证据准备必须针对上方“优化后的最终简历”生成
+2. 原始简历仅用于核实事实边界，不得围绕最终简历已经删除的内容设计核心问题或参考回答
+3. 最终简历中新加入或强化的内容必须纳入可能追问、证据准备和夸大风险检查
+4. suggestedAnswer 必须与最终简历措辞、能力层级和事实范围一致，不得添加最终简历及真实补充证据中不存在的经历或结果
+5. 如优化项包含 riskWarning，应将相关核实点体现到 evidenceNeeded 或 possibleExaggerations
+6. selfIntroduction 必须基于最终简历重新组织，不得直接复用原始简历摘要
+
 ${buildRequiredJsonRules([
   "interviewPrep",
   "interviewPrep.likelyQuestions",
@@ -561,10 +589,12 @@ ${buildRequiredJsonRules([
 
 export function buildOptimizeUserPrompt(
   input: UserInput,
-  style: OptimizeStyle,
+  _style: OptimizeStyle,
   followUpQuestions: FollowUpQuestion[] = []
 ): string {
-  return `请基于以下材料，按「${STYLE_LABELS[style]}」风格重新生成 optimizedItems。只生成有真实依据且能改善简历的信息，通常 3-6 条；材料不足时允许更少，不得为凑数量拆分、重复或强行插入追问信息。
+  return `请基于以下材料重新生成 optimizedItems。只生成有真实依据且能改善简历的信息，通常 3-6 条；材料不足时允许更少，不得为凑数量拆分、重复或强行插入追问信息。
+
+${OPTIMIZATION_OBJECTIVE}
 
 【目标岗位】${input.targetRole}
 【目标 JD】

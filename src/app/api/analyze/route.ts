@@ -6,7 +6,7 @@ import { analyzeResumeServer } from "@/services/ai/resumeAgent.server";
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as AnalyzeRequestBody;
-    const { input, optimizeStyle = "ai-product", exampleMode = false } = body;
+    const { input, optimizeStyle = "professional-match", exampleMode = false } = body;
 
     if (!input?.targetRole?.trim() || !input?.jobDescription?.trim() || !input?.originalResume?.trim()) {
       return NextResponse.json({ error: "请填写目标岗位、JD 和原始简历" }, { status: 400 });

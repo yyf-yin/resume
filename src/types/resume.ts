@@ -76,6 +76,7 @@ export interface FollowUpQuestion {
 }
 
 export type OptimizeStyle =
+  | "professional-match"
   | "concise"
   | "reduce-exaggeration"
   | "ai-product"
@@ -178,6 +179,11 @@ export interface AnalysisResult {
   finalResumeScore: number;
   interviewPrep: InterviewPrep;
 }
+
+export type OptimizationVariant = Pick<
+  AnalysisResult,
+  "optimizedItems" | "finalResume" | "finalResumeScore" | "interviewPrep"
+>;
 
 export interface StepConfig {
   id: StepId;

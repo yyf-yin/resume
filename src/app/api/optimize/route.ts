@@ -16,14 +16,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "缺少原始简历诊断信息" }, { status: 400 });
     }
 
-    const { optimizedItems, finalResume, finalResumeScore, mode } = await regenerateOptimizedItemsServer(
-      input,
-      style,
-      diagnosis,
-      followUpQuestions,
-      exampleMode
-    );
-    return NextResponse.json({ optimizedItems, finalResume, finalResumeScore, mode });
+    const { optimizedItems, finalResume, finalResumeScore, interviewPrep, mode } =
+      await regenerateOptimizedItemsServer(
+        input,
+        style,
+        diagnosis,
+        followUpQuestions,
+        exampleMode
+      );
+    return NextResponse.json({
+      optimizedItems,
+      finalResume,
+      finalResumeScore,
+      interviewPrep,
+      mode,
+    });
   } catch (error) {
     const message = error instanceof LLMError ? error.message : "优化生成失败，请稍后重试";
     return NextResponse.json({ error: message }, { status: 500 });

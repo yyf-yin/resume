@@ -9,6 +9,7 @@ import type {
 } from "@/types/resume";
 
 const STYLE_LABELS: Record<OptimizeStyle, string> = {
+  "professional-match": "更高匹配度与更强专业性",
   concise: "更简洁",
   "reduce-exaggeration": "降低夸张",
   "ai-product": "更偏 AI 产品",
@@ -252,7 +253,7 @@ function buildFollowUpQuestions(): AnalysisResult["followUpQuestions"] {
 }
 
 function buildOptimizedItems(
-  style: OptimizeStyle = "ai-product",
+  style: OptimizeStyle = "professional-match",
   input?: UserInput
 ): AnalysisResult["optimizedItems"] {
   const styleNote = STYLE_LABELS[style];
@@ -593,7 +594,7 @@ function buildInterviewPrep(): AnalysisResult["interviewPrep"] {
 
 export async function runMockResumeAnalysis(
   input: UserInput,
-  optimizeStyle: OptimizeStyle = "ai-product"
+  optimizeStyle: OptimizeStyle = "professional-match"
 ): Promise<AnalysisResult> {
   await delay(1800);
 
@@ -612,12 +613,15 @@ export async function runMockResumeAnalysis(
 export async function runMockRegenerateOptimizedItems(
   input: UserInput,
   style: OptimizeStyle
-): Promise<Pick<AnalysisResult, "optimizedItems" | "finalResume" | "finalResumeScore">> {
+): Promise<
+  Pick<AnalysisResult, "optimizedItems" | "finalResume" | "finalResumeScore" | "interviewPrep">
+> {
   await delay(800);
   return {
     optimizedItems: buildOptimizedItems(style, input),
     finalResume: buildFinalResume(input),
     finalResumeScore: input.jobStage === "校招" ? 76 : 78,
+    interviewPrep: buildInterviewPrep(),
   };
 }
 

@@ -28,7 +28,7 @@ function currentMode(forceMock = false): AIMode {
 
 export async function analyzeResumeServer(
   input: UserInput,
-  optimizeStyle: OptimizeStyle = "ai-product",
+  optimizeStyle: OptimizeStyle = "professional-match",
   forceMock = false
 ): Promise<{ result: AnalysisResult; mode: AIMode }> {
   const mode = currentMode(forceMock);
@@ -52,6 +52,7 @@ export async function regenerateOptimizedItemsServer(
   optimizedItems: AnalysisResult["optimizedItems"];
   finalResume: AnalysisResult["finalResume"];
   finalResumeScore: number;
+  interviewPrep: AnalysisResult["interviewPrep"];
   mode: AIMode;
 }> {
   const mode = currentMode(forceMock);

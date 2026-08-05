@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronRight, Loader2 } from "lucide-react";
+import { ChevronRight, Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -15,16 +14,7 @@ import {
 } from "@/components/ui/table";
 import { EmptyState, SectionTitle } from "@/components/shared/ui-helpers";
 import { useResumeStore } from "@/store/resume-store";
-import { regenerateOptimizedItems, STYLE_LABELS } from "@/services/ai/resumeAgent";
-import type { OptimizeStyle } from "@/types/resume";
-import { cn } from "@/lib/utils";
-
-const STYLE_OPTIONS: { value: OptimizeStyle; label: string }[] = [
-  { value: "concise", label: "更简洁" },
-  { value: "reduce-exaggeration", label: "降低夸张" },
-  { value: "ai-product", label: "更偏 AI 产品" },
-  { value: "tob-saas", label: "更偏 ToB SaaS" },
-];
+import { regenerateOptimizedItems } from "@/services/ai/resumeAgent";
 
 export function OptimizeStep() {
   const {
@@ -32,8 +22,7 @@ export function OptimizeStep() {
     userInput,
     optimizeStyle,
     exampleMode,
-    setOptimizeStyle,
-    setAnalysisResult,
+    applyOptimizationVariant,
     setCurrentStep,
   } = useResumeStore();
   const [regenerating, setRegenerating] = useState(false);
@@ -43,19 +32,18 @@ export function OptimizeStep() {
     return <EmptyState message="请先完成输入材料并开始分析" />;
   }
 
-  const handleStyleChange = async (style: OptimizeStyle) => {
-    setOptimizeStyle(style);
+  const handleRegenerate = async () => {
     setRegenerating(true);
     setOptimizeError(null);
     try {
-      const { optimizedItems, finalResume, finalResumeScore } = await regenerateOptimizedItems(
+      const variant = await regenerateOptimizedItems(
         userInput,
-        style,
+        optimizeStyle,
         analysisResult.diagnosis,
         analysisResult.followUpQuestions,
         exampleMode
       );
-      setAnalysisResult({ ...analysisResult, optimizedItems, finalResume, finalResumeScore });
+      applyOptimizationVariant(optimizeStyle, variant);
     } catch (error) {
       setOptimizeError(error instanceof Error ? error.message : "优化生成失败");
     } finally {
@@ -72,21 +60,24 @@ export function OptimizeStep() {
         description="对照展示修改前/后的表达，附修改理由与风险提示"
       />
 
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        <span className="text-xs text-neutral-500">优化风格：</span>
-        {STYLE_OPTIONS.map((opt) => (
-          <Button
-            key={opt.value}
-            variant={optimizeStyle === opt.value ? "default" : "outline"}
-            size="sm"
-            disabled={regenerating}
-            onClick={() => handleStyleChange(opt.value)}
-            className={cn("h-7 text-xs")}
-          >
-            {opt.label}
-          </Button>
-        ))}
-        {regenerating && <Loader2 className="h-4 w-4 animate-spin text-neutral-400" />}
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-neutral-600">
+          优化目标：<span className="font-medium text-neutral-900">更高匹配度 · 更强专业性</span>
+        </p>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={regenerating}
+          onClick={handleRegenerate}
+          className="h-7 text-xs"
+        >
+          {regenerating ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <RefreshCw className="h-3.5 w-3.5" />
+          )}
+          重新生成
+        </Button>
       </div>
 
       {optimizeError && (
@@ -97,37 +88,32 @@ export function OptimizeStep() {
 
       <Card className="mb-6">
         <CardHeader className="pb-3">
-          <CardTitle className="text-sm">
-            修改对照表
-            <Badge variant="secondary" className="ml-2 font-normal">
-              {STYLE_LABELS[optimizeStyle]}
-            </Badge>
-          </CardTitle>
+          <CardTitle className="text-sm">修改对照表</CardTitle>
         </CardHeader>
         <CardContent className="p-0 pb-2">
           <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[100px]">模块</TableHead>
-                <TableHead className="min-w-[180px]">修改前</TableHead>
-                <TableHead className="min-w-[180px]">修改后</TableHead>
-                <TableHead className="min-w-[120px]">修改理由</TableHead>
-                <TableHead className="min-w-[120px]">风险提示</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {optimizedItems.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell className="font-medium">{item.section}</TableCell>
-                  <TableCell className="text-neutral-500">{item.before}</TableCell>
-                  <TableCell className="text-neutral-900">{item.after}</TableCell>
-                  <TableCell className="text-neutral-600">{item.reason}</TableCell>
-                  <TableCell>
-                    <span className="text-amber-700">{item.riskWarning}</span>
-                  </TableCell>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[100px]">模块</TableHead>
+                  <TableHead className="min-w-[180px]">修改前</TableHead>
+                  <TableHead className="min-w-[180px]">修改后</TableHead>
+                  <TableHead className="min-w-[120px]">修改理由</TableHead>
+                  <TableHead className="min-w-[120px]">风险提示</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
+              </TableHeader>
+              <TableBody>
+                {optimizedItems.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell className="font-medium">{item.section}</TableCell>
+                    <TableCell className="text-neutral-500">{item.before}</TableCell>
+                    <TableCell className="text-neutral-900">{item.after}</TableCell>
+                    <TableCell className="text-neutral-600">{item.reason}</TableCell>
+                    <TableCell>
+                      <span className="text-amber-700">{item.riskWarning}</span>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
           </Table>
         </CardContent>
       </Card>

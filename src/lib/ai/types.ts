@@ -1,4 +1,5 @@
 export const STYLE_LABELS = {
+  "professional-match": "更高匹配度与更强专业性",
   concise: "更简洁",
   "reduce-exaggeration": "降低夸张",
   "ai-product": "更偏 AI 产品",
@@ -57,6 +58,7 @@ export interface OptimizeResponseBody {
   optimizedItems: import("@/types/resume").OptimizedItem[];
   finalResume: import("@/types/resume").FinalResume;
   finalResumeScore: number;
+  interviewPrep: import("@/types/resume").InterviewPrep;
   mode: AIMode;
 }
 

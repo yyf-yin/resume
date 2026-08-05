@@ -70,14 +70,18 @@ export function FollowUpStep() {
     setIsSyncingFollowUps(true);
     setError(null);
     try {
-      const { optimizedItems, finalResume, finalResumeScore } = await regenerateOptimizedItems(
-        userInput,
-        optimizeStyle,
-        analysisResult.diagnosis,
-        followUpQuestions,
-        exampleMode
+      const { optimizedItems, finalResume, finalResumeScore, interviewPrep } =
+        await regenerateOptimizedItems(
+          userInput,
+          optimizeStyle,
+          analysisResult.diagnosis,
+          followUpQuestions,
+          exampleMode
+        );
+      setAnalysisResult(
+        { ...analysisResult, optimizedItems, finalResume, finalResumeScore, interviewPrep },
+        optimizeStyle
       );
-      setAnalysisResult({ ...analysisResult, optimizedItems, finalResume, finalResumeScore });
       setCurrentStep("optimize");
     } catch (err) {
       setError(err instanceof Error ? err.message : "追问信息同步失败");

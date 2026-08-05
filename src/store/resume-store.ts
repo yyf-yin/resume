@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import type {
   AnalysisResult,
+  OptimizationVariant,
   OptimizeStyle,
   PerfectionPlan,
   StepId,
@@ -27,6 +28,7 @@ interface ResumeStore {
   currentStep: StepId;
   isAnalyzing: boolean;
   analysisResult: AnalysisResult | null;
+  optimizationCache: Partial<Record<OptimizeStyle, OptimizationVariant>>;
   analysisError: string | null;
   perfectionPlan: PerfectionPlan | null;
   isGeneratingPerfection: boolean;
@@ -40,7 +42,8 @@ interface ResumeStore {
   loadExampleData: () => void;
   setCurrentStep: (step: StepId) => void;
   setAnalyzing: (analyzing: boolean) => void;
-  setAnalysisResult: (result: AnalysisResult) => void;
+  setAnalysisResult: (result: AnalysisResult, style?: OptimizeStyle) => void;
+  applyOptimizationVariant: (style: OptimizeStyle, variant: OptimizationVariant) => void;
   setAnalysisError: (error: string | null) => void;
   setPerfectionPlan: (plan: PerfectionPlan) => void;
   setGeneratingPerfection: (generating: boolean) => void;
@@ -70,13 +73,14 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
   currentStep: "input",
   isAnalyzing: false,
   analysisResult: null,
+  optimizationCache: {},
   analysisError: null,
   perfectionPlan: null,
   isGeneratingPerfection: false,
   perfectionError: null,
   aiMode: null,
   exampleMode: false,
-  optimizeStyle: "ai-product",
+  optimizeStyle: "professional-match",
   copied: false,
 
   setUserInput: (input) =>
@@ -149,13 +153,39 @@ Axure、Figma、SQL、Jira、Confluence、数据分析
 
   setAnalyzing: (analyzing) => set({ isAnalyzing: analyzing }),
 
-  setAnalysisResult: (result) =>
-    set({
-      analysisResult: result,
-      analysisError: null,
+  setAnalysisResult: (result, style) =>
+    set((state) => {
+      const resultStyle = style ?? state.optimizeStyle;
+      return {
+        analysisResult: result,
+        optimizeStyle: resultStyle,
+        optimizationCache: {
+          [resultStyle]: {
+            optimizedItems: result.optimizedItems,
+            finalResume: result.finalResume,
+            finalResumeScore: result.finalResumeScore,
+            interviewPrep: result.interviewPrep,
+          },
+        },
+        analysisError: null,
+        perfectionPlan: null,
+        perfectionError: null,
+      };
+    }),
+
+  applyOptimizationVariant: (style, variant) =>
+    set((state) => ({
+      optimizeStyle: style,
+      optimizationCache: {
+        ...state.optimizationCache,
+        [style]: variant,
+      },
+      analysisResult: state.analysisResult
+        ? { ...state.analysisResult, ...variant }
+        : state.analysisResult,
       perfectionPlan: null,
       perfectionError: null,
-    }),
+    })),
 
   setAnalysisError: (error) => set({ analysisError: error }),
 
@@ -173,6 +203,7 @@ Axure、Figma、SQL、Jira、Confluence、数据分析
       exampleMode: enabled,
       currentStep: "input",
       analysisResult: null,
+      optimizationCache: {},
       analysisError: null,
       perfectionPlan: null,
       perfectionError: null,

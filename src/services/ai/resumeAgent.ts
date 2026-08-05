@@ -54,7 +54,7 @@ export async function fetchAIStatus() {
 
 export async function runResumeAnalysis(
   input: UserInput,
-  optimizeStyle: OptimizeStyle = "ai-product",
+  optimizeStyle: OptimizeStyle = "professional-match",
   exampleMode = false
 ): Promise<AnalysisResult> {
   const data = await postJSON<AnalyzeResponseBody>("/api/analyze", {
@@ -71,7 +71,9 @@ export async function regenerateOptimizedItems(
   diagnosis: ResumeDiagnosis,
   followUpQuestions: FollowUpQuestion[] = [],
   exampleMode = false
-): Promise<Pick<AnalysisResult, "optimizedItems" | "finalResume" | "finalResumeScore">> {
+): Promise<
+  Pick<AnalysisResult, "optimizedItems" | "finalResume" | "finalResumeScore" | "interviewPrep">
+> {
   const data = await postJSON<OptimizeResponseBody>("/api/optimize", {
     input,
     style,
@@ -83,6 +85,7 @@ export async function regenerateOptimizedItems(
     optimizedItems: data.optimizedItems,
     finalResume: data.finalResume,
     finalResumeScore: data.finalResumeScore,
+    interviewPrep: data.interviewPrep,
   };
 }
 

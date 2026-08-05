@@ -39,8 +39,8 @@ export function InputStep() {
     setAnalyzing(true);
     setAnalysisError(null);
     try {
-      const result = await runResumeAnalysis(userInput, "ai-product", exampleMode);
-      setAnalysisResult(result);
+      const result = await runResumeAnalysis(userInput, "professional-match", exampleMode);
+      setAnalysisResult(result, "professional-match");
       setCurrentStep("jd-analysis");
     } catch (error) {
       setAnalysisError(error instanceof Error ? error.message : "分析失败，请稍后重试");

@@ -52,15 +52,17 @@ function buildCoreSummary(parts: DiagnosisMatchResult): string {
 
 export async function runLLMResumeAnalysis(
   input: UserInput,
-  optimizeStyle: OptimizeStyle = "ai-product"
+  optimizeStyle: OptimizeStyle = "professional-match"
 ): Promise<AnalysisResult> {
   const jd = await chatCompletionJSON<JDAnalysisResult>({
+    operation: "analyze:jd",
     system: RESUME_AGENT_SYSTEM_PROMPT,
     user: buildAnalyzeCorePrompt(input),
-    maxTokens: 3000,
+    maxTokens: 4500,
   });
 
   const diagnosisMatch = await chatCompletionJSON<DiagnosisMatchResult>({
+    operation: "analyze:diagnosis-match-followups",
     system: RESUME_AGENT_SYSTEM_PROMPT,
     user: buildAnalyzeDiagnosisPrompt(input),
     maxTokens: 16000,
@@ -68,20 +70,15 @@ export async function runLLMResumeAnalysis(
 
   const coreSummary = buildCoreSummary(diagnosisMatch);
 
-  const [optimize, interview] = await Promise.all([
-    chatCompletionJSON<OptimizeResult>({
-      system: RESUME_AGENT_SYSTEM_PROMPT,
-      user: buildAnalyzeOutputPrompt(input, optimizeStyle, coreSummary),
-      maxTokens: 4500,
-    }),
-    chatCompletionJSON<InterviewResult>({
-      system: RESUME_AGENT_SYSTEM_PROMPT,
-      user: buildAnalyzeInterviewPrompt(input, coreSummary),
-      maxTokens: 3500,
-    }),
-  ]);
+  const optimize = await chatCompletionJSON<OptimizeResult>({
+    operation: "analyze:optimization",
+    system: RESUME_AGENT_SYSTEM_PROMPT,
+    user: buildAnalyzeOutputPrompt(input, optimizeStyle, coreSummary),
+    maxTokens: 12000,
+  });
 
   const finalResume = await chatCompletionJSON<FinalResumeResult>({
+    operation: "analyze:final-resume",
     system: RESUME_AGENT_SYSTEM_PROMPT,
     user: buildAnalyzeFinalResumePrompt(
       input,
@@ -92,16 +89,33 @@ export async function runLLMResumeAnalysis(
     maxTokens: 16000,
   });
 
-  const finalResumeScore = await chatCompletionJSON<FinalResumeScoreResult>({
-    system: RESUME_AGENT_SYSTEM_PROMPT,
-    user: buildFinalResumeScorePrompt(
-      input,
-      finalResume.finalResume,
-      diagnosisMatch.diagnosis
-    ),
-    temperature: 0.2,
-    maxTokens: 300,
-  });
+  const normalizedFinalResume = normalizeAnalysisResult(
+    {
+      finalResume: finalResume.finalResume,
+    } as AnalysisResult,
+    input
+  ).finalResume;
+
+  const [finalResumeScore, interview] = await Promise.all([
+    chatCompletionJSON<FinalResumeScoreResult>({
+      operation: "analyze:final-score",
+      system: RESUME_AGENT_SYSTEM_PROMPT,
+      user: buildFinalResumeScorePrompt(input, normalizedFinalResume, diagnosisMatch.diagnosis),
+      temperature: 0.2,
+      maxTokens: 3000,
+    }),
+    chatCompletionJSON<InterviewResult>({
+      operation: "analyze:interview",
+      system: RESUME_AGENT_SYSTEM_PROMPT,
+      user: buildAnalyzeInterviewPrompt(
+        input,
+        coreSummary,
+        normalizedFinalResume,
+        optimize.optimizedItems
+      ),
+      maxTokens: 12000,
+    }),
+  ]);
 
   const raw: AnalysisResult = {
     jdAnalysis: jd.jdAnalysis,
@@ -109,7 +123,7 @@ export async function runLLMResumeAnalysis(
     matchItems: diagnosisMatch.matchItems,
     followUpQuestions: diagnosisMatch.followUpQuestions,
     optimizedItems: optimize.optimizedItems,
-    finalResume: finalResume.finalResume,
+    finalResume: normalizedFinalResume,
     finalResumeScore: finalResumeScore.overallScore,
     interviewPrep: interview.interviewPrep,
   };
@@ -122,16 +136,20 @@ export async function runLLMRegenerateOptimizedItems(
   style: OptimizeStyle,
   diagnosis: ResumeDiagnosis,
   followUpQuestions: FollowUpQuestion[] = []
-): Promise<Pick<AnalysisResult, "optimizedItems" | "finalResume" | "finalResumeScore">> {
+): Promise<
+  Pick<AnalysisResult, "optimizedItems" | "finalResume" | "finalResumeScore" | "interviewPrep">
+> {
   const raw = await chatCompletionJSON<{ optimizedItems: AnalysisResult["optimizedItems"] }>({
+    operation: "regenerate:optimization",
     system: RESUME_AGENT_SYSTEM_PROMPT,
     user: buildOptimizeUserPrompt(input, style, followUpQuestions),
     temperature: 0.5,
-    maxTokens: 4000,
+    maxTokens: 12000,
   });
 
   const optimizedItems = normalizeOptimizedItems(raw.optimizedItems);
   const finalResume = await chatCompletionJSON<FinalResumeResult>({
+    operation: "regenerate:final-resume",
     system: RESUME_AGENT_SYSTEM_PROMPT,
     user: buildAnalyzeFinalResumePrompt(
       input,
@@ -149,17 +167,33 @@ export async function runLLMRegenerateOptimizedItems(
     } as AnalysisResult,
     input
   ).finalResume;
-  const finalResumeScore = await chatCompletionJSON<FinalResumeScoreResult>({
-    system: RESUME_AGENT_SYSTEM_PROMPT,
-    user: buildFinalResumeScorePrompt(input, normalizedFinalResume, diagnosis),
-    temperature: 0.2,
-    maxTokens: 300,
-  });
+  const [finalResumeScore, interview] = await Promise.all([
+    chatCompletionJSON<FinalResumeScoreResult>({
+      operation: "regenerate:final-score",
+      system: RESUME_AGENT_SYSTEM_PROMPT,
+      user: buildFinalResumeScorePrompt(input, normalizedFinalResume, diagnosis),
+      temperature: 0.2,
+      maxTokens: 3000,
+    }),
+    chatCompletionJSON<InterviewResult>({
+      operation: "regenerate:interview",
+      system: RESUME_AGENT_SYSTEM_PROMPT,
+      user: buildAnalyzeInterviewPrompt(
+        input,
+        "",
+        normalizedFinalResume,
+        optimizedItems,
+        followUpQuestions
+      ),
+      maxTokens: 12000,
+    }),
+  ]);
 
   return {
     optimizedItems,
     finalResume: normalizedFinalResume,
     finalResumeScore: Math.max(0, Math.min(100, Math.round(finalResumeScore.overallScore))),
+    interviewPrep: interview.interviewPrep,
   };
 }
 
@@ -170,6 +204,7 @@ export async function runLLMFollowUpBullet(
   userAnswer: string
 ): Promise<string> {
   const raw = await chatCompletionJSON<{ bullet: string }>({
+    operation: "follow-up:bullet",
     system: RESUME_AGENT_SYSTEM_PROMPT,
     user: buildFollowUpBulletPrompt(input, question, purpose, userAnswer),
     temperature: 0.3,
@@ -186,6 +221,7 @@ export async function runLLMPerfectionPlan(
   followUpQuestions: FollowUpQuestion[] = []
 ): Promise<PerfectionPlan> {
   const raw = await chatCompletionJSON<{ plan: PerfectionPlan }>({
+    operation: "perfection:recommendations",
     system: PERFECTION_SYSTEM_PROMPT,
     user: buildPerfectionPrompt(input, diagnosis, matchItems, followUpQuestions),
     temperature: 0.4,

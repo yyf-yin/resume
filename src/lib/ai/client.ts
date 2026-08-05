@@ -1,10 +1,12 @@
 import { getAIConfig } from "@/lib/ai/config";
 import { LLMError } from "@/lib/ai/errors";
 import { parseJSONFromMessage } from "@/lib/ai/parse-json";
+import { logAIResponse } from "@/lib/ai/response-logger";
 
 export { LLMError } from "@/lib/ai/errors";
 
 interface ChatCompletionOptions {
+  operation: string;
   system: string;
   user: string;
   temperature?: number;
@@ -41,6 +43,7 @@ async function requestChatCompletionJSON<T>(options: ChatCompletionOptions): Pro
 
     const fixed = await callChatCompletions(config, {
       ...options,
+      operation: `${options.operation}:json-repair`,
       temperature: 0,
       system: "你是 JSON 修复器。将输入修复为合法 JSON，只输出 JSON，不要任何解释。",
       user: `修复以下 JSON：\n${raw.slice(0, 14000)}`,
@@ -80,22 +83,59 @@ async function callChatCompletions(
     }),
   });
 
+  const rawResponse = await response.text();
+
   if (!response.ok) {
-    const detail = await response.text().catch(() => "");
+    await logAIResponse({
+      operation: options.operation,
+      provider: config.provider,
+      model: config.model,
+      httpStatus: response.status,
+      status: "http-error",
+      rawResponse,
+    });
     throw new LLMError(
-      detail
-        ? `大模型请求失败 (${response.status}): ${detail.slice(0, 300)}`
+      rawResponse
+        ? `大模型请求失败 (${response.status}): ${rawResponse.slice(0, 300)}`
         : `大模型请求失败 (${response.status})`,
       response.status
     );
   }
 
-  return (await response.json()) as {
+  let data: {
     choices?: Array<{
       finish_reason?: string;
       message?: ChatMessage;
     }>;
+    usage?: unknown;
   };
+
+  try {
+    data = JSON.parse(rawResponse) as typeof data;
+  } catch {
+    await logAIResponse({
+      operation: options.operation,
+      provider: config.provider,
+      model: config.model,
+      httpStatus: response.status,
+      status: "invalid-response",
+      rawResponse,
+    });
+    throw new LLMError("大模型接口返回了无法解析的响应");
+  }
+
+  await logAIResponse({
+    operation: options.operation,
+    provider: config.provider,
+    model: config.model,
+    httpStatus: response.status,
+    status: "success",
+    finishReason: data.choices?.[0]?.finish_reason,
+    usage: data.usage,
+    rawResponse,
+  });
+
+  return data;
 }
 
 function extractMessageContents(message?: ChatMessage): string[] {
