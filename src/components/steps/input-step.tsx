@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Loader2, Sparkles, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,44 +16,76 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SectionTitle } from "@/components/shared/ui-helpers";
 import { useResumeStore } from "@/store/resume-store";
-import { runResumeAnalysis } from "@/services/ai/resumeAgent";
+import {
+  discardPendingResumeAnalysis,
+  getPendingResumeAnalysisInput,
+  hasPendingResumeAnalysis,
+  runResumeAnalysis,
+} from "@/services/ai/resumeAgent";
 import type { CompanyType, JobStage } from "@/types/resume";
 
 export function InputStep() {
+  const [hasPendingAnalysis, setHasPendingAnalysis] = useState(false);
   const {
     userInput,
     setUserInput,
     loadExampleData,
     isAnalyzing,
+    analysisResult,
     analysisError,
     setAnalyzing,
     setAnalysisResult,
+    resetAnalysisProgress,
     setAnalysisError,
     setCurrentStep,
     exampleMode,
   } = useResumeStore();
 
-  const handleAnalyze = async () => {
-    if (!userInput.targetRole || !userInput.jobDescription || !userInput.originalResume) {
+  useEffect(() => {
+    const pendingInput = getPendingResumeAnalysisInput();
+    if (pendingInput) setUserInput(pendingInput);
+    setHasPendingAnalysis(hasPendingResumeAnalysis());
+  }, [setUserInput]);
+
+  const handleAnalyze = async (resumePending = false) => {
+    const input = resumePending ? getPendingResumeAnalysisInput() ?? userInput : userInput;
+    if (!input.targetRole || !input.jobDescription || !input.originalResume) {
       return;
     }
+    if (resumePending) setUserInput(input);
     setAnalyzing(true);
     setAnalysisError(null);
     try {
-      const result = await runResumeAnalysis(userInput, "professional-match", exampleMode);
+      const result = await runResumeAnalysis(
+        input,
+        "professional-match",
+        exampleMode,
+        resumePending
+      );
+      setHasPendingAnalysis(false);
       setAnalysisResult(result, "professional-match");
       setCurrentStep("jd-analysis");
     } catch (error) {
+      setHasPendingAnalysis(hasPendingResumeAnalysis());
       setAnalysisError(error instanceof Error ? error.message : "分析失败，请稍后重试");
     } finally {
       setAnalyzing(false);
     }
   };
 
+  const handleRestart = () => {
+    if (!window.confirm("是否确认放弃当前进度重新开始")) return;
+    discardPendingResumeAnalysis();
+    setHasPendingAnalysis(false);
+    resetAnalysisProgress();
+  };
+
   const canAnalyze =
     userInput.targetRole.trim() &&
     userInput.jobDescription.trim() &&
     userInput.originalResume.trim();
+  const hasAnalysisProgress = hasPendingAnalysis || analysisResult !== null;
+  const isInputLocked = isAnalyzing || hasAnalysisProgress;
 
   return (
     <div>
@@ -62,23 +95,68 @@ export function InputStep() {
       />
 
       <div className="mb-4 flex gap-2">
-        <Button variant="outline" size="sm" onClick={loadExampleData} disabled={exampleMode}>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={loadExampleData}
+          disabled={exampleMode || isInputLocked}
+        >
           <Wand2 className="h-3.5 w-3.5" />
           使用示例数据
         </Button>
-        <Button size="sm" onClick={handleAnalyze} disabled={!canAnalyze || isAnalyzing}>
-          {isAnalyzing ? (
-            <>
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              分析中...
-            </>
-          ) : (
-            <>
-              <Sparkles className="h-3.5 w-3.5" />
-              开始分析
-            </>
-          )}
-        </Button>
+        {hasAnalysisProgress ? (
+          <>
+            <Button
+              size="sm"
+              onClick={() => {
+                if (analysisResult) {
+                  setCurrentStep("jd-analysis");
+                } else {
+                  void handleAnalyze(true);
+                }
+              }}
+              disabled={isAnalyzing}
+            >
+              {isAnalyzing ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  分析中...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-3.5 w-3.5" />
+                  继续分析
+                </>
+              )}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRestart}
+              disabled={isAnalyzing}
+            >
+              重新开始
+            </Button>
+          </>
+        ) : (
+          <Button
+            size="sm"
+            onClick={() => void handleAnalyze(false)}
+            disabled={!canAnalyze || isAnalyzing}
+          >
+            {isAnalyzing ? (
+              <>
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                分析中...
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-3.5 w-3.5" />
+                开始分析
+              </>
+            )}
+          </Button>
+        )}
       </div>
 
       {analysisError && (
@@ -100,7 +178,7 @@ export function InputStep() {
                 id="targetRole"
                 placeholder="如：AI 产品经理"
                 value={userInput.targetRole}
-                disabled={exampleMode}
+                disabled={exampleMode || isInputLocked}
                 onChange={(e) => setUserInput({ targetRole: e.target.value })}
               />
             </div>
@@ -110,7 +188,7 @@ export function InputStep() {
                 id="industry"
                 placeholder="如：企业服务 / SaaS"
                 value={userInput.industry}
-                disabled={exampleMode}
+                disabled={exampleMode || isInputLocked}
                 onChange={(e) => setUserInput({ industry: e.target.value })}
               />
             </div>
@@ -118,7 +196,7 @@ export function InputStep() {
               <Label>公司类型</Label>
               <Select
                 value={userInput.companyType}
-                disabled={exampleMode}
+                disabled={exampleMode || isInputLocked}
                 onValueChange={(v) => setUserInput({ companyType: v as CompanyType })}
               >
                 <SelectTrigger>
@@ -137,7 +215,7 @@ export function InputStep() {
               <Label>求职阶段</Label>
               <Select
                 value={userInput.jobStage}
-                disabled={exampleMode}
+                disabled={exampleMode || isInputLocked}
                 onValueChange={(v) => setUserInput({ jobStage: v as JobStage })}
               >
                 <SelectTrigger>
@@ -158,7 +236,7 @@ export function InputStep() {
                 id="highlightSkills"
                 placeholder="如：AI 产品规划、数据驱动、ToB 需求分析"
                 value={userInput.highlightSkills}
-                disabled={exampleMode}
+                disabled={exampleMode || isInputLocked}
                 onChange={(e) => setUserInput({ highlightSkills: e.target.value })}
               />
             </div>
@@ -175,7 +253,7 @@ export function InputStep() {
               className="min-h-[200px] font-mono text-xs leading-relaxed"
               placeholder="粘贴岗位 JD..."
               value={userInput.jobDescription}
-              disabled={exampleMode}
+              disabled={exampleMode || isInputLocked}
               onChange={(e) => setUserInput({ jobDescription: e.target.value })}
             />
           </CardContent>
@@ -191,7 +269,7 @@ export function InputStep() {
               className="min-h-[240px] font-mono text-xs leading-relaxed"
               placeholder={"粘贴简历内容...\n请粘贴单页简历，简历过长可能会导致信息丢失"}
               value={userInput.originalResume}
-              disabled={exampleMode}
+              disabled={exampleMode || isInputLocked}
               onChange={(e) => setUserInput({ originalResume: e.target.value })}
             />
           </CardContent>
@@ -207,7 +285,7 @@ export function InputStep() {
               className="min-h-[100px] text-sm"
               placeholder="补充 Agent 需要了解的信息..."
               value={userInput.additionalInfo}
-              disabled={exampleMode}
+              disabled={exampleMode || isInputLocked}
               onChange={(e) => setUserInput({ additionalInfo: e.target.value })}
             />
           </CardContent>

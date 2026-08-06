@@ -11,6 +11,7 @@ interface ChatCompletionOptions {
   user: string;
   temperature?: number;
   maxTokens?: number;
+  thinking?: "enabled" | "disabled";
 }
 
 interface ChatMessage {
@@ -75,6 +76,7 @@ async function callChatCompletions(
       model: config.model,
       temperature: options.temperature ?? 0.3,
       max_tokens: options.maxTokens ?? 8192,
+      ...(options.thinking ? { thinking: { type: options.thinking } } : {}),
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: options.system },

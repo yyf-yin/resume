@@ -1,6 +1,10 @@
 import type {
+  AnalysisCheckpoint,
+  AnalyzeErrorResponse,
   AnalyzeResponseBody,
   FollowUpBulletResponseBody,
+  OptimizationCheckpoint,
+  OptimizeErrorResponse,
   OptimizeResponseBody,
   PerfectionResponseBody,
 } from "@/lib/ai/types";
@@ -16,6 +20,24 @@ import type {
 
 export { STYLE_LABELS } from "@/lib/ai/types";
 
+const USER_FACING_ERROR_MESSAGE = "出错，请刷新重试";
+const PENDING_ANALYSIS_STORAGE_KEY = "resume-expert:pending-analysis";
+const PENDING_OPTIMIZATION_STORAGE_KEY = "resume-expert:pending-optimization";
+
+interface PendingAnalysis {
+  analysisId: string;
+  fingerprint: string;
+  input: UserInput;
+  optimizeStyle: OptimizeStyle;
+  exampleMode: boolean;
+  checkpoint: AnalysisCheckpoint;
+}
+
+interface PendingOptimization {
+  fingerprint: string;
+  checkpoint: OptimizationCheckpoint;
+}
+
 class ResumeAgentClientError extends Error {
   constructor(message: string) {
     super(message);
@@ -24,19 +46,73 @@ class ResumeAgentClientError extends Error {
 }
 
 async function postJSON<T>(url: string, body: unknown): Promise<T> {
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
 
-  const data = (await response.json().catch(() => ({}))) as T & { error?: string };
+    if (!response.ok) {
+      throw new ResumeAgentClientError(USER_FACING_ERROR_MESSAGE);
+    }
 
-  if (!response.ok) {
-    throw new ResumeAgentClientError(data.error || `请求失败 (${response.status})`);
+    return (await response.json()) as T;
+  } catch {
+    throw new ResumeAgentClientError(USER_FACING_ERROR_MESSAGE);
   }
+}
 
-  return data;
+function buildAnalysisFingerprint(
+  input: UserInput,
+  optimizeStyle: OptimizeStyle,
+  exampleMode: boolean
+): string {
+  return JSON.stringify({ input, optimizeStyle, exampleMode });
+}
+
+function readPendingAnalysis(): PendingAnalysis | null {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const stored = window.sessionStorage.getItem(PENDING_ANALYSIS_STORAGE_KEY);
+    return stored ? (JSON.parse(stored) as PendingAnalysis) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writePendingAnalysis(pending: PendingAnalysis): void {
+  try {
+    window.sessionStorage.setItem(PENDING_ANALYSIS_STORAGE_KEY, JSON.stringify(pending));
+  } catch {
+    // A storage failure must not prevent the analysis itself from running.
+  }
+}
+
+function clearPendingAnalysis(): void {
+  try {
+    window.sessionStorage.removeItem(PENDING_ANALYSIS_STORAGE_KEY);
+  } catch {
+    // Ignore unavailable browser storage.
+  }
+}
+
+export function getPendingResumeAnalysisInput(): UserInput | null {
+  return readPendingAnalysis()?.input ?? null;
+}
+
+export function hasPendingResumeAnalysis(): boolean {
+  return readPendingAnalysis() !== null;
+}
+
+export function discardPendingResumeAnalysis(): void {
+  clearPendingAnalysis();
+  try {
+    window.sessionStorage.removeItem(PENDING_OPTIMIZATION_STORAGE_KEY);
+  } catch {
+    // Ignore unavailable browser storage.
+  }
 }
 
 export async function fetchAIStatus() {
@@ -55,14 +131,53 @@ export async function fetchAIStatus() {
 export async function runResumeAnalysis(
   input: UserInput,
   optimizeStyle: OptimizeStyle = "professional-match",
-  exampleMode = false
+  exampleMode = false,
+  resumePending = false
 ): Promise<AnalysisResult> {
-  const data = await postJSON<AnalyzeResponseBody>("/api/analyze", {
-    input,
-    optimizeStyle,
-    exampleMode,
-  });
-  return data.result;
+  const fingerprint = buildAnalysisFingerprint(input, optimizeStyle, exampleMode);
+  const saved = readPendingAnalysis();
+  const pending: PendingAnalysis =
+    resumePending && saved?.fingerprint === fingerprint
+      ? saved
+      : {
+          analysisId:
+            window.crypto?.randomUUID?.() ??
+            `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+          fingerprint,
+          input,
+          optimizeStyle,
+          exampleMode,
+          checkpoint: {},
+        };
+
+  writePendingAnalysis(pending);
+
+  try {
+    const response = await fetch("/api/analyze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        input,
+        optimizeStyle,
+        exampleMode,
+        checkpoint: pending.checkpoint,
+      }),
+    });
+    const data = (await response.json()) as AnalyzeResponseBody | AnalyzeErrorResponse;
+
+    if (!response.ok || !("result" in data)) {
+      const checkpoint = "checkpoint" in data ? data.checkpoint : undefined;
+      if (checkpoint) {
+        writePendingAnalysis({ ...pending, checkpoint });
+      }
+      throw new ResumeAgentClientError(USER_FACING_ERROR_MESSAGE);
+    }
+
+    clearPendingAnalysis();
+    return data.result;
+  } catch {
+    throw new ResumeAgentClientError(USER_FACING_ERROR_MESSAGE);
+  }
 }
 
 export async function regenerateOptimizedItems(
@@ -74,19 +189,71 @@ export async function regenerateOptimizedItems(
 ): Promise<
   Pick<AnalysisResult, "optimizedItems" | "finalResume" | "finalResumeScore" | "interviewPrep">
 > {
-  const data = await postJSON<OptimizeResponseBody>("/api/optimize", {
-    input,
-    style,
-    followUpQuestions,
-    diagnosis,
-    exampleMode,
-  });
-  return {
-    optimizedItems: data.optimizedItems,
-    finalResume: data.finalResume,
-    finalResumeScore: data.finalResumeScore,
-    interviewPrep: data.interviewPrep,
-  };
+  const fingerprint = JSON.stringify({ input, style, diagnosis, followUpQuestions, exampleMode });
+  let saved: PendingOptimization | null = null;
+  try {
+    const stored = window.sessionStorage.getItem(PENDING_OPTIMIZATION_STORAGE_KEY);
+    saved = stored ? (JSON.parse(stored) as PendingOptimization) : null;
+  } catch {
+    // Continue without a saved checkpoint.
+  }
+
+  const pending: PendingOptimization =
+    saved?.fingerprint === fingerprint
+      ? saved
+      : { fingerprint, checkpoint: {} };
+
+  try {
+    window.sessionStorage.setItem(PENDING_OPTIMIZATION_STORAGE_KEY, JSON.stringify(pending));
+  } catch {
+    // A storage failure must not prevent regeneration.
+  }
+
+  try {
+    const response = await fetch("/api/optimize", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        input,
+        style,
+        followUpQuestions,
+        diagnosis,
+        exampleMode,
+        checkpoint: pending.checkpoint,
+      }),
+    });
+    const data = (await response.json()) as OptimizeResponseBody | OptimizeErrorResponse;
+
+    if (!response.ok || !("optimizedItems" in data)) {
+      const checkpoint = "checkpoint" in data ? data.checkpoint : undefined;
+      if (checkpoint) {
+        try {
+          window.sessionStorage.setItem(
+            PENDING_OPTIMIZATION_STORAGE_KEY,
+            JSON.stringify({ ...pending, checkpoint })
+          );
+        } catch {
+          // Continue surfacing the generic error if storage is unavailable.
+        }
+      }
+      throw new ResumeAgentClientError(USER_FACING_ERROR_MESSAGE);
+    }
+
+    try {
+      window.sessionStorage.removeItem(PENDING_OPTIMIZATION_STORAGE_KEY);
+    } catch {
+      // Ignore unavailable browser storage.
+    }
+
+    return {
+      optimizedItems: data.optimizedItems,
+      finalResume: data.finalResume,
+      finalResumeScore: data.finalResumeScore,
+      interviewPrep: data.interviewPrep,
+    };
+  } catch {
+    throw new ResumeAgentClientError(USER_FACING_ERROR_MESSAGE);
+  }
 }
 
 export async function generateFollowUpBullet(

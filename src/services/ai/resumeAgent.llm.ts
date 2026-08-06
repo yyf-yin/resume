@@ -1,5 +1,10 @@
 import { chatCompletionJSON } from "@/lib/ai/client";
 import {
+  AnalysisCheckpointError,
+  OptimizationCheckpointError,
+} from "@/lib/ai/errors";
+import type { AnalysisCheckpoint, OptimizationCheckpoint } from "@/lib/ai/types";
+import {
   buildPerfectionPrompt,
   normalizePerfectionPlan,
   PERFECTION_SYSTEM_PROMPT,
@@ -8,6 +13,7 @@ import {
   RESUME_AGENT_SYSTEM_PROMPT,
   buildAnalyzeCorePrompt,
   buildAnalyzeDiagnosisPrompt,
+  buildAnalyzeFollowUpPrompt,
   buildAnalyzeFinalResumePrompt,
   buildAnalyzeInterviewPrompt,
   buildAnalyzeOutputPrompt,
@@ -28,10 +34,8 @@ import type {
 } from "@/types/resume";
 
 type JDAnalysisResult = Pick<AnalysisResult, "jdAnalysis">;
-type DiagnosisMatchResult = Pick<
-  AnalysisResult,
-  "diagnosis" | "matchItems" | "followUpQuestions"
->;
+type DiagnosisMatchResult = Pick<AnalysisResult, "diagnosis" | "matchItems">;
+type FollowUpResult = Pick<AnalysisResult, "followUpQuestions">;
 type OptimizeResult = Pick<AnalysisResult, "optimizedItems">;
 type FinalResumeResult = Pick<AnalysisResult, "finalResume">;
 type FinalResumeScoreResult = { overallScore: number };
@@ -50,82 +54,165 @@ function buildCoreSummary(parts: DiagnosisMatchResult): string {
   ].join("\n");
 }
 
+async function runAnalysisStage<T>(
+  checkpoint: AnalysisCheckpoint,
+  request: () => Promise<T>
+): Promise<T> {
+  try {
+    return await request();
+  } catch (error) {
+    throw new AnalysisCheckpointError(error, checkpoint);
+  }
+}
+
 export async function runLLMResumeAnalysis(
   input: UserInput,
-  optimizeStyle: OptimizeStyle = "professional-match"
+  optimizeStyle: OptimizeStyle = "professional-match",
+  savedCheckpoint: AnalysisCheckpoint = {}
 ): Promise<AnalysisResult> {
-  const jd = await chatCompletionJSON<JDAnalysisResult>({
-    operation: "analyze:jd",
-    system: RESUME_AGENT_SYSTEM_PROMPT,
-    user: buildAnalyzeCorePrompt(input),
-    maxTokens: 4500,
-  });
+  const checkpoint: AnalysisCheckpoint = { ...savedCheckpoint };
 
-  const diagnosisMatch = await chatCompletionJSON<DiagnosisMatchResult>({
-    operation: "analyze:diagnosis-match-followups",
-    system: RESUME_AGENT_SYSTEM_PROMPT,
-    user: buildAnalyzeDiagnosisPrompt(input),
-    maxTokens: 16000,
-  });
+  if (!checkpoint.jdAnalysis) {
+    const jd = await runAnalysisStage(checkpoint, () =>
+      chatCompletionJSON<JDAnalysisResult>({
+        operation: "analyze:jd",
+        system: RESUME_AGENT_SYSTEM_PROMPT,
+        user: buildAnalyzeCorePrompt(input),
+        maxTokens: 12000,
+      })
+    );
+    checkpoint.jdAnalysis = jd.jdAnalysis;
+  }
+
+  if (!checkpoint.diagnosis || !checkpoint.matchItems) {
+    const diagnosisMatch = await runAnalysisStage(checkpoint, () =>
+      chatCompletionJSON<DiagnosisMatchResult>({
+        operation: "analyze:diagnosis-match",
+        system: RESUME_AGENT_SYSTEM_PROMPT,
+        user: buildAnalyzeDiagnosisPrompt(input),
+        maxTokens: 16000,
+      })
+    );
+    checkpoint.diagnosis = diagnosisMatch.diagnosis;
+    checkpoint.matchItems = diagnosisMatch.matchItems;
+  }
+
+  if (!checkpoint.followUpQuestions) {
+    const followUps = await runAnalysisStage(checkpoint, () =>
+      chatCompletionJSON<FollowUpResult>({
+        operation: "analyze:followups",
+        system: RESUME_AGENT_SYSTEM_PROMPT,
+        user: buildAnalyzeFollowUpPrompt(
+          input,
+          checkpoint.diagnosis!,
+          checkpoint.matchItems!
+        ),
+        maxTokens: 5000,
+      })
+    );
+    checkpoint.followUpQuestions = followUps.followUpQuestions;
+  }
+
+  const diagnosisMatch: DiagnosisMatchResult = {
+    diagnosis: checkpoint.diagnosis,
+    matchItems: checkpoint.matchItems,
+  };
 
   const coreSummary = buildCoreSummary(diagnosisMatch);
 
-  const optimize = await chatCompletionJSON<OptimizeResult>({
-    operation: "analyze:optimization",
-    system: RESUME_AGENT_SYSTEM_PROMPT,
-    user: buildAnalyzeOutputPrompt(input, optimizeStyle, coreSummary),
-    maxTokens: 12000,
-  });
+  if (!checkpoint.optimizedItems) {
+    const optimize = await runAnalysisStage(checkpoint, () =>
+      chatCompletionJSON<OptimizeResult>({
+        operation: "analyze:optimization",
+        system: RESUME_AGENT_SYSTEM_PROMPT,
+        user: buildAnalyzeOutputPrompt(input, optimizeStyle, coreSummary),
+        maxTokens: 12000,
+      })
+    );
+    checkpoint.optimizedItems = optimize.optimizedItems;
+  }
 
-  const finalResume = await chatCompletionJSON<FinalResumeResult>({
-    operation: "analyze:final-resume",
-    system: RESUME_AGENT_SYSTEM_PROMPT,
-    user: buildAnalyzeFinalResumePrompt(
-      input,
-      optimizeStyle,
-      coreSummary,
-      optimize.optimizedItems
-    ),
-    maxTokens: 16000,
-  });
+  if (!checkpoint.finalResume) {
+    const finalResume = await runAnalysisStage(checkpoint, () =>
+      chatCompletionJSON<FinalResumeResult>({
+        operation: "analyze:final-resume",
+        system: RESUME_AGENT_SYSTEM_PROMPT,
+        user: buildAnalyzeFinalResumePrompt(
+          input,
+          optimizeStyle,
+          coreSummary,
+          checkpoint.optimizedItems!
+        ),
+        maxTokens: 16000,
+      })
+    );
+    checkpoint.finalResume = normalizeAnalysisResult(
+      {
+        finalResume: finalResume.finalResume,
+      } as AnalysisResult,
+      input
+    ).finalResume;
+  }
 
-  const normalizedFinalResume = normalizeAnalysisResult(
-    {
-      finalResume: finalResume.finalResume,
-    } as AnalysisResult,
-    input
-  ).finalResume;
+  const scoreRequest =
+    typeof checkpoint.finalResumeScore === "number"
+      ? Promise.resolve<FinalResumeScoreResult | null>(null)
+      : chatCompletionJSON<FinalResumeScoreResult>({
+          operation: "analyze:final-score",
+          system: RESUME_AGENT_SYSTEM_PROMPT,
+          user: buildFinalResumeScorePrompt(
+            input,
+            checkpoint.finalResume,
+            diagnosisMatch.diagnosis
+          ),
+          temperature: 0.2,
+          maxTokens: 4500,
+        });
+  const interviewRequest = checkpoint.interviewPrep
+    ? Promise.resolve<InterviewResult | null>(null)
+    : chatCompletionJSON<InterviewResult>({
+        operation: "analyze:interview",
+        system: RESUME_AGENT_SYSTEM_PROMPT,
+        user: buildAnalyzeInterviewPrompt(
+          input,
+          coreSummary,
+          checkpoint.finalResume,
+          checkpoint.optimizedItems
+        ),
+        maxTokens: 12000,
+      });
 
-  const [finalResumeScore, interview] = await Promise.all([
-    chatCompletionJSON<FinalResumeScoreResult>({
-      operation: "analyze:final-score",
-      system: RESUME_AGENT_SYSTEM_PROMPT,
-      user: buildFinalResumeScorePrompt(input, normalizedFinalResume, diagnosisMatch.diagnosis),
-      temperature: 0.2,
-      maxTokens: 3000,
-    }),
-    chatCompletionJSON<InterviewResult>({
-      operation: "analyze:interview",
-      system: RESUME_AGENT_SYSTEM_PROMPT,
-      user: buildAnalyzeInterviewPrompt(
-        input,
-        coreSummary,
-        normalizedFinalResume,
-        optimize.optimizedItems
-      ),
-      maxTokens: 12000,
-    }),
+  const [scoreResult, interviewResult] = await Promise.allSettled([
+    scoreRequest,
+    interviewRequest,
   ]);
 
+  if (scoreResult.status === "fulfilled" && scoreResult.value) {
+    checkpoint.finalResumeScore = scoreResult.value.overallScore;
+  }
+  if (interviewResult.status === "fulfilled" && interviewResult.value) {
+    checkpoint.interviewPrep = interviewResult.value.interviewPrep;
+  }
+
+  const finalStageError =
+    scoreResult.status === "rejected"
+      ? scoreResult.reason
+      : interviewResult.status === "rejected"
+        ? interviewResult.reason
+        : null;
+  if (finalStageError) {
+    throw new AnalysisCheckpointError(finalStageError, checkpoint);
+  }
+
   const raw: AnalysisResult = {
-    jdAnalysis: jd.jdAnalysis,
+    jdAnalysis: checkpoint.jdAnalysis,
     diagnosis: diagnosisMatch.diagnosis,
     matchItems: diagnosisMatch.matchItems,
-    followUpQuestions: diagnosisMatch.followUpQuestions,
-    optimizedItems: optimize.optimizedItems,
-    finalResume: normalizedFinalResume,
-    finalResumeScore: finalResumeScore.overallScore,
-    interviewPrep: interview.interviewPrep,
+    followUpQuestions: checkpoint.followUpQuestions,
+    optimizedItems: checkpoint.optimizedItems,
+    finalResume: checkpoint.finalResume,
+    finalResumeScore: checkpoint.finalResumeScore!,
+    interviewPrep: checkpoint.interviewPrep!,
   };
 
   return normalizeAnalysisResult(raw, input);
@@ -135,65 +222,105 @@ export async function runLLMRegenerateOptimizedItems(
   input: UserInput,
   style: OptimizeStyle,
   diagnosis: ResumeDiagnosis,
-  followUpQuestions: FollowUpQuestion[] = []
+  followUpQuestions: FollowUpQuestion[] = [],
+  savedCheckpoint: OptimizationCheckpoint = {}
 ): Promise<
   Pick<AnalysisResult, "optimizedItems" | "finalResume" | "finalResumeScore" | "interviewPrep">
 > {
-  const raw = await chatCompletionJSON<{ optimizedItems: AnalysisResult["optimizedItems"] }>({
-    operation: "regenerate:optimization",
-    system: RESUME_AGENT_SYSTEM_PROMPT,
-    user: buildOptimizeUserPrompt(input, style, followUpQuestions),
-    temperature: 0.5,
-    maxTokens: 12000,
-  });
+  const checkpoint: OptimizationCheckpoint = { ...savedCheckpoint };
 
-  const optimizedItems = normalizeOptimizedItems(raw.optimizedItems);
-  const finalResume = await chatCompletionJSON<FinalResumeResult>({
-    operation: "regenerate:final-resume",
-    system: RESUME_AGENT_SYSTEM_PROMPT,
-    user: buildAnalyzeFinalResumePrompt(
-      input,
-      style,
-      "",
-      optimizedItems,
-      followUpQuestions
-    ),
-    maxTokens: 16000,
-  });
+  try {
+    if (!checkpoint.optimizedItems) {
+      const raw = await chatCompletionJSON<{
+        optimizedItems: AnalysisResult["optimizedItems"];
+      }>({
+        operation: "regenerate:optimization",
+        system: RESUME_AGENT_SYSTEM_PROMPT,
+        user: buildOptimizeUserPrompt(input, style, followUpQuestions),
+        temperature: 0.5,
+        maxTokens: 12000,
+      });
+      checkpoint.optimizedItems = normalizeOptimizedItems(raw.optimizedItems);
+    }
 
-  const normalizedFinalResume = normalizeAnalysisResult(
-    {
-      finalResume: finalResume.finalResume,
-    } as AnalysisResult,
-    input
-  ).finalResume;
-  const [finalResumeScore, interview] = await Promise.all([
-    chatCompletionJSON<FinalResumeScoreResult>({
-      operation: "regenerate:final-score",
-      system: RESUME_AGENT_SYSTEM_PROMPT,
-      user: buildFinalResumeScorePrompt(input, normalizedFinalResume, diagnosis),
-      temperature: 0.2,
-      maxTokens: 3000,
-    }),
-    chatCompletionJSON<InterviewResult>({
-      operation: "regenerate:interview",
-      system: RESUME_AGENT_SYSTEM_PROMPT,
-      user: buildAnalyzeInterviewPrompt(
-        input,
-        "",
-        normalizedFinalResume,
-        optimizedItems,
-        followUpQuestions
-      ),
-      maxTokens: 12000,
-    }),
+    if (!checkpoint.finalResume) {
+      const finalResume = await chatCompletionJSON<FinalResumeResult>({
+        operation: "regenerate:final-resume",
+        system: RESUME_AGENT_SYSTEM_PROMPT,
+        user: buildAnalyzeFinalResumePrompt(
+          input,
+          style,
+          "",
+          checkpoint.optimizedItems,
+          followUpQuestions
+        ),
+        maxTokens: 16000,
+      });
+      checkpoint.finalResume = normalizeAnalysisResult(
+        {
+          finalResume: finalResume.finalResume,
+        } as AnalysisResult,
+        input
+      ).finalResume;
+    }
+  } catch (error) {
+    throw new OptimizationCheckpointError(error, checkpoint);
+  }
+
+  const scoreRequest =
+    typeof checkpoint.finalResumeScore === "number"
+      ? Promise.resolve<FinalResumeScoreResult | null>(null)
+      : chatCompletionJSON<FinalResumeScoreResult>({
+          operation: "regenerate:final-score",
+          system: RESUME_AGENT_SYSTEM_PROMPT,
+          user: buildFinalResumeScorePrompt(input, checkpoint.finalResume, diagnosis),
+          temperature: 0.2,
+          maxTokens: 4500,
+        });
+  const interviewRequest = checkpoint.interviewPrep
+    ? Promise.resolve<InterviewResult | null>(null)
+    : chatCompletionJSON<InterviewResult>({
+        operation: "regenerate:interview",
+        system: RESUME_AGENT_SYSTEM_PROMPT,
+        user: buildAnalyzeInterviewPrompt(
+          input,
+          "",
+          checkpoint.finalResume,
+          checkpoint.optimizedItems,
+          followUpQuestions
+        ),
+        maxTokens: 12000,
+      });
+
+  const [scoreResult, interviewResult] = await Promise.allSettled([
+    scoreRequest,
+    interviewRequest,
   ]);
+  if (scoreResult.status === "fulfilled" && scoreResult.value) {
+    checkpoint.finalResumeScore = scoreResult.value.overallScore;
+  }
+  if (interviewResult.status === "fulfilled" && interviewResult.value) {
+    checkpoint.interviewPrep = interviewResult.value.interviewPrep;
+  }
+
+  const finalStageError =
+    scoreResult.status === "rejected"
+      ? scoreResult.reason
+      : interviewResult.status === "rejected"
+        ? interviewResult.reason
+        : null;
+  if (finalStageError) {
+    throw new OptimizationCheckpointError(finalStageError, checkpoint);
+  }
 
   return {
-    optimizedItems,
-    finalResume: normalizedFinalResume,
-    finalResumeScore: Math.max(0, Math.min(100, Math.round(finalResumeScore.overallScore))),
-    interviewPrep: interview.interviewPrep,
+    optimizedItems: checkpoint.optimizedItems,
+    finalResume: checkpoint.finalResume,
+    finalResumeScore: Math.max(
+      0,
+      Math.min(100, Math.round(checkpoint.finalResumeScore!))
+    ),
+    interviewPrep: checkpoint.interviewPrep!,
   };
 }
 
@@ -209,6 +336,7 @@ export async function runLLMFollowUpBullet(
     user: buildFollowUpBulletPrompt(input, question, purpose, userAnswer),
     temperature: 0.3,
     maxTokens: 500,
+    thinking: "disabled",
   });
 
   return raw.bullet?.trim() ?? "";

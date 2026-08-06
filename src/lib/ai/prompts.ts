@@ -2,7 +2,9 @@ import type {
   AnalysisResult,
   EvidenceStrength,
   FollowUpQuestion,
+  MatchItem,
   OptimizeStyle,
+  ResumeDiagnosis,
   UserInput,
 } from "@/types/resume";
 
@@ -259,7 +261,7 @@ ${buildRequiredJsonRules([
 }
 
 export function buildAnalyzeDiagnosisPrompt(input: UserInput): string {
-  return `请完成简历诊断、匹配分析、经历追问（第二部分）。
+  return `请完成简历诊断和匹配分析（第二部分 A）。
 ${buildInputContext(input)}
 
 ${buildRequiredJsonRules([
@@ -277,12 +279,6 @@ ${buildRequiredJsonRules([
   "matchItems[].evidenceStrength",
   "matchItems[].needsSupplement",
   "matchItems[].optimizationSuggestion",
-  "followUpQuestions",
-  "followUpQuestions[].id",
-  "followUpQuestions[].question",
-  "followUpQuestions[].purpose",
-  "followUpQuestions[].userAnswer",
-  "followUpQuestions[].generatedBullet",
 ])}
 
 即使简历证据不足，也必须根据已有证据给出保守的 overallScore；证据不足应通过较低评分、mainIssues、evidenceStrength 和 needsSupplement 表达，绝不能省略 diagnosis 或 overallScore。
@@ -309,7 +305,37 @@ ${buildRequiredJsonRules([
       "needsSupplement": true,
       "optimizationSuggestion": "补充项目目标、个人行动和量化结果"
     }
-  ],
+  ]
+}
+
+要求：matchItems 6-8 条。`;
+}
+
+export function buildAnalyzeFollowUpPrompt(
+  input: UserInput,
+  diagnosis: ResumeDiagnosis,
+  matchItems: MatchItem[]
+): string {
+  return `请根据已完成的简历诊断和匹配分析生成经历追问（第二部分 B）。
+${buildInputContext(input)}
+
+【已有诊断】
+${JSON.stringify(diagnosis)}
+
+【已有匹配分析】
+${JSON.stringify(matchItems)}
+
+${buildRequiredJsonRules([
+  "followUpQuestions",
+  "followUpQuestions[].id",
+  "followUpQuestions[].question",
+  "followUpQuestions[].purpose",
+  "followUpQuestions[].userAnswer",
+  "followUpQuestions[].generatedBullet",
+])}
+
+输出结构示例：
+{
   "followUpQuestions": [
     {
       "id": "fu-1",
@@ -321,7 +347,7 @@ ${buildRequiredJsonRules([
   ]
 }
 
-要求：followUpQuestions 5-7 条，id 为 fu-1...；matchItems 6-8 条。`;
+要求：followUpQuestions 5-7 条，id 为 fu-1...；只追问简历和补充信息中缺失但对目标岗位重要的真实证据。`;
 }
 
 export function buildAnalyzeOutputPrompt(

@@ -19,7 +19,10 @@ export interface AnalyzeRequestBody {
   input: import("@/types/resume").UserInput;
   optimizeStyle?: import("@/types/resume").OptimizeStyle;
   exampleMode?: boolean;
+  checkpoint?: AnalysisCheckpoint;
 }
+
+export type AnalysisCheckpoint = Partial<import("@/types/resume").AnalysisResult>;
 
 export interface OptimizeRequestBody {
   input: import("@/types/resume").UserInput;
@@ -27,7 +30,12 @@ export interface OptimizeRequestBody {
   followUpQuestions?: import("@/types/resume").FollowUpQuestion[];
   diagnosis: import("@/types/resume").ResumeDiagnosis;
   exampleMode?: boolean;
+  checkpoint?: OptimizationCheckpoint;
 }
+
+export type OptimizationCheckpoint = Partial<
+  import("@/types/resume").OptimizationVariant
+>;
 
 export interface FollowUpBulletRequestBody {
   input: import("@/types/resume").UserInput;
@@ -54,12 +62,20 @@ export interface AnalyzeResponseBody {
   mode: AIMode;
 }
 
+export interface AnalyzeErrorResponse extends APIErrorResponse {
+  checkpoint?: AnalysisCheckpoint;
+}
+
 export interface OptimizeResponseBody {
   optimizedItems: import("@/types/resume").OptimizedItem[];
   finalResume: import("@/types/resume").FinalResume;
   finalResumeScore: number;
   interviewPrep: import("@/types/resume").InterviewPrep;
   mode: AIMode;
+}
+
+export interface OptimizeErrorResponse extends APIErrorResponse {
+  checkpoint?: OptimizationCheckpoint;
 }
 
 export interface FollowUpBulletResponseBody {

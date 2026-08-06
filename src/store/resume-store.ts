@@ -43,6 +43,7 @@ interface ResumeStore {
   setCurrentStep: (step: StepId) => void;
   setAnalyzing: (analyzing: boolean) => void;
   setAnalysisResult: (result: AnalysisResult, style?: OptimizeStyle) => void;
+  resetAnalysisProgress: () => void;
   applyOptimizationVariant: (style: OptimizeStyle, variant: OptimizationVariant) => void;
   setAnalysisError: (error: string | null) => void;
   setPerfectionPlan: (plan: PerfectionPlan) => void;
@@ -151,7 +152,19 @@ Axure、Figma、SQL、Jira、Confluence、数据分析
 
   setCurrentStep: (step) => set({ currentStep: step }),
 
-  setAnalyzing: (analyzing) => set({ isAnalyzing: analyzing }),
+  setAnalyzing: (analyzing) =>
+    set(
+      analyzing
+        ? {
+            isAnalyzing: true,
+            analysisResult: null,
+            optimizationCache: {},
+            perfectionPlan: null,
+            perfectionError: null,
+            copied: false,
+          }
+        : { isAnalyzing: false }
+    ),
 
   setAnalysisResult: (result, style) =>
     set((state) => {
@@ -171,6 +184,21 @@ Axure、Figma、SQL、Jira、Confluence、数据分析
         perfectionPlan: null,
         perfectionError: null,
       };
+    }),
+
+  resetAnalysisProgress: () =>
+    set({
+      currentStep: "input",
+      isAnalyzing: false,
+      analysisResult: null,
+      optimizationCache: {},
+      analysisError: null,
+      perfectionPlan: null,
+      isGeneratingPerfection: false,
+      perfectionError: null,
+      aiMode: null,
+      exampleMode: false,
+      copied: false,
     }),
 
   applyOptimizationVariant: (style, variant) =>

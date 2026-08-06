@@ -1,5 +1,9 @@
 import { getAIConfig } from "@/lib/ai/config";
-import type { AIMode } from "@/lib/ai/types";
+import type {
+  AIMode,
+  AnalysisCheckpoint,
+  OptimizationCheckpoint,
+} from "@/lib/ai/types";
 import {
   runMockFollowUpBullet,
   runMockPerfectionPlan,
@@ -29,12 +33,13 @@ function currentMode(forceMock = false): AIMode {
 export async function analyzeResumeServer(
   input: UserInput,
   optimizeStyle: OptimizeStyle = "professional-match",
-  forceMock = false
+  forceMock = false,
+  checkpoint: AnalysisCheckpoint = {}
 ): Promise<{ result: AnalysisResult; mode: AIMode }> {
   const mode = currentMode(forceMock);
 
   if (mode === "llm") {
-    const result = await runLLMResumeAnalysis(input, optimizeStyle);
+    const result = await runLLMResumeAnalysis(input, optimizeStyle, checkpoint);
     return { result, mode };
   }
 
@@ -47,7 +52,8 @@ export async function regenerateOptimizedItemsServer(
   style: OptimizeStyle,
   diagnosis: ResumeDiagnosis,
   followUpQuestions: FollowUpQuestion[] = [],
-  forceMock = false
+  forceMock = false,
+  checkpoint: OptimizationCheckpoint = {}
 ): Promise<{
   optimizedItems: AnalysisResult["optimizedItems"];
   finalResume: AnalysisResult["finalResume"];
@@ -62,7 +68,8 @@ export async function regenerateOptimizedItemsServer(
       input,
       style,
       diagnosis,
-      followUpQuestions
+      followUpQuestions,
+      checkpoint
     );
     return { ...result, mode };
   }
