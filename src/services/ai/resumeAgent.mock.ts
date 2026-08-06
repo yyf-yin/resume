@@ -1,4 +1,5 @@
 import { delay } from "@/lib/utils";
+import { getCampusExperiencePolicy } from "@/lib/campus-experience-policy";
 import type {
   AnalysisResult,
   MatchItem,
@@ -198,8 +199,8 @@ function buildMatchItems(): AnalysisResult["matchItems"] {
   ];
 }
 
-function buildFollowUpQuestions(): AnalysisResult["followUpQuestions"] {
-  return [
+function buildFollowUpQuestions(input: UserInput): AnalysisResult["followUpQuestions"] {
+  const questions: AnalysisResult["followUpQuestions"] = [
     {
       id: "fu-1",
       question: "你的文档问答 Demo 具体解决了什么业务问题？用了哪些技术栈？",
@@ -249,7 +250,62 @@ function buildFollowUpQuestions(): AnalysisResult["followUpQuestions"] {
       userAnswer: "",
       generatedBullet: "",
     },
+    {
+      id: "fu-8",
+      experienceType: "project",
+      experienceTitle: "内部文档问答 Demo",
+      evidenceDimension: "result",
+      question: "这个 Demo 最终交付了哪些可演示功能？有多少人试用、完成了多少条测试，准确率或有效反馈如何？",
+      purpose: "挖掘项目交付物与可量化验证结果",
+      userAnswer: "",
+      generatedBullet: "",
+    },
+    {
+      id: "fu-9",
+      experienceType: "work",
+      experienceTitle: "跨团队版本交付",
+      evidenceDimension: "result",
+      question: "这次跨团队协作最终交付了什么？是否能提供版本数量、交付周期、延期变化、上线质量或采用范围？",
+      purpose: "补充协作经历的交付结果",
+      userAnswer: "",
+      generatedBullet: "",
+    },
+    {
+      id: "fu-10",
+      experienceType: "work",
+      experienceTitle: "需求优先级或 ROI 评估",
+      evidenceDimension: "result",
+      question: "你的评估最终促成了什么决策或业务变化？如果没有完整 ROI，是否有需求采纳、资源节约、周期缩短或正式反馈可以验证？",
+      purpose: "挖掘决策工作的可验证成果",
+      userAnswer: "",
+      generatedBullet: "",
+    },
   ];
+
+  if (["校招", "社招-初级", "转行"].includes(input.jobStage)) {
+    questions[5] = {
+      id: "fu-6",
+      experienceType: "campus",
+      experienceTitle: "学生组织或社团经历",
+      evidenceDimension: "action",
+      question: "你在最重要的一段学生组织、社团或志愿经历中承担什么角色？哪些工作是你个人完成的？",
+      purpose: "挖掘可迁移的校园实践证据",
+      userAnswer: "",
+      generatedBullet: "",
+    };
+    questions[6] = {
+      id: "fu-7",
+      experienceType: "campus",
+      experienceTitle: "学生组织或社团经历",
+      evidenceDimension: "result",
+      question: "这段校园经历覆盖了多少人或持续多久？最终产生了什么可验证的结果或反馈？",
+      purpose: "补充校园经历的规模与结果",
+      userAnswer: "",
+      generatedBullet: "",
+    };
+  }
+
+  return questions;
 }
 
 function buildOptimizedItems(
@@ -303,7 +359,7 @@ function buildOptimizedItems(
     ];
   }
 
-  return [
+  const items: AnalysisResult["optimizedItems"] = [
     {
       id: "opt-1",
       section: "职业摘要",
@@ -360,9 +416,24 @@ function buildOptimizedItems(
       riskWarning: "AI 技能标注「基础/Demo 级」，避免夸大",
     },
   ];
+
+  if (input && ["社招-初级", "转行"].includes(input.jobStage)) {
+    items[5] = {
+      id: "opt-6",
+      section: input.jobStage === "转行" ? "补充经历" : "校园经历",
+      before: "负责学生会新媒体工作",
+      after: "协调 6 名成员完成校园活动内容策划与发布，建立选题和复盘机制",
+      reason: "职业经历较少时，以相关校园实践补充组织协调和结果意识证据",
+      riskWarning: "仅在经历真实且与目标岗位相关时保留，成员数量和结果需可核实",
+    };
+  }
+
+  return items;
 }
 
 function buildFinalResume(input: UserInput): AnalysisResult["finalResume"] {
+  const campusPolicy = getCampusExperiencePolicy(input.jobStage);
+
   if (input.jobStage === "校招") {
     return {
       template: "campus",
@@ -486,7 +557,20 @@ function buildFinalResume(input: UserInput): AnalysisResult["finalResume"] {
         ],
       },
     ],
-    campusExperience: [],
+    campusExperience:
+      campusPolicy.allowed && ["社招-初级", "转行"].includes(input.jobStage)
+        ? [
+            {
+              organization: "校学生会新媒体中心",
+              role: "项目组负责人",
+              period: "2019.09 - 2020.06",
+              bullets: [
+                "协调 6 名成员完成校园活动内容策划与发布，建立选题和复盘机制",
+                "结合阅读数据调整内容方向，单篇平均阅读量较前期提升 35%",
+              ],
+            },
+          ]
+        : [],
     awardsAndCertificates: [],
     skillsAndTools: [
       "Axure",
@@ -602,7 +686,7 @@ export async function runMockResumeAnalysis(
     jdAnalysis: buildJDAnalysis(input),
     diagnosis: buildDiagnosis(),
     matchItems: buildMatchItems(),
-    followUpQuestions: buildFollowUpQuestions(),
+    followUpQuestions: buildFollowUpQuestions(input),
     optimizedItems: buildOptimizedItems(optimizeStyle, input),
     finalResume: buildFinalResume(input),
     finalResumeScore: input.jobStage === "校招" ? 76 : 78,

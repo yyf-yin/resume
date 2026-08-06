@@ -65,11 +65,14 @@ export function formatResumeAsText(resume: import("@/types/resume").FinalResume)
   );
   pushEntries("项目经历", resume.projectExperience);
 
-  if (isCampusTemplate) {
+  if (resume.campusExperience.length > 0) {
     pushEntries(
       "校园经历",
       resume.campusExperience.map((item) => ({ ...item, name: item.organization }))
     );
+  }
+
+  if (isCampusTemplate) {
     if (resume.awardsAndCertificates.length > 0) {
       lines.push("获奖证书");
       resume.awardsAndCertificates.forEach((award) => lines.push(`• ${award}`));

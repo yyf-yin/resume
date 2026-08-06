@@ -69,6 +69,9 @@ export interface MatchItem {
 
 export interface FollowUpQuestion {
   id: string;
+  experienceType?: "work" | "internship" | "project" | "campus" | "skill" | "other";
+  experienceTitle?: string;
+  evidenceDimension?: "role" | "action" | "scale" | "challenge" | "collaboration" | "result" | "other";
   question: string;
   purpose: string;
   userAnswer: string;

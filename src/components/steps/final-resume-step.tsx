@@ -111,6 +111,7 @@ export function FinalResumeStep() {
     period: item.period,
     bullets: item.bullets,
   }));
+  const showCampusExperience = campusEntries.length > 0;
 
   return (
     <div>
@@ -160,7 +161,7 @@ export function FinalResumeStep() {
 
           <EntrySection title="项目经历" entries={projectEntries} />
 
-          {isCampusTemplate && <EntrySection title="校园经历" entries={campusEntries} />}
+          {showCampusExperience && <EntrySection title="校园经历" entries={campusEntries} />}
 
           {isCampusTemplate && finalResume.awardsAndCertificates.length > 0 && (
             <section className="mb-5">

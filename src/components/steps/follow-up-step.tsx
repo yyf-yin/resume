@@ -14,6 +14,25 @@ import {
 } from "@/services/ai/resumeAgent";
 import { useResumeStore } from "@/store/resume-store";
 
+const EXPERIENCE_TYPE_LABELS = {
+  work: "工作经历",
+  internship: "实习经历",
+  project: "项目经历",
+  campus: "校园经历",
+  skill: "技能能力",
+  other: "补充信息",
+} as const;
+
+const EVIDENCE_DIMENSION_LABELS = {
+  role: "个人角色",
+  action: "具体行动",
+  scale: "经历规模",
+  challenge: "关键难点",
+  collaboration: "协作过程",
+  result: "真实结果",
+  other: "证据补充",
+} as const;
+
 export function FollowUpStep() {
   const {
     analysisResult,
@@ -94,7 +113,7 @@ export function FollowUpStep() {
     <div>
       <SectionTitle
         title="经历追问"
-        description="Agent 针对简历缺口生成追问，填写回答后可生成可用于简历的 bullet"
+        description="Agent 针对能力缺口和缺少成果的经历生成最多 10 个追问，填写回答后可生成简历 bullet"
       />
 
       {error && (
@@ -116,6 +135,17 @@ export function FollowUpStep() {
                     <Badge variant="outline" className="font-normal">
                       {q.purpose}
                     </Badge>
+                    {q.experienceType && (
+                      <Badge variant="secondary" className="font-normal">
+                        {EXPERIENCE_TYPE_LABELS[q.experienceType]}
+                        {q.experienceTitle ? ` · ${q.experienceTitle}` : ""}
+                      </Badge>
+                    )}
+                    {q.evidenceDimension && (
+                      <Badge variant="secondary" className="font-normal">
+                        {EVIDENCE_DIMENSION_LABELS[q.evidenceDimension]}
+                      </Badge>
+                    )}
                   </div>
                   <CardTitle className="text-sm font-medium leading-snug">{q.question}</CardTitle>
                 </div>

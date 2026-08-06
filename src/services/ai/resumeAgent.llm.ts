@@ -107,10 +107,10 @@ export async function runLLMResumeAnalysis(
           checkpoint.diagnosis!,
           checkpoint.matchItems!
         ),
-        maxTokens: 5000,
+        maxTokens: 7000,
       })
     );
-    checkpoint.followUpQuestions = followUps.followUpQuestions;
+    checkpoint.followUpQuestions = followUps.followUpQuestions.slice(0, 10);
   }
 
   const diagnosisMatch: DiagnosisMatchResult = {
