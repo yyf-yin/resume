@@ -82,6 +82,11 @@ export function FollowUpStep() {
     );
 
     if (!hasFollowUpEvidence) {
+      const shouldContinue = window.confirm(
+        "不回答追问会让最终简历质量降低，确定继续吗？"
+      );
+      if (!shouldContinue) return;
+
       setCurrentStep("optimize");
       return;
     }

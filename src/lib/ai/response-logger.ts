@@ -27,6 +27,9 @@ const logDirectory = path.join(process.cwd(), ".ai-logs");
 const logFile = path.join(logDirectory, `run-${runId}.jsonl`);
 
 export async function logAIResponse(entry: AIResponseLogEntry): Promise<void> {
+  const enabled = process.env.AI_RESPONSE_LOG_ENABLED === "true";
+  if (!enabled) return;
+
   const writeLog = async () => {
     await mkdir(logDirectory, { recursive: true });
     await appendFile(

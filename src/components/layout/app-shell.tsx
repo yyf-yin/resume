@@ -63,6 +63,16 @@ export function AppShell() {
           </div>
         </main>
       </div>
+      <footer className="flex h-9 shrink-0 items-center justify-center border-t border-neutral-200 bg-white px-4 text-[11px] text-neutral-500">
+        <a
+          href="https://beian.miit.gov.cn/"
+          target="_blank"
+          rel="noreferrer"
+          className="transition-colors hover:text-neutral-900"
+        >
+          苏ICP备2026058202号
+        </a>
+      </footer>
     </div>
   );
 }

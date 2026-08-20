@@ -1,4 +1,5 @@
 import { chatCompletionJSON } from "@/lib/ai/client";
+import { applyOptimizedScoreFloor } from "@/lib/ai/score-policy";
 import {
   AnalysisCheckpointError,
   OptimizationCheckpointError,
@@ -165,7 +166,7 @@ export async function runLLMResumeAnalysis(
             checkpoint.finalResume,
             diagnosisMatch.diagnosis
           ),
-          temperature: 0.2,
+          temperature: 0,
           maxTokens: 4500,
         });
   const interviewRequest = checkpoint.interviewPrep
@@ -211,7 +212,10 @@ export async function runLLMResumeAnalysis(
     followUpQuestions: checkpoint.followUpQuestions,
     optimizedItems: checkpoint.optimizedItems,
     finalResume: checkpoint.finalResume,
-    finalResumeScore: checkpoint.finalResumeScore!,
+    finalResumeScore: applyOptimizedScoreFloor(
+      diagnosisMatch.diagnosis.overallScore,
+      checkpoint.finalResumeScore!
+    ),
     interviewPrep: checkpoint.interviewPrep!,
   };
 
@@ -274,7 +278,7 @@ export async function runLLMRegenerateOptimizedItems(
           operation: "regenerate:final-score",
           system: RESUME_AGENT_SYSTEM_PROMPT,
           user: buildFinalResumeScorePrompt(input, checkpoint.finalResume, diagnosis),
-          temperature: 0.2,
+          temperature: 0,
           maxTokens: 4500,
         });
   const interviewRequest = checkpoint.interviewPrep
@@ -316,9 +320,9 @@ export async function runLLMRegenerateOptimizedItems(
   return {
     optimizedItems: checkpoint.optimizedItems,
     finalResume: checkpoint.finalResume,
-    finalResumeScore: Math.max(
-      0,
-      Math.min(100, Math.round(checkpoint.finalResumeScore!))
+    finalResumeScore: applyOptimizedScoreFloor(
+      diagnosis.overallScore,
+      checkpoint.finalResumeScore!
     ),
     interviewPrep: checkpoint.interviewPrep!,
   };

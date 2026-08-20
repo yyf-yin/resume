@@ -2,11 +2,12 @@ import { NextResponse } from "next/server";
 import { LLMError } from "@/lib/ai/client";
 import { OptimizationCheckpointError } from "@/lib/ai/errors";
 import type { OptimizeRequestBody } from "@/lib/ai/types";
+import { APIRequestError, parseProtectedJSON } from "@/lib/api/request-guard";
 import { regenerateOptimizedItemsServer } from "@/services/ai/resumeAgent.server";
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as OptimizeRequestBody;
+    const body = await parseProtectedJSON<OptimizeRequestBody>(request);
     const {
       input,
       style,
@@ -41,6 +42,17 @@ export async function POST(request: Request) {
       mode,
     });
   } catch (error) {
+    if (error instanceof APIRequestError) {
+      return NextResponse.json(
+        { error: error.message },
+        {
+          status: error.status,
+          headers: error.retryAfterSeconds
+            ? { "Retry-After": String(error.retryAfterSeconds) }
+            : undefined,
+        }
+      );
+    }
     const message = error instanceof LLMError ? error.message : "优化生成失败，请稍后重试";
     return NextResponse.json(
       {

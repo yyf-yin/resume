@@ -19,6 +19,15 @@ const OPTIMIZATION_OBJECTIVE = `【唯一优化目标：更高匹配度、更强
 4. 不得为提高匹配度虚构经历、职责、工具、数据或能力层级；缺失能力不得伪装成已有经验
 5. 优化后的内容应便于招聘者快速识别岗位匹配点，同时保持事实边界清晰`;
 
+const MATCH_SCORE_RUBRIC = `【统一评分口径】
+必须仅依据简历中可验证的事实，按以下固定维度和权重评分：
+1. JD 硬性条件匹配（30%）：学历、年限、行业背景、必备资质等
+2. 核心职责与项目证据（30%）：是否有直接、具体、可验证的职责和项目证据
+3. 成果与证据强度（20%）：个人贡献、交付结果、量化成果及证据完整性
+4. JD 关键词与专业能力覆盖（10%）：真实能力与目标岗位关键词的有效覆盖
+5. 表达质量与信息结构（10%）：重点顺序、清晰度、专业性和可读性
+overallScore 必须按上述权重计算并四舍五入为整数。硬性条件或事实没有变化时，其对应维度不得仅因改写而加分；同一事实、同一证据必须得到一致评价。`;
+
 const ANALYSIS_JSON_SCHEMA = `{
   "jdAnalysis": {
     "responsibilities": string[],
@@ -277,6 +286,8 @@ ${buildRequiredJsonRules([
 export function buildAnalyzeDiagnosisPrompt(input: UserInput): string {
   return `请完成简历诊断和匹配分析（第二部分 A）。
 ${buildInputContext(input)}
+
+${MATCH_SCORE_RUBRIC}
 
 ${buildRequiredJsonRules([
   "diagnosis",
@@ -584,8 +595,10 @@ ${buildInputContext(input)}
 【优化后的最终简历】
 ${JSON.stringify(finalResume, null, 2)}
 
+${MATCH_SCORE_RUBRIC}
+
 【评分一致性要求】
-1. 使用与原始简历诊断相同的评价口径，重点评估 JD 硬性要求、核心职责、关键词和证据强度
+1. 必须使用上方固定维度、权重和计算方式，与原始简历诊断完全一致
 2. 原始诊断维度仅用于保持评价口径一致，不得直接沿用原分数：
 ${JSON.stringify(diagnosis.dimensionScores, null, 2)}
 3. 只认可最终简历中有明确事实依据的内容；不得因为措辞更华丽而虚增分数

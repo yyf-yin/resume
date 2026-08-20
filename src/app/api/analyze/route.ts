@@ -2,11 +2,12 @@ import { NextResponse } from "next/server";
 import { LLMError } from "@/lib/ai/client";
 import { AnalysisCheckpointError } from "@/lib/ai/errors";
 import type { AnalyzeRequestBody } from "@/lib/ai/types";
+import { APIRequestError, parseProtectedJSON } from "@/lib/api/request-guard";
 import { analyzeResumeServer } from "@/services/ai/resumeAgent.server";
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as AnalyzeRequestBody;
+    const body = await parseProtectedJSON<AnalyzeRequestBody>(request);
     const { input, optimizeStyle = "professional-match", exampleMode = false, checkpoint } = body;
 
     if (!input?.targetRole?.trim() || !input?.jobDescription?.trim() || !input?.originalResume?.trim()) {
@@ -21,6 +22,17 @@ export async function POST(request: Request) {
     );
     return NextResponse.json({ result, mode });
   } catch (error) {
+    if (error instanceof APIRequestError) {
+      return NextResponse.json(
+        { error: error.message },
+        {
+          status: error.status,
+          headers: error.retryAfterSeconds
+            ? { "Retry-After": String(error.retryAfterSeconds) }
+            : undefined,
+        }
+      );
+    }
     const message =
       error instanceof LLMError
         ? error.message

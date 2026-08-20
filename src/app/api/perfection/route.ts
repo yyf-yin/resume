@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { LLMError } from "@/lib/ai/client";
 import type { PerfectionRequestBody } from "@/lib/ai/types";
+import { APIRequestError, parseProtectedJSON } from "@/lib/api/request-guard";
 import { generatePerfectionPlanServer } from "@/services/ai/resumeAgent.server";
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as PerfectionRequestBody;
+    const body = await parseProtectedJSON<PerfectionRequestBody>(request);
     const { input, diagnosis, matchItems, followUpQuestions = [], exampleMode = false } = body;
 
     if (!input?.targetRole?.trim() || !diagnosis || !Array.isArray(matchItems)) {
@@ -21,6 +22,17 @@ export async function POST(request: Request) {
     );
     return NextResponse.json({ plan, mode });
   } catch (error) {
+    if (error instanceof APIRequestError) {
+      return NextResponse.json(
+        { error: error.message },
+        {
+          status: error.status,
+          headers: error.retryAfterSeconds
+            ? { "Retry-After": String(error.retryAfterSeconds) }
+            : undefined,
+        }
+      );
+    }
     const message =
       error instanceof LLMError
         ? error.message

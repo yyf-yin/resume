@@ -41,7 +41,7 @@ export function TopNav() {
           <FileText className="h-3.5 w-3.5 text-neutral-700" />
         </div>
         <div>
-          <h1 className="text-sm font-semibold tracking-tight text-neutral-900">简历专家</h1>
+          <h1 className="text-sm font-semibold tracking-tight text-neutral-900">简历助手</h1>
         </div>
         <span className="rounded-md border border-neutral-200 px-1.5 py-0.5 text-[10px] font-medium text-neutral-500">
           JD 定制简历优化 Agent

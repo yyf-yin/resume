@@ -1,4 +1,4 @@
-# 简历专家
+# 简历助手
 
 基于目标岗位 JD 的 AI 简历优化 Agent Web App。
 
@@ -19,6 +19,10 @@ npm run dev
 ```
 
 打开 [http://localhost:3000](http://localhost:3000)
+
+## 腾讯云部署
+
+生产环境准备和部署步骤见 [DEPLOY_TENCENT.md](./DEPLOY_TENCENT.md)。
 
 ## 使用流程
 
