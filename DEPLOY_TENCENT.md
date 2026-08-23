@@ -2,8 +2,6 @@
 
 项目采用 Next.js 服务端 API，部署目标为腾讯云中国大陆 Ubuntu 服务器、Nginx 和 PM2。备案号为 `苏ICP备2026058202号`，已经展示在网页底部并链接至工信部备案系统。
 
-> `resume-eval-platform/` 是独立的本地测试平台，不属于生产服务。生产环境只构建和启动仓库根目录应用；不要在服务器上启动测试平台的 Worker、数据库或开发服务。
-
 ## 1. 上线前提
 
 - 如果 ICP 备案不是通过腾讯云完成，先在腾讯云办理接入备案。
@@ -13,7 +11,7 @@
 
 ## 2. 服务器环境
 
-推荐 Ubuntu 22.04/24.04、Node.js 20 或 22、Nginx、Git、PM2。项目起步配置建议 2 核 4GB。
+推荐 Ubuntu 22.04/24.04、Node.js 20 或 22、Nginx、Git、PM2。当前目标服务器为 4 核 8GB、5Mbps，可与其他轻量网站共享；建议为系统和其他服务保留至少 3GB 可用内存。
 
 ```bash
 node --version
@@ -34,7 +32,7 @@ cp .env.example .env.production
 chmod 600 .env.production
 ```
 
-以上命令必须在 `/var/www/resume-assistant` 根目录执行，不要进入 `resume-eval-platform/`。
+以上命令必须在 `/var/www/resume-assistant` 根目录执行。
 
 编辑 `.env.production`，至少替换真实的 `LLM_API_KEY`、模型和接口地址。生产环境保持：
 
