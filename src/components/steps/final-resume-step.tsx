@@ -121,7 +121,7 @@ export function FinalResumeStep() {
       />
 
       <Card className="mb-6">
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           <div className="mb-4">
             <h3 className="text-xl font-semibold">{personalInfo.name}</h3>
             <p className="mt-1 text-sm text-neutral-500">
@@ -190,7 +190,7 @@ export function FinalResumeStep() {
         </CardContent>
       </Card>
 
-      <div className="flex justify-end">
+      <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
         <Button variant="outline" size="sm" onClick={() => setCurrentStep("interview")}>
           下一步：面试准备
           <ChevronRight className="h-4 w-4" />

@@ -118,7 +118,7 @@ export function OptimizeStep() {
         </CardContent>
       </Card>
 
-      <div className="flex justify-end">
+      <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
         <Button variant="outline" size="sm" onClick={() => setCurrentStep("final-resume")}>
           下一步：最终简历
           <ChevronRight className="h-4 w-4" />

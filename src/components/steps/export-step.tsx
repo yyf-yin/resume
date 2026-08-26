@@ -84,7 +84,7 @@ export function ExportStep() {
                   预览导出内容
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-h-[80vh] max-w-2xl overflow-y-auto">
+              <DialogContent className="max-h-[92dvh] max-w-2xl overflow-y-auto sm:max-h-[80vh]">
                 <DialogHeader>
                   <DialogTitle>简历预览</DialogTitle>
                   <DialogDescription>
@@ -93,10 +93,10 @@ export function ExportStep() {
                 </DialogHeader>
                 <Textarea
                   readOnly
-                  className="min-h-[400px] font-mono text-xs leading-relaxed"
+                  className="min-h-[240px] font-mono text-xs leading-relaxed sm:min-h-[400px]"
                   value={resumeText}
                 />
-                <div className="flex justify-end gap-2">
+                <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
                   <Button variant="outline" onClick={handleCopy}>
                     {copied ? "已复制" : "复制内容"}
                   </Button>
@@ -139,7 +139,7 @@ export function ExportStep() {
         </CardContent>
       </Card>
 
-      <div className="mt-6 flex justify-end">
+      <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-end">
         <Button variant="outline" size="sm" onClick={() => setCurrentStep("perfection")}>
           下一步：精益求精
           <ChevronRight className="h-4 w-4" />

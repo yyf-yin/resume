@@ -48,7 +48,7 @@ export function SectionTitle({
   description?: string;
 }) {
   return (
-    <div className="mb-6">
+    <div className="mb-4 sm:mb-6">
       <h2 className="text-lg font-semibold tracking-tight text-neutral-900">{title}</h2>
       {description && <p className="mt-1 text-sm text-neutral-500">{description}</p>}
     </div>

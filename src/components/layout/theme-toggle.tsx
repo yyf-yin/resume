@@ -41,14 +41,14 @@ export function ThemeToggle() {
         title="切换到 Light 模式"
         onClick={() => selectTheme("light")}
         className={cn(
-          "flex h-5 items-center gap-1 rounded px-1.5 text-[10px] font-medium transition-colors",
+          "flex h-5 w-6 items-center justify-center gap-1 rounded text-[10px] font-medium transition-colors sm:w-auto sm:px-1.5",
           theme === "light"
             ? "bg-white text-neutral-900 shadow-sm"
             : "text-neutral-400 hover:text-neutral-700"
         )}
       >
         <Sun className="h-3 w-3" />
-        Light
+        <span className="hidden sm:inline">Light</span>
       </button>
       <button
         type="button"
@@ -56,14 +56,14 @@ export function ThemeToggle() {
         title="切换到 Dark 模式"
         onClick={() => selectTheme("dark")}
         className={cn(
-          "flex h-5 items-center gap-1 rounded px-1.5 text-[10px] font-medium transition-colors",
+          "flex h-5 w-6 items-center justify-center gap-1 rounded text-[10px] font-medium transition-colors sm:w-auto sm:px-1.5",
           theme === "dark"
             ? "bg-white text-neutral-900 shadow-sm"
             : "text-neutral-400 hover:text-neutral-700"
         )}
       >
         <Moon className="h-3 w-3" />
-        Dark
+        <span className="hidden sm:inline">Dark</span>
       </button>
     </div>
   );

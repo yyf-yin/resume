@@ -53,17 +53,17 @@ export function AppShell() {
   }, []);
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden">
+    <div className="flex h-[100dvh] min-h-[100dvh] flex-col overflow-hidden">
       <TopNav />
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden md:flex-row">
         <StepSidebar />
-        <main className="flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-5xl p-6">
+        <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+          <div className="mx-auto max-w-5xl p-3 pb-6 sm:p-6">
             <StepContent />
           </div>
         </main>
       </div>
-      <footer className="flex h-9 shrink-0 items-center justify-center border-t border-neutral-200 bg-white px-4 text-[11px] text-neutral-500">
+      <footer className="flex h-8 shrink-0 items-center justify-center border-t border-neutral-200 bg-white px-3 pb-[env(safe-area-inset-bottom)] text-[10px] text-neutral-500 sm:h-9 sm:px-4 sm:text-[11px]">
         <a
           href="https://beian.miit.gov.cn/"
           target="_blank"

@@ -178,7 +178,7 @@ export function InputStep() {
         description="填写目标岗位信息与原始简历，Agent 将基于 JD 进行定制分析与优化"
       />
 
-      <div className="mb-4 flex gap-2">
+      <div className="mb-4 flex flex-wrap gap-2">
         <Button
           variant="outline"
           size="sm"
@@ -334,7 +334,7 @@ export function InputStep() {
           </CardHeader>
           <CardContent>
             <Textarea
-              className="min-h-[200px] font-mono text-xs leading-relaxed"
+              className="min-h-[160px] font-mono text-xs leading-relaxed sm:min-h-[200px]"
               placeholder="粘贴岗位 JD..."
               value={userInput.jobDescription}
               disabled={exampleMode || isInputLocked}
@@ -435,7 +435,7 @@ export function InputStep() {
               </div>
             )}
             <Textarea
-              className="min-h-[240px] font-mono text-xs leading-relaxed"
+              className="min-h-[180px] font-mono text-xs leading-relaxed sm:min-h-[240px]"
               placeholder={"粘贴简历内容...\n请粘贴单页简历，简历过长可能会导致信息丢失"}
               value={userInput.originalResume}
               disabled={exampleMode || isInputLocked || isParsingResume}
@@ -451,7 +451,7 @@ export function InputStep() {
         </Card>
 
         <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-          <DialogContent className="max-h-[85vh] max-w-3xl grid-rows-[auto_minmax(0,1fr)] overflow-hidden">
+          <DialogContent className="max-h-[92dvh] max-w-3xl grid-rows-[auto_minmax(0,1fr)] overflow-hidden sm:max-h-[85vh]">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 pr-8">
                 <FileText className="h-5 w-5" />

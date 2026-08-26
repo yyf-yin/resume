@@ -85,7 +85,7 @@ export function InterviewStep() {
         </Card>
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
         <Button variant="outline" size="sm" onClick={() => setCurrentStep("export")}>
           下一步：导出结果
           <ChevronRight className="h-4 w-4" />

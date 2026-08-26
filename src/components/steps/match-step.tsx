@@ -67,7 +67,7 @@ export function MatchStep() {
         </CardContent>
       </Card>
 
-      <div className="flex justify-end">
+      <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
         <Button variant="outline" size="sm" onClick={() => setCurrentStep("follow-up")}>
           下一步：经历追问
           <ChevronRight className="h-4 w-4" />

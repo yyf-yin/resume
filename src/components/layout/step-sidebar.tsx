@@ -45,11 +45,11 @@ export function StepSidebar() {
     : 0;
 
   return (
-    <aside className="flex w-56 shrink-0 flex-col border-r border-neutral-200 bg-white">
-      <div className="border-b border-neutral-200 px-4 py-3">
+    <aside className="flex w-full shrink-0 flex-col border-b border-neutral-200 bg-white md:w-56 md:border-b-0 md:border-r">
+      <div className="hidden border-b border-neutral-200 px-4 py-3 md:block">
         <p className="text-xs font-medium uppercase tracking-wider text-neutral-400">分析流程</p>
       </div>
-      <nav className="flex-1 overflow-y-auto p-2">
+      <nav className="flex max-w-full gap-1 overflow-x-auto p-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:block md:flex-1 md:overflow-y-auto">
         {STEPS.map((step, index) => {
           const status = getStepStatus(step.id);
           const Icon = step.icon;
@@ -64,7 +64,7 @@ export function StepSidebar() {
                 if (!isDisabled) setCurrentStep(step.id);
               }}
               className={cn(
-                "mb-0.5 flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left text-sm transition-colors",
+                "flex min-w-[76px] shrink-0 flex-col items-center gap-1 rounded-md px-2 py-1.5 text-center text-xs transition-colors md:mb-0.5 md:w-full md:min-w-0 md:flex-row md:gap-2.5 md:px-3 md:py-2 md:text-left md:text-sm",
                 status === "active" && "bg-neutral-100 text-neutral-900",
                 status === "completed" && "text-neutral-600 hover:bg-neutral-50",
                 status === "pending" && "text-neutral-500 hover:bg-neutral-50",
@@ -81,13 +81,13 @@ export function StepSidebar() {
                 )}
               </span>
               <span className="flex-1 truncate">{step.label}</span>
-              <span className="text-[10px] tabular-nums text-neutral-400">{index + 1}</span>
+              <span className="hidden text-[10px] tabular-nums text-neutral-400 md:inline">{index + 1}</span>
             </button>
           );
         })}
       </nav>
       {analysisResult && (
-        <div className="border-t border-neutral-200 p-3">
+        <div className="hidden border-t border-neutral-200 p-3 md:block">
           <p className="text-xs text-neutral-400">
             {showFinalResumeScore ? "优化后匹配度" : "整体匹配度"}
           </p>

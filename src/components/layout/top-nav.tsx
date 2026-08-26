@@ -35,23 +35,23 @@ export function TopNav() {
   };
 
   return (
-    <header className="flex h-12 shrink-0 items-center justify-between border-b border-neutral-200 bg-white px-4">
-      <div className="flex items-center gap-2.5">
+    <header className="flex h-12 shrink-0 items-center justify-between border-b border-neutral-200 bg-white px-2.5 sm:px-4">
+      <div className="flex min-w-0 items-center gap-1.5 sm:gap-2.5">
         <div className="flex h-7 w-7 items-center justify-center rounded-md border border-neutral-200 bg-neutral-50">
           <FileText className="h-3.5 w-3.5 text-neutral-700" />
         </div>
         <div>
           <h1 className="text-sm font-semibold tracking-tight text-neutral-900">简历助手</h1>
         </div>
-        <span className="rounded-md border border-neutral-200 px-1.5 py-0.5 text-[10px] font-medium text-neutral-500">
+        <span className="hidden rounded-md border border-neutral-200 px-1.5 py-0.5 text-[10px] font-medium text-neutral-500 sm:inline-flex">
           JD 定制简历优化 Agent
         </span>
         <div
           role="group"
           aria-label="示例模式"
-          className="flex h-7 items-center gap-1 rounded-md border border-neutral-200 bg-neutral-50 p-0.5 pl-2"
+          className="flex h-7 shrink-0 items-center gap-0.5 rounded-md border border-neutral-200 bg-neutral-50 p-0.5 sm:gap-1 sm:pl-2"
         >
-          <span className="text-[10px] font-medium text-neutral-500">示例模式：</span>
+          <span className="hidden text-[10px] font-medium text-neutral-500 sm:inline">示例模式：</span>
           <button
             type="button"
             aria-pressed={exampleMode}
@@ -93,7 +93,7 @@ export function TopNav() {
               示例模式下仅可使用示例数据，这样会丢失已有进度，是否确认
             </DialogDescription>
           </DialogHeader>
-          <div className="flex justify-end gap-2">
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <DialogClose asChild>
               <Button variant="outline" size="sm">取消</Button>
             </DialogClose>
