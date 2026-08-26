@@ -1,11 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Loader2, Sparkles, Wand2 } from "lucide-react";
+import { ChangeEvent, DragEvent, useEffect, useState } from "react";
+import { Eye, FileText, Loader2, Sparkles, Upload, Wand2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -26,6 +33,13 @@ import type { CompanyType, JobStage } from "@/types/resume";
 
 export function InputStep() {
   const [hasPendingAnalysis, setHasPendingAnalysis] = useState(false);
+  const [isParsingResume, setIsParsingResume] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const [uploadedResumeText, setUploadedResumeText] = useState("");
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [isDraggingResume, setIsDraggingResume] = useState(false);
+  const [processingFileName, setProcessingFileName] = useState<string | null>(null);
   const {
     userInput,
     setUserInput,
@@ -46,6 +60,21 @@ export function InputStep() {
     if (pendingInput) setUserInput(pendingInput);
     setHasPendingAnalysis(hasPendingResumeAnalysis());
   }, [setUserInput]);
+
+  useEffect(() => {
+    const preventFileNavigation = (event: globalThis.DragEvent) => {
+      if (Array.from(event.dataTransfer?.types ?? []).includes("Files")) {
+        event.preventDefault();
+      }
+    };
+
+    window.addEventListener("dragover", preventFileNavigation);
+    window.addEventListener("drop", preventFileNavigation);
+    return () => {
+      window.removeEventListener("dragover", preventFileNavigation);
+      window.removeEventListener("drop", preventFileNavigation);
+    };
+  }, []);
 
   const handleAnalyze = async (resumePending = false) => {
     const input = resumePending ? getPendingResumeAnalysisInput() ?? userInput : userInput;
@@ -86,6 +115,61 @@ export function InputStep() {
     userInput.originalResume.trim();
   const hasAnalysisProgress = hasPendingAnalysis || analysisResult !== null;
   const isInputLocked = isAnalyzing || hasAnalysisProgress;
+  const uploadDisabled = exampleMode || isInputLocked || isParsingResume;
+
+  const parseResumeFile = async (file: File) => {
+    setUploadError(null);
+    setProcessingFileName(file.name);
+    const extension = file.name.toLowerCase().split(".").pop();
+    if (extension !== "pdf" && extension !== "docx") {
+      setUploadError("仅支持 PDF 和 DOCX 文件");
+      setProcessingFileName(null);
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setUploadError("文件不能超过 10MB");
+      setProcessingFileName(null);
+      return;
+    }
+
+    setIsParsingResume(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await fetch("/api/resume/parse", { method: "POST", body: formData });
+      const payload = (await response.json().catch(() => ({}))) as {
+        text?: string;
+        error?: string;
+        fileName?: string;
+      };
+      if (!response.ok || !payload.text) {
+        throw new Error(payload.error || `文件解析失败（${response.status}）`);
+      }
+      setUserInput({ originalResume: payload.text });
+      setUploadedFileName(payload.fileName || file.name);
+      setUploadedResumeText(payload.text);
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : "文件解析失败");
+    } finally {
+      setIsParsingResume(false);
+      setProcessingFileName(null);
+    }
+  };
+
+  const handleResumeUpload = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (file) void parseResumeFile(file);
+  };
+
+  const handleResumeDrop = (event: DragEvent<HTMLInputElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDraggingResume(false);
+    if (uploadDisabled) return;
+    const file = event.dataTransfer.files?.[0];
+    if (file) void parseResumeFile(file);
+  };
 
   return (
     <div>
@@ -262,18 +346,128 @@ export function InputStep() {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm">原始简历</CardTitle>
-            <CardDescription>粘贴当前简历全文</CardDescription>
+            <CardDescription>粘贴简历全文，或上传 PDF / Word 文档自动提取</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-3">
+            <div
+              className={`relative flex min-h-28 flex-col items-center justify-center overflow-hidden rounded-lg border-2 border-dashed px-4 py-5 text-center transition-colors focus-within:ring-2 focus-within:ring-neutral-400 focus-within:ring-offset-2 ${
+                isDraggingResume
+                  ? "border-neutral-900 bg-neutral-100"
+                  : "border-neutral-300 bg-neutral-50 hover:border-neutral-500 hover:bg-neutral-100"
+              } ${uploadDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+            >
+              <input
+                id="resume-file-upload"
+                type="file"
+                accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                className={`absolute inset-0 z-10 h-full w-full opacity-0 ${
+                  uploadDisabled ? "cursor-not-allowed" : "cursor-pointer"
+                }`}
+                aria-label="选择或拖入简历文件"
+                disabled={uploadDisabled}
+                onChange={handleResumeUpload}
+                onDragEnter={(event) => {
+                  event.preventDefault();
+                  if (!uploadDisabled) setIsDraggingResume(true);
+                }}
+                onDragOver={(event) => {
+                  event.preventDefault();
+                  event.dataTransfer.dropEffect = uploadDisabled ? "none" : "copy";
+                }}
+                onDragLeave={(event) => {
+                  event.preventDefault();
+                  setIsDraggingResume(false);
+                }}
+                onDrop={handleResumeDrop}
+              />
+              {isParsingResume ? (
+                <Loader2 className="mb-2 h-6 w-6 animate-spin text-neutral-600" />
+              ) : (
+                <Upload className="mb-2 h-6 w-6 text-neutral-600" />
+              )}
+              <span className="text-sm font-medium">
+                {isParsingResume
+                  ? `已接收 ${processingFileName ?? "文件"}，正在解析...`
+                  : isDraggingResume
+                    ? "松开鼠标上传"
+                    : "点击选择，或将简历拖到这里"}
+              </span>
+              <span className="mt-1 text-xs text-muted-foreground">
+                支持 PDF、DOCX，最大 10MB
+              </span>
+            </div>
+            {uploadedFileName && (
+              <div className="flex items-center gap-2 rounded-md border bg-muted/40 px-3 py-2 text-xs">
+                <FileText className="h-4 w-4 text-primary" />
+                <span className="min-w-0 flex-1 truncate">已提取：{uploadedFileName}</span>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-7 px-2"
+                  onClick={() => setPreviewOpen(true)}
+                >
+                  <Eye className="h-3.5 w-3.5" />
+                  预览
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0"
+                  aria-label="清除已上传简历"
+                  disabled={isInputLocked}
+                  onClick={() => {
+                    setUploadedFileName(null);
+                    setUploadedResumeText("");
+                    setPreviewOpen(false);
+                    setUploadError(null);
+                    setUserInput({ originalResume: "" });
+                  }}
+                >
+                  <X className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            )}
+            {uploadError && (
+              <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+                {uploadError}
+              </div>
+            )}
             <Textarea
               className="min-h-[240px] font-mono text-xs leading-relaxed"
               placeholder={"粘贴简历内容...\n请粘贴单页简历，简历过长可能会导致信息丢失"}
               value={userInput.originalResume}
-              disabled={exampleMode || isInputLocked}
-              onChange={(e) => setUserInput({ originalResume: e.target.value })}
+              disabled={exampleMode || isInputLocked || isParsingResume}
+              onChange={(e) => {
+                setUserInput({ originalResume: e.target.value });
+                if (uploadedFileName) {
+                  setUploadedFileName(null);
+                  setUploadedResumeText("");
+                }
+              }}
             />
           </CardContent>
         </Card>
+
+        <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+          <DialogContent className="max-h-[85vh] max-w-3xl grid-rows-[auto_minmax(0,1fr)] overflow-hidden">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 pr-8">
+                <FileText className="h-5 w-5" />
+                文档预览
+              </DialogTitle>
+              <DialogDescription className="break-all">
+                {uploadedFileName} · 已提取 {uploadedResumeText.length.toLocaleString()} 个字符
+              </DialogDescription>
+            </DialogHeader>
+            <div className="min-h-0 overflow-y-auto rounded-md border bg-neutral-50 p-4">
+              <pre className="whitespace-pre-wrap break-words font-sans text-sm leading-6 text-neutral-800">
+                {uploadedResumeText}
+              </pre>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         <Card>
           <CardHeader className="pb-3">
