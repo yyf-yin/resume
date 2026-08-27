@@ -26,6 +26,8 @@ interface VoiceInputButtonProps {
   onTranscript: (text: string) => void;
 }
 
+type MicrophonePermissionState = PermissionState | "unknown";
+
 function mergeChunks(chunks: Float32Array[]) {
   const length = chunks.reduce((total, chunk) => total + chunk.length, 0);
   const merged = new Float32Array(length);
@@ -112,14 +114,42 @@ export function VoiceInputButton({
   const stopRef = useRef<() => Promise<void>>(async () => undefined);
   const mountedRef = useRef(true);
   const [isRecording, setIsRecording] = useState(false);
+  const [isRequestingPermission, setIsRequestingPermission] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
+  const [microphonePermission, setMicrophonePermission] =
+    useState<MicrophonePermissionState>("unknown");
   const [elapsed, setElapsed] = useState(0);
   const [message, setMessage] = useState<string | null>(null);
   const [hasResult, setHasResult] = useState(false);
 
   useEffect(() => {
+    mountedRef.current = true;
+    let permissionStatus: PermissionStatus | null = null;
+    let cancelled = false;
+    const handlePermissionChange = () => {
+      if (mountedRef.current && permissionStatus) {
+        setMicrophonePermission(permissionStatus.state);
+      }
+    };
+
+    if (navigator.permissions?.query) {
+      void navigator.permissions
+        .query({ name: "microphone" as PermissionName })
+        .then((status) => {
+          if (cancelled) return;
+          permissionStatus = status;
+          setMicrophonePermission(status.state);
+          status.addEventListener("change", handlePermissionChange);
+        })
+        .catch(() => {
+          // Safari and some embedded browsers do not expose microphone permission state.
+        });
+    }
+
     return () => {
+      cancelled = true;
       mountedRef.current = false;
+      permissionStatus?.removeEventListener("change", handlePermissionChange);
       const session = sessionRef.current;
       sessionRef.current = null;
       if (session) void releaseSession(session);
@@ -190,6 +220,9 @@ export function VoiceInputButton({
     let pendingStream: MediaStream | null = null;
     let pendingContext: AudioContext | null = null;
     try {
+      setIsRequestingPermission(true);
+      setMessage("正在请求麦克风权限，请在浏览器提示中选择“允许”…");
+      onActiveChange(true);
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           channelCount: 1,
@@ -198,6 +231,11 @@ export function VoiceInputButton({
           autoGainControl: true,
         },
       });
+      if (!mountedRef.current) {
+        stream.getTracks().forEach((track) => track.stop());
+        return;
+      }
+      setMicrophonePermission("granted");
       pendingStream = stream;
       const AudioContextClass =
         window.AudioContext ||
@@ -243,17 +281,22 @@ export function VoiceInputButton({
       pendingStream = null;
       pendingContext = null;
       setElapsed(0);
+      setIsRequestingPermission(false);
       setIsRecording(true);
-      onActiveChange(true);
+      setMessage("麦克风权限已开启，正在录音…");
     } catch (error) {
       pendingStream?.getTracks().forEach((track) => track.stop());
       if (pendingContext) await pendingContext.close().catch(() => undefined);
+      if (!mountedRef.current) return;
+      setIsRequestingPermission(false);
+      onActiveChange(false);
       const permissionDenied =
         error instanceof DOMException &&
         (error.name === "NotAllowedError" || error.name === "PermissionDeniedError");
+      if (permissionDenied) setMicrophonePermission("denied");
       setMessage(
         permissionDenied
-          ? "麦克风权限未开启，请在浏览器设置中允许后重试"
+          ? "麦克风权限未开启。请点击地址栏旁的网站设置，允许使用麦克风后重试"
           : error instanceof Error
             ? error.message
             : "无法启动录音，请检查麦克风"
@@ -267,11 +310,17 @@ export function VoiceInputButton({
         type="button"
         variant={isRecording ? "destructive" : "outline"}
         size="sm"
-        disabled={disabled || isTranscribing}
+        disabled={disabled || isRequestingPermission || isTranscribing}
         onClick={isRecording ? () => void stopAndTranscribe() : () => void startRecording()}
         aria-pressed={isRecording}
+        aria-busy={isRequestingPermission || isTranscribing}
       >
-        {isTranscribing ? (
+        {isRequestingPermission ? (
+          <>
+            <Loader2 className="animate-spin" />
+            正在请求麦克风权限…
+          </>
+        ) : isTranscribing ? (
           <>
             <Loader2 className="animate-spin" />
             正在识别…
@@ -284,7 +333,11 @@ export function VoiceInputButton({
         ) : (
           <>
             <Mic />
-            语音输入
+            {microphonePermission === "granted"
+              ? "语音输入"
+              : microphonePermission === "denied"
+                ? "重新申请麦克风权限"
+                : "允许麦克风并开始录音"}
           </>
         )}
       </Button>
@@ -298,8 +351,12 @@ export function VoiceInputButton({
           {message}
         </p>
       )}
-      {!message && !isRecording && !isTranscribing && (
-        <p className="text-xs text-neutral-400">最长55秒，录音将发送至腾讯云进行文字识别</p>
+      {!message && !isRecording && !isRequestingPermission && !isTranscribing && (
+        <p className="text-xs text-neutral-400">
+          {microphonePermission === "granted"
+            ? "最长55秒，录音将发送至腾讯云进行文字识别"
+            : "首次使用会请求麦克风权限，同意后才会开始录音"}
+        </p>
       )}
     </div>
   );
