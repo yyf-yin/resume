@@ -29,7 +29,7 @@ npm run dev
 1. 点击「使用示例数据」填充示例
 2. 点击「开始分析」触发 mock AI 分析
 3. 按左侧流程导航逐步查看各模块结果
-4. 在「经历追问」中填写回答并生成 bullet
+4. 在「经历追问」中填写或使用语音输入回答，并生成 bullet
 5. 在「导出结果」中复制最终简历
 
 ## 大模型接入
@@ -50,6 +50,19 @@ LLM_PROVIDER=deepseek
 ```
 
 3. 重启开发服务器。顶部导航会显示 **AI 模式**；未配置 Key 时自动使用 **Mock 模式**。
+
+## 腾讯云语音识别
+
+经历追问支持腾讯云「一句话识别」。先在腾讯云开通语音识别服务，并为子账号授予一句话识别所需的最小权限，然后配置：
+
+```env
+TENCENT_CLOUD_SECRET_ID=your-secret-id
+TENCENT_CLOUD_SECRET_KEY=your-secret-key
+TENCENT_ASR_REGION=ap-shanghai
+TENCENT_ASR_ENGINE_TYPE=16k_zh
+```
+
+密钥仅由服务端 API 读取。线上必须使用 HTTPS，浏览器才会开放麦克风权限。单次录音最长 55 秒，前端会生成 16kHz 单声道 WAV 后提交识别。
 
 ### 常用 Provider 示例
 

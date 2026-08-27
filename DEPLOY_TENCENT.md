@@ -42,6 +42,12 @@ AI_RESPONSE_LOG_ENABLED=false
 API_RATE_LIMIT_MAX=20
 API_RATE_LIMIT_WINDOW_MS=600000
 API_MAX_BODY_BYTES=1048576
+
+# 腾讯云一句话识别，使用仅具备所需权限的子账号密钥
+TENCENT_CLOUD_SECRET_ID=your-secret-id
+TENCENT_CLOUD_SECRET_KEY=your-secret-key
+TENCENT_ASR_REGION=ap-shanghai
+TENCENT_ASR_ENGINE_TYPE=16k_zh
 ```
 
 `.env.production` 已加入 Git 忽略规则，禁止提交真实密钥。
@@ -90,6 +96,7 @@ curl -I https://YOUR_DOMAIN
 - `/api/health` 返回 `status: ok`。
 - `/api/ai/status` 返回 `mode: llm`，且不会返回密钥。
 - 使用非敏感测试简历完成分析、优化、追问和补强计划全流程。
+- 在经历追问中允许麦克风权限，录制一段测试回答并确认文字自动写入输入框。
 - 连续超限调用 API 时返回 HTTP 429。
 - `.ai-logs` 不产生包含简历正文的生产日志。
 - `3000` 端口无法从公网直接访问。

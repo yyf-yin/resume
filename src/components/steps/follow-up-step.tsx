@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { VoiceInputButton } from "@/components/shared/voice-input-button";
 import { EmptyState, SectionTitle } from "@/components/shared/ui-helpers";
 import {
   generateFollowUpBullet,
@@ -45,6 +46,7 @@ export function FollowUpStep() {
     setCurrentStep,
   } = useResumeStore();
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [activeVoiceId, setActiveVoiceId] = useState<string | null>(null);
   const [isSyncingFollowUps, setIsSyncingFollowUps] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -166,6 +168,16 @@ export function FollowUpStep() {
                   value={q.userAnswer}
                   onChange={(e) => updateFollowUpAnswer(q.id, e.target.value)}
                 />
+                <VoiceInputButton
+                  disabled={activeVoiceId !== null && activeVoiceId !== q.id}
+                  onActiveChange={(active) => setActiveVoiceId(active ? q.id : null)}
+                  onTranscript={(text) =>
+                    updateFollowUpAnswer(
+                      q.id,
+                      q.userAnswer.trim() ? `${q.userAnswer.trim()}\n${text}` : text
+                    )
+                  }
+                />
               </div>
               <Button
                 variant="outline"
@@ -200,7 +212,7 @@ export function FollowUpStep() {
         <Button
           variant="outline"
           size="sm"
-          disabled={isSyncingFollowUps || loadingId !== null}
+          disabled={isSyncingFollowUps || loadingId !== null || activeVoiceId !== null}
           onClick={handleContinue}
         >
           {isSyncingFollowUps ? (

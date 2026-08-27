@@ -47,7 +47,7 @@ export async function parseProtectedJSON<T>(request: Request): Promise<T> {
   }
 }
 
-function enforceRateLimit(request: Request) {
+export function enforceRateLimit(request: Request) {
   const now = Date.now();
   const windowMs = readPositiveInteger("API_RATE_LIMIT_WINDOW_MS", DEFAULT_WINDOW_MS);
   const maxRequests = readPositiveInteger("API_RATE_LIMIT_MAX", DEFAULT_MAX_REQUESTS);
