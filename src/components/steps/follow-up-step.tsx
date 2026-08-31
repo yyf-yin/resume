@@ -14,6 +14,7 @@ import {
   regenerateOptimizedItems,
 } from "@/services/ai/resumeAgent";
 import { useResumeStore } from "@/store/resume-store";
+import type { ExperienceAssessment, FollowUpQuestion } from "@/types/resume";
 
 const EXPERIENCE_TYPE_LABELS = {
   work: "工作经历",
@@ -34,6 +35,52 @@ const EVIDENCE_DIMENSION_LABELS = {
   other: "证据补充",
 } as const;
 
+interface FollowUpQuestionGroup {
+  id: string;
+  experienceType: NonNullable<FollowUpQuestion["experienceType"]>;
+  experienceTitle: string;
+  assessment?: ExperienceAssessment;
+  questions: Array<{ question: FollowUpQuestion; index: number }>;
+}
+
+function groupFollowUpQuestions(
+  questions: FollowUpQuestion[],
+  assessments: ExperienceAssessment[]
+): FollowUpQuestionGroup[] {
+  const groups = new Map<string, FollowUpQuestionGroup>();
+
+  assessments.forEach((assessment) => {
+    groups.set(assessment.experienceId, {
+      id: assessment.experienceId,
+      experienceType: assessment.experienceType,
+      experienceTitle:
+        assessment.experienceTitle ||
+        [assessment.organization, assessment.role].filter(Boolean).join(" · ") ||
+        EXPERIENCE_TYPE_LABELS[assessment.experienceType],
+      assessment,
+      questions: [],
+    });
+  });
+
+  questions.forEach((question, index) => {
+    const experienceType = question.experienceType ?? "other";
+    const experienceTitle =
+      question.experienceTitle?.trim() || EXPERIENCE_TYPE_LABELS[experienceType];
+    const groupId =
+      question.experienceId || `${experienceType}:${experienceTitle || question.id}`;
+    const group = groups.get(groupId) ?? {
+      id: groupId,
+      experienceType,
+      experienceTitle,
+      questions: [],
+    };
+    group.questions.push({ question, index });
+    groups.set(groupId, group);
+  });
+
+  return Array.from(groups.values());
+}
+
 export function FollowUpStep() {
   const {
     analysisResult,
@@ -42,6 +89,7 @@ export function FollowUpStep() {
     exampleMode,
     updateFollowUpAnswer,
     setFollowUpBullet,
+    setExperienceDecision,
     setAnalysisResult,
     setCurrentStep,
   } = useResumeStore();
@@ -55,6 +103,8 @@ export function FollowUpStep() {
   }
 
   const { followUpQuestions } = analysisResult;
+  const { experienceAssessments = [] } = analysisResult;
+  const questionGroups = groupFollowUpQuestions(followUpQuestions, experienceAssessments);
 
   const handleGenerateBullet = async (id: string) => {
     const question = followUpQuestions.find((q) => q.id === id);
@@ -83,7 +133,11 @@ export function FollowUpStep() {
       (question) => question.userAnswer.trim() || question.generatedBullet.trim()
     );
 
-    if (!hasFollowUpEvidence) {
+    const hasApprovedRemoval = experienceAssessments.some(
+      (assessment) => assessment.userDecision === "remove"
+    );
+
+    if (!hasFollowUpEvidence && !hasApprovedRemoval) {
       const shouldContinue = window.confirm(
         "不回答追问会让最终简历质量降低，确定继续吗？"
       );
@@ -102,6 +156,7 @@ export function FollowUpStep() {
           optimizeStyle,
           analysisResult.diagnosis,
           followUpQuestions,
+          experienceAssessments,
           exampleMode
         );
       setAnalysisResult(
@@ -120,7 +175,11 @@ export function FollowUpStep() {
     <div>
       <SectionTitle
         title="经历追问"
-        description="Agent 针对能力缺口和缺少成果的经历生成最多 10 个追问，填写回答后可生成简历 bullet"
+        description={
+          userInput.jobStage === "校招"
+            ? "逐段检查实习、项目和校园经历；非对口经历也可提炼通用能力，成果尽量使用真实数据量化"
+            : "优先核实高匹配职业经历；低相关经历只提出删除建议，由你决定保留或移除"
+        }
       />
 
       {error && (
@@ -129,83 +188,176 @@ export function FollowUpStep() {
         </div>
       )}
 
-      <div className="mb-6 space-y-4">
-        {followUpQuestions.map((q, index) => (
-          <Card key={q.id}>
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <div className="mb-1 flex items-center gap-2">
-                    <span className="text-xs font-medium text-neutral-400">
-                      追问 {index + 1}
-                    </span>
-                    <Badge variant="outline" className="font-normal">
-                      {q.purpose}
-                    </Badge>
-                    {q.experienceType && (
-                      <Badge variant="secondary" className="font-normal">
-                        {EXPERIENCE_TYPE_LABELS[q.experienceType]}
-                        {q.experienceTitle ? ` · ${q.experienceTitle}` : ""}
-                      </Badge>
-                    )}
-                    {q.evidenceDimension && (
-                      <Badge variant="secondary" className="font-normal">
-                        {EVIDENCE_DIMENSION_LABELS[q.evidenceDimension]}
-                      </Badge>
-                    )}
-                  </div>
-                  <CardTitle className="text-sm font-medium leading-snug">{q.question}</CardTitle>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="space-y-2">
-                <Label htmlFor={`answer-${q.id}`}>你的回答</Label>
-                <Textarea
-                  id={`answer-${q.id}`}
-                  className="min-h-[80px] text-sm"
-                  placeholder="填写具体经历、数据和方法..."
-                  value={q.userAnswer}
-                  onChange={(e) => updateFollowUpAnswer(q.id, e.target.value)}
-                />
-                <VoiceInputButton
-                  disabled={activeVoiceId !== null && activeVoiceId !== q.id}
-                  onActiveChange={(active) => setActiveVoiceId(active ? q.id : null)}
-                  onTranscript={(text) =>
-                    updateFollowUpAnswer(
-                      q.id,
-                      q.userAnswer.trim() ? `${q.userAnswer.trim()}\n${text}` : text
-                    )
-                  }
-                />
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={!q.userAnswer.trim() || loadingId === q.id}
-                onClick={() => handleGenerateBullet(q.id)}
-              >
-                {loadingId === q.id ? (
-                  <>
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    生成中...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-3.5 w-3.5" />
-                    生成简历 bullet
-                  </>
-                )}
-              </Button>
-              {q.generatedBullet && (
-                <div className="rounded-md border border-emerald-200 bg-emerald-50/50 p-3">
-                  <p className="mb-1 text-xs font-medium text-emerald-700">生成的 bullet</p>
-                  <p className="text-sm leading-relaxed text-neutral-700">{q.generatedBullet}</p>
-                </div>
-              )}
+      <div className="mb-6 space-y-6">
+        {questionGroups.length === 0 ? (
+          <Card>
+            <CardContent className="p-4 text-sm text-neutral-500">
+              当前没有需要补充的重要经历证据，可以直接进入下一步。
             </CardContent>
           </Card>
-        ))}
+        ) : (
+          questionGroups.map((group) => {
+            const removalCandidate = group.assessment?.suggestedAction === "removal_candidate";
+            const decision = group.assessment?.userDecision ?? "retain";
+            const showQuestions = !removalCandidate || decision === "retain";
+
+            return (
+            <section key={group.id} className="space-y-3" aria-labelledby={`group-${group.id}`}>
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="secondary" className="font-normal">
+                  {EXPERIENCE_TYPE_LABELS[group.experienceType]}
+                </Badge>
+                <h3 id={`group-${group.id}`} className="text-sm font-semibold text-neutral-800">
+                  {group.experienceTitle}
+                </h3>
+                <span className="text-xs text-neutral-400">
+                  {group.questions.length > 0
+                    ? `${group.questions.length} 个追问`
+                    : "信息已完成评估"}
+                </span>
+              </div>
+
+              {removalCandidate && (
+                <Card className="border-amber-200 bg-amber-50/40">
+                  <CardContent className="space-y-3 p-4">
+                    <div>
+                      <p className="text-sm font-medium text-amber-900">建议考虑移除</p>
+                      <p className="mt-1 text-sm leading-relaxed text-amber-800">
+                        {group.assessment?.removalReason ||
+                          "该经历与目标岗位的直接匹配度较低，可能挤占核心职业经历篇幅。"}
+                      </p>
+                    </div>
+                    {decision === "pending" ? (
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setExperienceDecision(group.id, "retain")}
+                        >
+                          继续保留
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setExperienceDecision(group.id, "remove")}
+                        >
+                          同意移除
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge variant="outline">
+                          {decision === "remove" ? "已同意移除" : "已选择保留"}
+                        </Badge>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            setExperienceDecision(
+                              group.id,
+                              decision === "remove" ? "retain" : "remove"
+                            )
+                          }
+                        >
+                          {decision === "remove" ? "改为保留" : "改为移除"}
+                        </Button>
+                      </div>
+                    )}
+                    {decision === "pending" && (
+                      <p className="text-xs text-amber-700">未操作时默认继续保留。</p>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {showQuestions && group.questions.length === 0 && (
+                <Card>
+                  <CardContent className="p-4 text-sm text-neutral-500">
+                    当前信息已较完整，无需额外追问；最终简历仍会保留这段经历。
+                  </CardContent>
+                </Card>
+              )}
+
+              {showQuestions && group.questions.map(({ question: q, index }) => (
+                <Card key={q.id}>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <div className="mb-1 flex flex-wrap items-center gap-2">
+                          <span className="text-xs font-medium text-neutral-400">
+                            追问 {index + 1}
+                          </span>
+                          <Badge variant="outline" className="font-normal">
+                            {q.purpose}
+                          </Badge>
+                          {q.evidenceDimension && (
+                            <Badge variant="secondary" className="font-normal">
+                              {EVIDENCE_DIMENSION_LABELS[q.evidenceDimension]}
+                            </Badge>
+                          )}
+                        </div>
+                        <CardTitle className="text-sm font-medium leading-snug">
+                          {q.question}
+                        </CardTitle>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="space-y-2">
+                      <Label htmlFor={`answer-${q.id}`}>你的回答</Label>
+                      <Textarea
+                        id={`answer-${q.id}`}
+                        className="min-h-[80px] text-sm"
+                        placeholder="填写具体经历、数据和方法..."
+                        value={q.userAnswer}
+                        onChange={(e) => updateFollowUpAnswer(q.id, e.target.value)}
+                      />
+                      <VoiceInputButton
+                        disabled={activeVoiceId !== null && activeVoiceId !== q.id}
+                        onActiveChange={(active) => setActiveVoiceId(active ? q.id : null)}
+                        onTranscript={(text) =>
+                          updateFollowUpAnswer(
+                            q.id,
+                            q.userAnswer.trim() ? `${q.userAnswer.trim()}\n${text}` : text
+                          )
+                        }
+                      />
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={!q.userAnswer.trim() || loadingId === q.id}
+                      onClick={() => handleGenerateBullet(q.id)}
+                    >
+                      {loadingId === q.id ? (
+                        <>
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          生成中...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="h-3.5 w-3.5" />
+                          生成简历 bullet
+                        </>
+                      )}
+                    </Button>
+                    {q.generatedBullet && (
+                      <div className="rounded-md border border-emerald-200 bg-emerald-50/50 p-3">
+                        <p className="mb-1 text-xs font-medium text-emerald-700">
+                          生成的 bullet
+                        </p>
+                        <p className="text-sm leading-relaxed text-neutral-700">
+                          {q.generatedBullet}
+                        </p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </section>
+            );
+          })
+        )}
       </div>
 
       <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">

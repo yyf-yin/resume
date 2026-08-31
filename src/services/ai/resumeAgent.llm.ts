@@ -1,6 +1,11 @@
 import { chatCompletionJSON } from "@/lib/ai/client";
 import { applyOptimizedScoreFloor } from "@/lib/ai/score-policy";
 import {
+  enforceExperienceRetention,
+  ensureFollowUpCoverage,
+  normalizeExperienceAssessments,
+} from "@/lib/experience-assessment";
+import {
   AnalysisCheckpointError,
   OptimizationCheckpointError,
 } from "@/lib/ai/errors";
@@ -14,6 +19,7 @@ import {
   RESUME_AGENT_SYSTEM_PROMPT,
   buildAnalyzeCorePrompt,
   buildAnalyzeDiagnosisPrompt,
+  buildAnalyzeExperienceInventoryPrompt,
   buildAnalyzeFollowUpPrompt,
   buildAnalyzeFinalResumePrompt,
   buildAnalyzeInterviewPrompt,
@@ -22,6 +28,7 @@ import {
   buildFollowUpBulletPrompt,
   buildOptimizeUserPrompt,
   normalizeAnalysisResult,
+  normalizeFollowUpQuestions,
   normalizeOptimizedItems,
 } from "@/lib/ai/prompts";
 import type {
@@ -36,6 +43,7 @@ import type {
 
 type JDAnalysisResult = Pick<AnalysisResult, "jdAnalysis">;
 type DiagnosisMatchResult = Pick<AnalysisResult, "diagnosis" | "matchItems">;
+type ExperienceInventoryResult = Pick<AnalysisResult, "experienceAssessments">;
 type FollowUpResult = Pick<AnalysisResult, "followUpQuestions">;
 type OptimizeResult = Pick<AnalysisResult, "optimizedItems">;
 type FinalResumeResult = Pick<AnalysisResult, "finalResume">;
@@ -72,6 +80,9 @@ export async function runLLMResumeAnalysis(
   savedCheckpoint: AnalysisCheckpoint = {}
 ): Promise<AnalysisResult> {
   const checkpoint: AnalysisCheckpoint = { ...savedCheckpoint };
+  if (checkpoint.followUpQuestions) {
+    checkpoint.followUpQuestions = normalizeFollowUpQuestions(checkpoint.followUpQuestions);
+  }
 
   if (!checkpoint.jdAnalysis) {
     const jd = await runAnalysisStage(checkpoint, () =>
@@ -98,6 +109,31 @@ export async function runLLMResumeAnalysis(
     checkpoint.matchItems = diagnosisMatch.matchItems;
   }
 
+  if (!checkpoint.experienceAssessments) {
+    const inventory = await runAnalysisStage(checkpoint, () =>
+      chatCompletionJSON<ExperienceInventoryResult>({
+        operation: "analyze:experience-inventory",
+        system: RESUME_AGENT_SYSTEM_PROMPT,
+        user: buildAnalyzeExperienceInventoryPrompt(
+          input,
+          checkpoint.diagnosis!,
+          checkpoint.matchItems!
+        ),
+        temperature: 0,
+        maxTokens: 12000,
+      })
+    );
+    checkpoint.experienceAssessments = normalizeExperienceAssessments(
+      inventory.experienceAssessments,
+      input.jobStage
+    );
+  } else {
+    checkpoint.experienceAssessments = normalizeExperienceAssessments(
+      checkpoint.experienceAssessments,
+      input.jobStage
+    );
+  }
+
   if (!checkpoint.followUpQuestions) {
     const followUps = await runAnalysisStage(checkpoint, () =>
       chatCompletionJSON<FollowUpResult>({
@@ -106,13 +142,21 @@ export async function runLLMResumeAnalysis(
         user: buildAnalyzeFollowUpPrompt(
           input,
           checkpoint.diagnosis!,
-          checkpoint.matchItems!
+          checkpoint.matchItems!,
+          checkpoint.experienceAssessments!
         ),
-        maxTokens: 7000,
+        maxTokens: 10000,
       })
     );
-    checkpoint.followUpQuestions = followUps.followUpQuestions.slice(0, 10);
+    checkpoint.followUpQuestions = normalizeFollowUpQuestions(followUps.followUpQuestions);
   }
+  checkpoint.followUpQuestions = normalizeFollowUpQuestions(
+    ensureFollowUpCoverage(
+      checkpoint.followUpQuestions,
+      checkpoint.experienceAssessments,
+      input.jobStage
+    )
+  );
 
   const diagnosisMatch: DiagnosisMatchResult = {
     diagnosis: checkpoint.diagnosis,
@@ -126,7 +170,12 @@ export async function runLLMResumeAnalysis(
       chatCompletionJSON<OptimizeResult>({
         operation: "analyze:optimization",
         system: RESUME_AGENT_SYSTEM_PROMPT,
-        user: buildAnalyzeOutputPrompt(input, optimizeStyle, coreSummary),
+        user: buildAnalyzeOutputPrompt(
+          input,
+          optimizeStyle,
+          coreSummary,
+          checkpoint.experienceAssessments
+        ),
         maxTokens: 12000,
       })
     );
@@ -142,18 +191,30 @@ export async function runLLMResumeAnalysis(
           input,
           optimizeStyle,
           coreSummary,
-          checkpoint.optimizedItems!
+          checkpoint.optimizedItems!,
+          checkpoint.followUpQuestions,
+          checkpoint.experienceAssessments
         ),
         maxTokens: 16000,
       })
     );
-    checkpoint.finalResume = normalizeAnalysisResult(
+    const normalizedFinalResume = normalizeAnalysisResult(
       {
         finalResume: finalResume.finalResume,
       } as AnalysisResult,
       input
     ).finalResume;
+    checkpoint.finalResume = enforceExperienceRetention(
+      normalizedFinalResume,
+      checkpoint.experienceAssessments,
+      input.jobStage
+    );
   }
+  checkpoint.finalResume = enforceExperienceRetention(
+    checkpoint.finalResume,
+    checkpoint.experienceAssessments,
+    input.jobStage
+  );
 
   const scoreRequest =
     typeof checkpoint.finalResumeScore === "number"
@@ -209,6 +270,7 @@ export async function runLLMResumeAnalysis(
     jdAnalysis: checkpoint.jdAnalysis,
     diagnosis: diagnosisMatch.diagnosis,
     matchItems: diagnosisMatch.matchItems,
+    experienceAssessments: checkpoint.experienceAssessments,
     followUpQuestions: checkpoint.followUpQuestions,
     optimizedItems: checkpoint.optimizedItems,
     finalResume: checkpoint.finalResume,
@@ -227,6 +289,7 @@ export async function runLLMRegenerateOptimizedItems(
   style: OptimizeStyle,
   diagnosis: ResumeDiagnosis,
   followUpQuestions: FollowUpQuestion[] = [],
+  experienceAssessments: AnalysisResult["experienceAssessments"] = [],
   savedCheckpoint: OptimizationCheckpoint = {}
 ): Promise<
   Pick<AnalysisResult, "optimizedItems" | "finalResume" | "finalResumeScore" | "interviewPrep">
@@ -240,7 +303,12 @@ export async function runLLMRegenerateOptimizedItems(
       }>({
         operation: "regenerate:optimization",
         system: RESUME_AGENT_SYSTEM_PROMPT,
-        user: buildOptimizeUserPrompt(input, style, followUpQuestions),
+        user: buildOptimizeUserPrompt(
+          input,
+          style,
+          followUpQuestions,
+          experienceAssessments
+        ),
         temperature: 0.5,
         maxTokens: 12000,
       });
@@ -256,20 +324,32 @@ export async function runLLMRegenerateOptimizedItems(
           style,
           "",
           checkpoint.optimizedItems,
-          followUpQuestions
+          followUpQuestions,
+          experienceAssessments
         ),
         maxTokens: 16000,
       });
-      checkpoint.finalResume = normalizeAnalysisResult(
+      const normalizedFinalResume = normalizeAnalysisResult(
         {
           finalResume: finalResume.finalResume,
         } as AnalysisResult,
         input
       ).finalResume;
+      checkpoint.finalResume = enforceExperienceRetention(
+        normalizedFinalResume,
+        experienceAssessments,
+        input.jobStage
+      );
     }
   } catch (error) {
     throw new OptimizationCheckpointError(error, checkpoint);
   }
+
+  checkpoint.finalResume = enforceExperienceRetention(
+    checkpoint.finalResume!,
+    experienceAssessments,
+    input.jobStage
+  );
 
   const scoreRequest =
     typeof checkpoint.finalResumeScore === "number"

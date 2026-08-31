@@ -1,6 +1,7 @@
 import type {
   AnalysisResult,
   EvidenceStrength,
+  ExperienceAssessment,
   FollowUpQuestion,
   MatchItem,
   OptimizeStyle,
@@ -11,6 +12,7 @@ import {
   buildCampusExperiencePolicyPrompt,
   getCampusExperiencePolicy,
 } from "@/lib/campus-experience-policy";
+import { normalizeExperienceAssessments } from "@/lib/experience-assessment";
 
 const OPTIMIZATION_OBJECTIVE = `【唯一优化目标：更高匹配度、更强专业性】
 1. 优先强化与目标 JD 核心职责、硬性要求和高权重关键词直接相关的真实证据
@@ -52,6 +54,10 @@ const ANALYSIS_JSON_SCHEMA = `{
   }],
   "followUpQuestions": [{
     "id": string,
+    "experienceId": string,
+    "experienceType": "work"|"internship"|"project"|"campus"|"skill"|"other",
+    "experienceTitle": string,
+    "evidenceDimension": "role"|"action"|"scale"|"challenge"|"collaboration"|"result"|"other",
     "question": string,
     "purpose": string,
     "userAnswer": "",
@@ -93,7 +99,7 @@ export const RESUME_AGENT_SYSTEM_PROMPT = `你是「简历专家」，一位 JD 
 1. 所有内容使用中文
 2. 分析必须基于用户提供的 JD 与简历，不得编造无法从材料推断的虚假经历
 3. 对缺失证据要明确标注 needsSupplement 或 evidenceStrength 为 weak/none
-4. followUpQuestions 生成 5-10 条，id 格式 fu-1, fu-2...
+4. followUpQuestions 必须按简历中的独立经历及其证据缺口生成；每段与目标岗位相关的经历生成 0-3 条，不设置固定总题数，id 格式 fu-1, fu-2...
 5. optimizedItems 通常生成 5 条左右，id 格式 opt-1, opt-2...；真实材料不足时允许更少，不得为凑数量虚构或重复内容
 6. interviewPrep.likelyQuestions 恰好 10 条
 7. overallScore 与各 dimensionScores.score 必须是 0-100 范围内的整数；即使证据不足也必须给出保守评分，不得省略或返回 null
@@ -138,6 +144,10 @@ const ANALYSIS_CORE_SCHEMA = `{
   }],
   "followUpQuestions": [{
     "id": string,
+    "experienceId": string,
+    "experienceType": "work"|"internship"|"project"|"campus"|"skill"|"other",
+    "experienceTitle": string,
+    "evidenceDimension": "role"|"action"|"scale"|"challenge"|"collaboration"|"result"|"other",
     "question": string,
     "purpose": string,
     "userAnswer": "",
@@ -217,7 +227,7 @@ ${answeredQuestions
   .map(
     (item, index) => `追问 ${index + 1}：${item.question}
 追问目的：${item.purpose}
-关联经历：${item.experienceTitle || "未指定"}（${item.experienceType || "other"}）
+关联经历：${item.experienceTitle || "未指定"}（${item.experienceType || "other"}，${item.experienceId || "未编号"}）
 补充维度：${item.evidenceDimension || "other"}
 用户回答：${item.userAnswer || "未填写"}
 已生成 Bullet：${item.generatedBullet || "未生成"}`
@@ -230,7 +240,7 @@ ${FOLLOW_UP_EVIDENCE_ROUTING_RULES}`;
 function buildResumeTemplateSectionRules(input: UserInput): string {
   const campusPolicy = getCampusExperiencePolicy(input.jobStage);
   const campusSectionRule = campusPolicy.allowed
-    ? `- 允许按校园经历策略生成“校园经历”或“补充经历”优化项，最多 ${campusPolicy.maxEntries} 段候选经历；只有与目标岗位相关且能补充职业证据时才生成`
+    ? `- 允许按校园经历策略生成“校园经历”或“补充经历”优化项；可建议优先展示最多 ${campusPolicy.maxEntries} 段，但只有用户明确同意移除的经历才可删除，用户拒绝或未操作时必须保留`
     : `- 不生成“校园经历”“补充经历”或“获奖证书”优化项`;
 
   return input.jobStage === "校招"
@@ -336,10 +346,68 @@ ${buildRequiredJsonRules([
 要求：matchItems 6-8 条。`;
 }
 
-export function buildAnalyzeFollowUpPrompt(
+export function buildAnalyzeExperienceInventoryPrompt(
   input: UserInput,
   diagnosis: ResumeDiagnosis,
   matchItems: MatchItem[]
+): string {
+  const isCampusRecruiting = input.jobStage === "校招";
+
+  return `请先完整提取并逐段评估原始简历中的经历，建立后续追问和最终成稿必须共同使用的经历清单。
+${buildInputContext(input)}
+
+【已有诊断】
+${JSON.stringify(diagnosis)}
+
+【已有匹配分析】
+${JSON.stringify(matchItems)}
+
+${buildCampusExperiencePolicyPrompt(input.jobStage)}
+
+【完整提取规则】
+1. 逐段提取工作、实习、项目、竞赛、科研、学生组织、社团、志愿、班级职务和社会实践；原始简历中的每一段独立经历必须且只能出现一次
+2. 公司工作与实习分别标为 work、internship；课程、科研、竞赛和有明确交付物的实践标为 project；学生组织、社团、志愿和班级职务标为 campus
+3. experienceId 按原文顺序稳定编号为 exp-1、exp-2...；originalBullets 必须忠实保留原文事实，不得概括到丢失工具、交付物、数字或具体动作
+4. directRelevance 评估与目标岗位的直接相关性；transferableValue 独立评估团队合作、沟通、语言、组织协调、执行、领导力、学习、数据和结果意识等通用能力价值
+5. evidenceCompleteness：同时有明确个人行动和结果为 complete；缺少其中一项为 partial；只有名称、职位或笼统职责为 weak
+6. missingDimensions 只能列真实缺口。成果尽量量化时优先检查 scale 和 result，量化口径包括覆盖人数、活动场次、内容或交付数量、完成率、增长变化、周期、成本、排名、满意度和正式反馈
+
+【阶段分流】
+${
+    isCampusRecruiting
+      ? `- 当前为校招/实习：所有真实经历 suggestedAction 必须为 retain、userDecision 必须为 retain
+- 直接相关性低不能作为删除理由；只要能证明通用能力就应保留并优化
+- 内容弱时标记缺口供后续追问，不得因材料暂时不足而遗漏经历`
+      : `- 当前为社招：岗位直接匹配度要求较高，可将低相关、重复、过时或明显挤占核心职业证据篇幅的经历标为 removal_candidate
+- removal_candidate 必须提供具体、对用户可见的 removalReason，userDecision 必须为 pending
+- 其余经历 suggestedAction 为 retain、userDecision 为 retain；不得在本阶段直接决定删除`}
+
+${buildRequiredJsonRules([
+    "experienceAssessments",
+    "experienceAssessments[].experienceId",
+    "experienceAssessments[].experienceType",
+    "experienceAssessments[].experienceTitle",
+    "experienceAssessments[].organization",
+    "experienceAssessments[].role",
+    "experienceAssessments[].period",
+    "experienceAssessments[].originalBullets",
+    "experienceAssessments[].directRelevance",
+    "experienceAssessments[].transferableValue",
+    "experienceAssessments[].evidenceCompleteness",
+    "experienceAssessments[].missingDimensions",
+    "experienceAssessments[].suggestedAction",
+    "experienceAssessments[].removalReason",
+    "experienceAssessments[].userDecision",
+  ])}
+
+只输出 { "experienceAssessments": [...] }。不得生成追问、优化项或最终简历。`;
+}
+
+export function buildAnalyzeFollowUpPrompt(
+  input: UserInput,
+  diagnosis: ResumeDiagnosis,
+  matchItems: MatchItem[],
+  experienceAssessments: ExperienceAssessment[]
 ): string {
   const campusPolicy = getCampusExperiencePolicy(input.jobStage);
 
@@ -352,27 +420,39 @@ ${JSON.stringify(diagnosis)}
 【已有匹配分析】
 ${JSON.stringify(matchItems)}
 
+【已完成的逐段经历清单】
+${JSON.stringify(experienceAssessments, null, 2)}
+
 ${buildCampusExperiencePolicyPrompt(input.jobStage)}
 
-【校园经历追问规则】
-1. 先识别原始简历中的每段工作、实习、项目和校园经历，再围绕对目标岗位最重要的证据缺口提问
-2. 对一段经历的追问必须聚焦一个缺失维度：个人角色、具体行动、活动规模、关键难点、协作过程或真实结果
-3. ${campusPolicy.allowed ? "如果职业经历只有 0-1 段、内容单薄或缺少目标岗位证据，且原始材料提到相关校园活动，应在总问题中安排 1-2 条校园经历追问" : "当前阶段不主动追问普通校园活动，除非需要验证明显的真实性或夸大风险"}
-4. 不追问与目标岗位无关、即使补充也不应进入简历的校园活动
-5. 问题中应尽量指出具体经历名称，避免笼统询问“还有什么经历”
+【按经历生成追问：必须严格执行】
+1. 必须以经历清单为唯一索引；同一段经历的所有问题必须复用清单中的 experienceId、experienceType 和 experienceTitle，不得新增、合并或遗漏经历
+2. evidenceCompleteness=complete 且没有重要缺口的经历生成 0 条；partial 或 weak 的经历按阶段规则生成问题，不得为了凑数量追问
+3. 每段被选中的经历按需生成 1-3 条，绝不能超过 3 条；总题数等于各段经历实际需要的问题数，不设置固定总题数，也不得先确定总题数后平均分配
+4. 数量判断原则：只有 1 个关键缺口时生成 1 条；同时缺少“个人行动”和“结果证据”时生成 2 条；只有名称、职位或职责描述且与 JD 高度相关时最多生成 3 条
+5. 每个问题只允许聚焦一个 evidenceDimension，同一经历不得重复询问同一维度，也不得把多段经历合并成一个笼统问题
+6. 一段经历生成 1 条时，选择对 JD 匹配度影响最大的缺口；生成 2 条时优先覆盖“个人角色/具体行动”与“真实结果”；生成 3 条时优先覆盖“个人角色或具体行动”“关键难点或协作过程”“规模或真实结果”
+7. 问题必须直接写出具体经历名称和需要回忆的事实，不问泛泛的兴趣、态度、理论知识或“还有什么经历”
+8. 社招 removal_candidate 仍可预生成 1-2 条可迁移能力问题，但前端应先询问用户是否移除；同意移除后这些问题不再展示或使用，拒绝后再回答
 
-【产出与成果挖掘规则】
-1. 在保留原有岗位能力缺口追问的基础上，逐段审计与目标岗位相关的工作、实习、项目和校园经历是否已经说明“最终交付了什么、产生了什么变化”
-2. 对只有职责、过程或动作，没有产出、结果、影响或反馈的经历，必须安排至少 1 条 evidenceDimension="result" 的专门追问；不得把多个无关经历合并成一个笼统问题
-3. 优先挖掘可量化成果，可从以下真实口径中选择最适合该经历的口径提问：交付物数量、用户或参与人数、覆盖范围、采用率、完成率、效率或周期变化、成本节约、收入或转化、质量或准确率、问题减少、满意度或反馈、竞赛排名或奖项
-4. 问题应帮助用户回忆统计口径和对比基准，例如“上线前后分别是多少”“覆盖多少人、持续多久”“交付了多少份/场”“被谁采用”；不得在问题中暗示或预设不存在的数字
-5. 如果确实没有量化数据，继续挖掘可验证的定性成果，例如具体交付物、功能上线、流程被采用、问题被解决、获得正式反馈、形成制度或完成关键节点；不得为了量化而编造数字
-6. 如果多个经历都缺少成果问题而总题数将超过 10，优先追问：与 JD 最相关的经历 > 最近经历 > 用户个人贡献最明确的经历；其余缺口留给后续完善建议
-7. 已经具有清晰且可信成果口径的经历，不重复询问相同结果，只追问其仍缺失的统计范围、个人贡献或真实性依据
+【问题方向与结果证据规则】
+1. role：本人在团队中的职责边界、决策权和独立贡献；action：本人实际采取的步骤、方法、工具或方案
+2. challenge：关键限制、冲突或复杂问题及处理方式；collaboration：与谁协作、本人如何推动和解决分歧
+3. scale：用户、参与者、数据、功能、场次、周期或覆盖范围；result：最终交付物、采用情况、业务变化、正式反馈或可验证影响
+4. 对只有职责、过程或动作，没有产出、结果、影响或反馈的相关经历，必须包含 1 条 evidenceDimension="result" 的问题
+5. 校招和社招成果都应尽量量化。可量化时优先追问真实统计口径和对比基准，例如上线前后、覆盖人数、参与人数、活动场次、内容或交付数量、完成率、增长、效率、周期、成本、质量、准确率、排名、满意度或反馈数量；不得暗示或预设不存在的数字
+6. 没有量化数据时允许追问可验证的定性结果，例如功能上线、报告或方案被采用、流程形成、问题解决、关键节点完成或获得正式反馈；不得为了量化而编造
+7. 已有清晰可信的结果时不重复追问 result，只追问仍缺失且影响 JD 匹配的其他维度
+
+【校园经历专项规则】
+1. ${input.jobStage === "校招" ? "校招/实习阶段必须覆盖经历清单中的每一段校园经历；直接相关性低但能证明通用能力的经历也要按缺口生成 1-3 条，不得因总题数或不够对口而省略" : campusPolicy.allowed ? `校园经历直接相关性较低时可建议移除，但必须先让用户确认；用户保留后仍按 1-2 条追问可迁移能力和真实成果` : "不主动追问普通校园活动，除非需要验证明显的真实性或夸大风险"}
+2. 校园经历不得包装成工作、实习或商业项目；experienceType 必须为 campus，竞赛/科研/课程项目如果有明确项目交付可标为 project
+3. 校招/实习阶段如果原始材料完全没有任何校园经历线索，最多生成 1 条发现式问题，experienceId 使用 campus-discovery；用户确认没有后不得虚构或继续扩展
 
 ${buildRequiredJsonRules([
   "followUpQuestions",
   "followUpQuestions[].id",
+  "followUpQuestions[].experienceId",
   "followUpQuestions[].experienceType",
   "followUpQuestions[].experienceTitle",
   "followUpQuestions[].evidenceDimension",
@@ -387,10 +467,11 @@ ${buildRequiredJsonRules([
   "followUpQuestions": [
     {
       "id": "fu-1",
+      "experienceId": "exp-1",
       "experienceType": "project",
       "experienceTitle": "项目名称",
       "evidenceDimension": "result",
-      "question": "该项目中你的具体职责和最终结果是什么？",
+      "question": "该项目最终交付了什么，产生了哪些可验证的结果或反馈？",
       "purpose": "补充项目落地证据",
       "userAnswer": "",
       "generatedBullet": ""
@@ -398,13 +479,14 @@ ${buildRequiredJsonRules([
   ]
 }
 
-要求：followUpQuestions 生成 5-10 条且绝不能超过 10 条，id 为 fu-1...；在有相关经历缺少产出或结果时，成果类问题优先于泛泛的知识或兴趣问题；experienceType 只能是 work、internship、project、campus、skill、other；evidenceDimension 只能是 role、action、scale、challenge、collaboration、result、other；只追问简历和补充信息中缺失但对目标岗位重要的真实证据。`;
+要求：id 按最终问题顺序使用 fu-1、fu-2...；同一 experienceId 只能有 1-3 条问题；experienceType 只能是 work、internship、project、campus、skill、other；evidenceDimension 只能是 role、action、scale、challenge、collaboration、result、other；只追问原始材料中真实存在或校招发现式问题确认的经历，不得虚构经历。`;
 }
 
 export function buildAnalyzeOutputPrompt(
   input: UserInput,
   _optimizeStyle: OptimizeStyle,
-  coreSummary: string
+  coreSummary: string,
+  experienceAssessments: ExperienceAssessment[] = []
 ): string {
   return `请完成简历优化项（第三部分 A）。
 ${OPTIMIZATION_OBJECTIVE}
@@ -412,6 +494,11 @@ ${OPTIMIZATION_OBJECTIVE}
 ${buildInputContext(input)}
 
 ${coreSummary ? `【前序分析摘要】\n${coreSummary}\n` : ""}
+【经历保留与删除建议】
+${JSON.stringify(experienceAssessments, null, 2)}
+
+校招不得生成删除原始经历的优化项。社招可以说明 removal_candidate 的删除理由，但 userDecision 不是 remove 时不得按已删除处理。
+
 ${buildResumeTemplateSectionRules(input)}
 ${buildRequiredJsonRules([
   "optimizedItems",
@@ -445,7 +532,8 @@ export function buildAnalyzeFinalResumePrompt(
   _optimizeStyle: OptimizeStyle,
   coreSummary: string,
   optimizedItems: AnalysisResult["optimizedItems"],
-  followUpQuestions: FollowUpQuestion[] = []
+  followUpQuestions: FollowUpQuestion[] = [],
+  experienceAssessments: ExperienceAssessment[] = []
 ): string {
   const isCampusTemplate = input.jobStage === "校招";
   const campusPolicy = getCampusExperiencePolicy(input.jobStage);
@@ -456,18 +544,19 @@ export function buildAnalyzeFinalResumePrompt(
 2. 不生成职业摘要，summary 必须返回空字符串 ""
 3. 页面栏目顺序为：求职意向、教育背景、专业能力、实习经历（如有）、项目经历、校园经历、获奖证书、技能工具
 4. workExperience 只放真实实习经历；没有实习时返回 []，不得把校园活动伪装成实习
-5. campusExperience 放学生组织、社团、志愿活动、班级职务等真实校园经历，建议 1-3 段，每段 1-3 条 bullets
+5. campusExperience 放学生组织、社团、志愿活动、班级职务等真实校园经历；经历清单中的每段校园经历都必须保留，每段 1-3 条 bullets
 6. projectExperience 优先保留课程项目、竞赛项目、科研项目和个人项目，最多 4 个，每个 2-3 条 bullets
 7. awardsAndCertificates 只列真实奖项、竞赛名次、奖学金或证书；没有则返回 []
-8. coreSkills 保留 4-6 项；经历按时间倒序排列；正文总长度控制在约 1000-1400 个中文字符
-9. 不得为了填满一页虚构实习、校园职务、奖项、项目成果或量化数据`
+8. coreSkills 保留 4-6 项；经历按时间倒序排列；正文总长度控制在约 1000-1600 个中文字符，空间不足时先精简重复技能和句子，不得直接删除整段经历
+9. 校招成果也应尽量使用用户能够确认的真实数字，优先展示覆盖人数、场次、交付数量、完成率、增长、周期、排名、满意度和反馈；没有可靠数字时写可验证的定性结果
+10. 不得为了填满一页虚构实习、校园职务、奖项、项目成果或量化数据`
     : `【社会招聘模板规则】
 1. template 必须为 "experienced"
 2. 栏目顺序为：求职意向、职业摘要、核心能力、工作经历、项目经历、校园/补充经历（仅在策略允许且确有必要时）、技能工具、教育背景
 3. 职业摘要控制在 80-120 个中文字符，只概括定位、相关经验与核心优势
 4. coreSkills 保留 5-8 项；工作经历按时间倒序排列，每段保留 2-4 条 bullets
 5. projectExperience 最多 3 个，每个保留 2-3 条 bullets
-6. ${campusPolicy.allowed ? `先判断工作、实习和项目证据是否足够；不足时才从真实校园经历中选择最多 ${campusPolicy.maxEntries} 段与目标岗位最相关、个人行动和结果最明确的内容写入 campusExperience，否则返回 []` : "campusExperience 必须返回 []"}
+6. ${campusPolicy.allowed ? `优先展示岗位直接匹配的职业经历；校园经历可作为补充。只有经历清单中 userDecision="remove" 的经历可以删除，pending 或 retain 必须继续保留` : "campusExperience 必须返回 []，但其他工作、实习和项目经历仍只有 userDecision=remove 时才允许删除"}
 7. awardsAndCertificates 返回 []，不在社会招聘模板中新增获奖证书栏目
 8. 正文总长度控制在约 1200-1600 个中文字符
 9. 社招校园经历只能作为补充证据，不得挤占更相关的职业经历`;
@@ -484,14 +573,19 @@ ${JSON.stringify(optimizedItems, null, 2)}
 
 ${buildFollowUpEvidence(followUpQuestions)}
 
+【经历保留与删除决定】
+${JSON.stringify(experienceAssessments, null, 2)}
+
 ${buildCampusExperiencePolicyPrompt(input.jobStage)}
 
 生成最终简历时必须以原始简历事实为基础，并将适用的优化项放入其标注的对应栏目。不得虚构原始材料中不存在的公司、学校、项目、职责、校园职务、奖项、成果或量化数据；不得把标注为核心能力或技能工具的知识类优化项改写进经历栏目。
+每段工作、实习、项目和校园经历必须填写对应的 sourceExperienceId。校招必须保留经历清单中的全部真实经历；社招只有 userDecision="remove" 才能删除，pending 表示用户尚未同意、必须继续保留。不得合并两段不同 sourceExperienceId 的经历。
+追问回答只能补充原始事实，不能把原文改得更加笼统；原文中的具体动作、工具、交付物和真实数字不得无故丢失。没有回答或回答不足时保留原始 bullet。
 标注为“校园经历”或“补充经历”的优化项如果通过当前校园经历策略筛选，统一写入 finalResume.campusExperience；未通过筛选时忽略，不得改写进 workExperience 或 projectExperience。
 
 【单页长度与格式要求】
 1. 以常规 A4 单页中文简历为目标；JSON 字段名和结构字符不计入正文长度
-2. 如果真实经历不足，允许短于一页，不得为填满篇幅虚构、重复或无依据扩写；如果经历较多，优先保留与目标 JD 最相关、证据最充分、结果最明确的内容，压缩低相关内容
+2. 如果真实经历不足，允许短于一页，不得为填满篇幅虚构、重复或无依据扩写；如果经历较多，校招优先压缩低相关内容但保留每段经历，社招按用户删除决定处理
 3. 每条经历 bullet 控制在 35-60 个中文字符，优先使用“行动 + 方法/场景 + 真实结果”的表达
 4. skillsAndTools 保留 6-12 项，只列真实出现或能从材料直接确认的技能与工具
 5. 各字段只输出纯文本，不得在字符串中加入 Markdown 标题、表格、代码块或额外编号；不得增加规定结构之外的栏目
@@ -511,16 +605,19 @@ ${buildRequiredJsonRules([
   "finalResume.summary",
   "finalResume.coreSkills",
   "finalResume.workExperience",
+  "finalResume.workExperience[].sourceExperienceId",
   "finalResume.workExperience[].company",
   "finalResume.workExperience[].role",
   "finalResume.workExperience[].period",
   "finalResume.workExperience[].bullets",
   "finalResume.projectExperience",
+  "finalResume.projectExperience[].sourceExperienceId",
   "finalResume.projectExperience[].name",
   "finalResume.projectExperience[].role",
   "finalResume.projectExperience[].period",
   "finalResume.projectExperience[].bullets",
   "finalResume.campusExperience",
+  "finalResume.campusExperience[].sourceExperienceId",
   "finalResume.campusExperience[].organization",
   "finalResume.campusExperience[].role",
   "finalResume.campusExperience[].period",
@@ -548,6 +645,7 @@ ${buildRequiredJsonRules([
     "coreSkills": ["${isCampusTemplate ? "专业能力一" : "核心能力一"}", "${isCampusTemplate ? "专业能力二" : "核心能力二"}"],
     "workExperience": [
       {
+        "sourceExperienceId": "exp-1",
         "company": "${isCampusTemplate ? "实习单位" : "公司名称"}",
         "role": "${isCampusTemplate ? "实习岗位" : "岗位名称"}",
         "period": "${isCampusTemplate ? "实习时间" : "任职时间"}",
@@ -556,6 +654,7 @@ ${buildRequiredJsonRules([
     ],
     "projectExperience": [
       {
+        "sourceExperienceId": "exp-2",
         "name": "项目名称",
         "role": "项目角色",
         "period": "项目时间",
@@ -564,6 +663,7 @@ ${buildRequiredJsonRules([
     ],
     "campusExperience": ${campusPolicy.allowed ? `[
       {
+        "sourceExperienceId": "exp-3",
         "organization": "学生组织或社团",
         "role": "校园角色",
         "period": "参与时间",
@@ -675,7 +775,8 @@ ${buildRequiredJsonRules([
 export function buildOptimizeUserPrompt(
   input: UserInput,
   _style: OptimizeStyle,
-  followUpQuestions: FollowUpQuestion[] = []
+  followUpQuestions: FollowUpQuestion[] = [],
+  experienceAssessments: ExperienceAssessment[] = []
 ): string {
   return `请基于以下材料重新生成 optimizedItems。只生成有真实依据且能改善简历的信息，通常 3-6 条；材料不足时允许更少，不得为凑数量拆分、重复或强行插入追问信息。
 
@@ -692,6 +793,11 @@ ${input.originalResume}
 ${input.additionalInfo || "无"}
 
 ${buildFollowUpEvidence(followUpQuestions)}
+
+【经历保留与删除决定】
+${JSON.stringify(experienceAssessments, null, 2)}
+
+校招不得建议删除原始经历；社招只有 userDecision="remove" 的经历可按用户决定删除，pending 或 retain 必须继续保留。校招成果与社招成果都应尽量采用用户能够确认的真实量化口径，没有可靠数字时使用可验证的定性结果。
 
 ${buildResumeTemplateSectionRules(input)}
 
@@ -734,7 +840,8 @@ export function buildFollowUpBulletPrompt(
 2. 知识掌握：如果回答只表示了解、学习过或能够解释概念，只返回适合“技能工具”栏目的简短能力短语，不得虚构项目使用、优化动作或成果
 3. 无可用证据：如果用户表示不了解、没有使用过、无法确认或回答没有有效信息，bullet 返回空字符串
 4. 不得将“了解、学习、知道、接触过”升级为“应用、搭建、优化、落地、负责、推动、实现”
-5. 不要夸大，不要引号包裹，只输出 JSON
+5. 校招和社招成果都尽量量化：回答中存在覆盖人数、场次、交付数量、完成率、增长、效率、周期、成本、排名、满意度或反馈数量时应准确保留并体现统计口径；回答没有可靠数字时使用交付、采用、问题解决或正式反馈等定性结果，不得自行补数字
+6. 不要夸大，不要引号包裹，只输出 JSON
 
 【目标岗位】${input.targetRole}
 【追问目的】${purpose}
@@ -748,6 +855,86 @@ ${buildRequiredJsonRules(["bullet"])}
 }
 
 const EVIDENCE_STRENGTHS: EvidenceStrength[] = ["strong", "medium", "weak", "none"];
+const FOLLOW_UP_EXPERIENCE_TYPES = [
+  "work",
+  "internship",
+  "project",
+  "campus",
+  "skill",
+  "other",
+] as const;
+const FOLLOW_UP_EVIDENCE_DIMENSIONS = [
+  "role",
+  "action",
+  "scale",
+  "challenge",
+  "collaboration",
+  "result",
+  "other",
+] as const;
+
+export function normalizeFollowUpQuestions(
+  questions: FollowUpQuestion[] = []
+): FollowUpQuestion[] {
+  const normalized: FollowUpQuestion[] = [];
+  const groupCounts = new Map<string, number>();
+  const groupDimensions = new Map<string, Set<string>>();
+  const usedQuestionIds = new Set<string>();
+  const usedQuestionTexts = new Set<string>();
+
+  questions.forEach((item, index) => {
+    const question = item.question?.trim();
+    if (!question || usedQuestionTexts.has(question)) return;
+
+    const experienceType = FOLLOW_UP_EXPERIENCE_TYPES.includes(
+      item.experienceType as (typeof FOLLOW_UP_EXPERIENCE_TYPES)[number]
+    )
+      ? item.experienceType!
+      : "other";
+    const evidenceDimension = FOLLOW_UP_EVIDENCE_DIMENSIONS.includes(
+      item.evidenceDimension as (typeof FOLLOW_UP_EVIDENCE_DIMENSIONS)[number]
+    )
+      ? item.evidenceDimension!
+      : "other";
+    const experienceTitle = item.experienceTitle?.trim() ?? "";
+    const experienceId =
+      item.experienceId?.trim() ||
+      (experienceTitle
+        ? `${experienceType}:${experienceTitle}`
+        : `legacy-experience-${index + 1}`);
+    const currentCount = groupCounts.get(experienceId) ?? 0;
+    const dimensions = groupDimensions.get(experienceId) ?? new Set<string>();
+
+    if (
+      currentCount >= 3 ||
+      (evidenceDimension !== "other" && dimensions.has(evidenceDimension))
+    ) {
+      return;
+    }
+
+    let questionId = item.id?.trim() || `fu-${normalized.length + 1}`;
+    if (usedQuestionIds.has(questionId)) questionId = `fu-${normalized.length + 1}`;
+
+    groupCounts.set(experienceId, currentCount + 1);
+    if (evidenceDimension !== "other") dimensions.add(evidenceDimension);
+    groupDimensions.set(experienceId, dimensions);
+    usedQuestionIds.add(questionId);
+    usedQuestionTexts.add(question);
+    normalized.push({
+      id: questionId,
+      experienceId,
+      experienceType,
+      experienceTitle,
+      evidenceDimension,
+      question,
+      purpose: item.purpose?.trim() ?? "",
+      userAnswer: item.userAnswer ?? "",
+      generatedBullet: item.generatedBullet ?? "",
+    });
+  });
+
+  return normalized;
+}
 
 export function normalizeAnalysisResult(raw: AnalysisResult, input?: UserInput): AnalysisResult {
   return {
@@ -782,16 +969,11 @@ export function normalizeAnalysisResult(raw: AnalysisResult, input?: UserInput):
       needsSupplement: Boolean(item.needsSupplement),
       optimizationSuggestion: item.optimizationSuggestion ?? "",
     })),
-    followUpQuestions: (raw.followUpQuestions ?? []).slice(0, 10).map((item, index) => ({
-      id: item.id || `fu-${index + 1}`,
-      experienceType: item.experienceType ?? "other",
-      experienceTitle: item.experienceTitle ?? "",
-      evidenceDimension: item.evidenceDimension ?? "other",
-      question: item.question ?? "",
-      purpose: item.purpose ?? "",
-      userAnswer: item.userAnswer ?? "",
-      generatedBullet: item.generatedBullet ?? "",
-    })),
+    experienceAssessments: normalizeExperienceAssessments(
+      raw.experienceAssessments,
+      input?.jobStage
+    ),
+    followUpQuestions: normalizeFollowUpQuestions(raw.followUpQuestions),
     optimizedItems: (raw.optimizedItems ?? []).map((item, index) => ({
       id: item.id || `opt-${index + 1}`,
       section: item.section ?? "",
@@ -811,9 +993,22 @@ export function normalizeAnalysisResult(raw: AnalysisResult, input?: UserInput):
       jobIntent: raw.finalResume?.jobIntent || (input ? `${input.targetRole} | ${input.industry}` : ""),
       summary: raw.finalResume?.summary ?? "",
       coreSkills: raw.finalResume?.coreSkills ?? [],
-      workExperience: raw.finalResume?.workExperience ?? [],
-      projectExperience: raw.finalResume?.projectExperience ?? [],
+      workExperience: (raw.finalResume?.workExperience ?? []).map((item) => ({
+        sourceExperienceId: item.sourceExperienceId?.trim() || undefined,
+        company: item.company ?? "",
+        role: item.role ?? "",
+        period: item.period ?? "",
+        bullets: item.bullets ?? [],
+      })),
+      projectExperience: (raw.finalResume?.projectExperience ?? []).map((item) => ({
+        sourceExperienceId: item.sourceExperienceId?.trim() || undefined,
+        name: item.name ?? "",
+        role: item.role ?? "",
+        period: item.period ?? "",
+        bullets: item.bullets ?? [],
+      })),
       campusExperience: (raw.finalResume?.campusExperience ?? []).map((item) => ({
+        sourceExperienceId: item.sourceExperienceId?.trim() || undefined,
         organization: item.organization ?? "",
         role: item.role ?? "",
         period: item.period ?? "",

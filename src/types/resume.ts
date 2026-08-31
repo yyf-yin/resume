@@ -67,11 +67,47 @@ export interface MatchItem {
   optimizationSuggestion: string;
 }
 
+export type ExperienceType =
+  | "work"
+  | "internship"
+  | "project"
+  | "campus"
+  | "skill"
+  | "other";
+
+export type EvidenceDimension =
+  | "role"
+  | "action"
+  | "scale"
+  | "challenge"
+  | "collaboration"
+  | "result"
+  | "other";
+
+export interface ExperienceAssessment {
+  experienceId: string;
+  experienceType: ExperienceType;
+  experienceTitle: string;
+  organization: string;
+  role: string;
+  period: string;
+  originalBullets: string[];
+  directRelevance: "high" | "medium" | "low";
+  transferableValue: "high" | "medium" | "low";
+  evidenceCompleteness: "complete" | "partial" | "weak";
+  missingDimensions: EvidenceDimension[];
+  suggestedAction: "retain" | "removal_candidate";
+  removalReason: string;
+  userDecision: "retain" | "remove" | "pending";
+}
+
 export interface FollowUpQuestion {
   id: string;
-  experienceType?: "work" | "internship" | "project" | "campus" | "skill" | "other";
+  /** Stable identifier shared by all questions for the same resume experience. */
+  experienceId?: string;
+  experienceType?: ExperienceType;
   experienceTitle?: string;
-  evidenceDimension?: "role" | "action" | "scale" | "challenge" | "collaboration" | "result" | "other";
+  evidenceDimension?: EvidenceDimension;
   question: string;
   purpose: string;
   userAnswer: string;
@@ -95,6 +131,7 @@ export interface OptimizedItem {
 }
 
 export interface WorkExperience {
+  sourceExperienceId?: string;
   company: string;
   role: string;
   period: string;
@@ -102,6 +139,7 @@ export interface WorkExperience {
 }
 
 export interface ProjectExperience {
+  sourceExperienceId?: string;
   name: string;
   role: string;
   period: string;
@@ -109,6 +147,7 @@ export interface ProjectExperience {
 }
 
 export interface CampusExperience {
+  sourceExperienceId?: string;
   organization: string;
   role: string;
   period: string;
@@ -176,6 +215,7 @@ export interface AnalysisResult {
   jdAnalysis: JDAnalysis;
   diagnosis: ResumeDiagnosis;
   matchItems: MatchItem[];
+  experienceAssessments: ExperienceAssessment[];
   followUpQuestions: FollowUpQuestion[];
   optimizedItems: OptimizedItem[];
   finalResume: FinalResume;

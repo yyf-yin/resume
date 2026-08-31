@@ -18,6 +18,7 @@ import {
 } from "@/services/ai/resumeAgent.llm";
 import type {
   AnalysisResult,
+  ExperienceAssessment,
   FollowUpQuestion,
   MatchItem,
   OptimizeStyle,
@@ -52,6 +53,7 @@ export async function regenerateOptimizedItemsServer(
   style: OptimizeStyle,
   diagnosis: ResumeDiagnosis,
   followUpQuestions: FollowUpQuestion[] = [],
+  experienceAssessments: ExperienceAssessment[] = [],
   forceMock = false,
   checkpoint: OptimizationCheckpoint = {}
 ): Promise<{
@@ -69,12 +71,18 @@ export async function regenerateOptimizedItemsServer(
       style,
       diagnosis,
       followUpQuestions,
+      experienceAssessments,
       checkpoint
     );
     return { ...result, mode };
   }
 
-  const result = await runMockRegenerateOptimizedItems(input, style);
+  const result = await runMockRegenerateOptimizedItems(
+    input,
+    style,
+    followUpQuestions,
+    experienceAssessments
+  );
   return { ...result, mode };
 }
 

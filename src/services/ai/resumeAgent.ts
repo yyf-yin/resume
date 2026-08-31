@@ -10,6 +10,7 @@ import type {
 } from "@/lib/ai/types";
 import type {
   AnalysisResult,
+  ExperienceAssessment,
   FollowUpQuestion,
   MatchItem,
   OptimizeStyle,
@@ -185,11 +186,19 @@ export async function regenerateOptimizedItems(
   style: OptimizeStyle,
   diagnosis: ResumeDiagnosis,
   followUpQuestions: FollowUpQuestion[] = [],
+  experienceAssessments: ExperienceAssessment[] = [],
   exampleMode = false
 ): Promise<
   Pick<AnalysisResult, "optimizedItems" | "finalResume" | "finalResumeScore" | "interviewPrep">
 > {
-  const fingerprint = JSON.stringify({ input, style, diagnosis, followUpQuestions, exampleMode });
+  const fingerprint = JSON.stringify({
+    input,
+    style,
+    diagnosis,
+    followUpQuestions,
+    experienceAssessments,
+    exampleMode,
+  });
   let saved: PendingOptimization | null = null;
   try {
     const stored = window.sessionStorage.getItem(PENDING_OPTIMIZATION_STORAGE_KEY);
@@ -217,6 +226,7 @@ export async function regenerateOptimizedItems(
         input,
         style,
         followUpQuestions,
+        experienceAssessments,
         diagnosis,
         exampleMode,
         checkpoint: pending.checkpoint,

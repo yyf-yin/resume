@@ -1,7 +1,13 @@
 import { delay } from "@/lib/utils";
 import { getCampusExperiencePolicy } from "@/lib/campus-experience-policy";
+import {
+  enforceExperienceRetention,
+  ensureFollowUpCoverage,
+} from "@/lib/experience-assessment";
 import type {
   AnalysisResult,
+  ExperienceAssessment,
+  FollowUpQuestion,
   MatchItem,
   OptimizeStyle,
   PerfectionPlan,
@@ -18,6 +24,7 @@ const STYLE_LABELS: Record<OptimizeStyle, string> = {
 };
 
 function buildJDAnalysis(_input: UserInput): AnalysisResult["jdAnalysis"] {
+  void _input;
   return {
     responsibilities: [
       "负责 AI 功能的产品规划与迭代（智能问答、文档理解、工作流自动化）",
@@ -203,20 +210,32 @@ function buildFollowUpQuestions(input: UserInput): AnalysisResult["followUpQuest
   const questions: AnalysisResult["followUpQuestions"] = [
     {
       id: "fu-1",
-      question: "你的文档问答 Demo 具体解决了什么业务问题？用了哪些技术栈？",
+      experienceId: "exp-project-document-qa",
+      experienceType: "project",
+      experienceTitle: "内部文档问答 Demo",
+      evidenceDimension: "action",
+      question: "你在内部文档问答 Demo 中具体负责了哪些功能，采用了什么方法实现？",
       purpose: "挖掘 AI 实践经验",
       userAnswer: "",
       generatedBullet: "",
     },
     {
       id: "fu-2",
-      question: "WMS 智能补货的「策略模型」具体是什么逻辑？有没有 A/B 测试或效果数据？",
+      experienceId: "exp-work-wms-replenishment",
+      experienceType: "work",
+      experienceTitle: "WMS 智能补货",
+      evidenceDimension: "action",
+      question: "WMS 智能补货的策略逻辑是什么，你本人如何把业务规则转化为产品方案？",
       purpose: "强化智能化经历表达",
       userAnswer: "",
       generatedBullet: "",
     },
     {
       id: "fu-3",
+      experienceId: "exp-work-report-platform",
+      experienceType: "work",
+      experienceTitle: "经营数据报表平台",
+      evidenceDimension: "result",
       question: "经营数据报表平台中，你如何定义「报表生成效率提升 60%」？",
       purpose: "验证量化数据可信度",
       userAnswer: "",
@@ -224,6 +243,10 @@ function buildFollowUpQuestions(input: UserInput): AnalysisResult["followUpQuest
     },
     {
       id: "fu-4",
+      experienceId: "exp-work-priority-roi",
+      experienceType: "work",
+      experienceTitle: "需求优先级或 ROI 评估",
+      evidenceDimension: "action",
       question: "你有没有参与过需求优先级排序或 ROI 评估？具体案例？",
       purpose: "补充产品策略能力",
       userAnswer: "",
@@ -231,6 +254,10 @@ function buildFollowUpQuestions(input: UserInput): AnalysisResult["followUpQuest
     },
     {
       id: "fu-5",
+      experienceId: "exp-work-cross-team-delivery",
+      experienceType: "work",
+      experienceTitle: "跨团队版本交付",
+      evidenceDimension: "challenge",
       question: "与研发协作中，有没有遇到过技术方案与产品预期不一致的情况？如何解决？",
       purpose: "挖掘跨团队协作细节",
       userAnswer: "",
@@ -238,13 +265,21 @@ function buildFollowUpQuestions(input: UserInput): AnalysisResult["followUpQuest
     },
     {
       id: "fu-6",
-      question: "你最近关注的 AI 产品有哪些？它们哪里做得好/不好？",
-      purpose: "补充行业认知与竞品分析",
+      experienceId: "exp-work-wms-replenishment",
+      experienceType: "work",
+      experienceTitle: "WMS 智能补货",
+      evidenceDimension: "result",
+      question: "WMS 智能补货策略上线或验证后产生了什么变化，是否有采用范围、准确率或效率数据？",
+      purpose: "补充智能补货经历的结果证据",
       userAnswer: "",
       generatedBullet: "",
     },
     {
       id: "fu-7",
+      experienceId: "exp-work-erp-wms",
+      experienceType: "work",
+      experienceTitle: "ERP/WMS 业务流程设计",
+      evidenceDimension: "action",
       question: "ERP/WMS 经验中，哪个业务流程最复杂？你如何抽象成产品方案？",
       purpose: "强化 ToB 需求分析能力",
       userAnswer: "",
@@ -252,6 +287,7 @@ function buildFollowUpQuestions(input: UserInput): AnalysisResult["followUpQuest
     },
     {
       id: "fu-8",
+      experienceId: "exp-project-document-qa",
       experienceType: "project",
       experienceTitle: "内部文档问答 Demo",
       evidenceDimension: "result",
@@ -262,6 +298,7 @@ function buildFollowUpQuestions(input: UserInput): AnalysisResult["followUpQuest
     },
     {
       id: "fu-9",
+      experienceId: "exp-work-cross-team-delivery",
       experienceType: "work",
       experienceTitle: "跨团队版本交付",
       evidenceDimension: "result",
@@ -272,6 +309,7 @@ function buildFollowUpQuestions(input: UserInput): AnalysisResult["followUpQuest
     },
     {
       id: "fu-10",
+      experienceId: "exp-work-priority-roi",
       experienceType: "work",
       experienceTitle: "需求优先级或 ROI 评估",
       evidenceDimension: "result",
@@ -285,6 +323,7 @@ function buildFollowUpQuestions(input: UserInput): AnalysisResult["followUpQuest
   if (["校招", "社招-初级", "转行"].includes(input.jobStage)) {
     questions[5] = {
       id: "fu-6",
+      experienceId: "exp-3",
       experienceType: "campus",
       experienceTitle: "学生组织或社团经历",
       evidenceDimension: "action",
@@ -295,6 +334,7 @@ function buildFollowUpQuestions(input: UserInput): AnalysisResult["followUpQuest
     };
     questions[6] = {
       id: "fu-7",
+      experienceId: "exp-3",
       experienceType: "campus",
       experienceTitle: "学生组织或社团经历",
       evidenceDimension: "result",
@@ -306,6 +346,68 @@ function buildFollowUpQuestions(input: UserInput): AnalysisResult["followUpQuest
   }
 
   return questions;
+}
+
+function buildExperienceAssessments(input: UserInput): ExperienceAssessment[] {
+  const campusRecruiting = input.jobStage === "校招";
+  return [
+    {
+      experienceId: "exp-1",
+      experienceType: "work",
+      experienceTitle: "某 SaaS 公司 · 产品经理",
+      organization: "某 SaaS 公司",
+      role: "产品经理",
+      period: "2021.06 - 至今",
+      originalBullets: [
+        "负责 WMS 仓储管理系统核心模块，服务 50+ 企业客户",
+        "主导库存盘点功能重构，盘点效率提升 40%",
+      ],
+      directRelevance: "high",
+      transferableValue: "high",
+      evidenceCompleteness: "complete",
+      missingDimensions: [],
+      suggestedAction: "retain",
+      removalReason: "",
+      userDecision: "retain",
+    },
+    {
+      experienceId: "exp-2",
+      experienceType: "work",
+      experienceTitle: "某软件公司 · 产品助理",
+      organization: "某软件公司",
+      role: "产品助理",
+      period: "2020.07 - 2021.05",
+      originalBullets: [
+        "参与 ERP 采购模块需求分析与原型设计",
+        "编写 PRD 文档，跟进开发进度与 UAT 测试",
+      ],
+      directRelevance: "medium",
+      transferableValue: "high",
+      evidenceCompleteness: "partial",
+      missingDimensions: ["result"],
+      suggestedAction: "retain",
+      removalReason: "",
+      userDecision: "retain",
+    },
+    {
+      experienceId: "exp-3",
+      experienceType: "campus",
+      experienceTitle: "学生组织或社团经历",
+      organization: "学生组织或社团",
+      role: "成员",
+      period: "",
+      originalBullets: ["参与校园活动策划与团队协作"],
+      directRelevance: "low",
+      transferableValue: "medium",
+      evidenceCompleteness: "weak",
+      missingDimensions: ["action", "scale", "result"],
+      suggestedAction: campusRecruiting ? "retain" : "removal_candidate",
+      removalReason: campusRecruiting
+        ? ""
+        : "与目标岗位直接匹配度较低，且已有更充分的职业经历可证明相关能力。",
+      userDecision: campusRecruiting ? "retain" : "pending",
+    },
+  ];
 }
 
 function buildOptimizedItems(
@@ -681,14 +783,24 @@ export async function runMockResumeAnalysis(
   optimizeStyle: OptimizeStyle = "professional-match"
 ): Promise<AnalysisResult> {
   await delay(1800);
+  const experienceAssessments = buildExperienceAssessments(input);
 
   return {
     jdAnalysis: buildJDAnalysis(input),
     diagnosis: buildDiagnosis(),
     matchItems: buildMatchItems(),
-    followUpQuestions: buildFollowUpQuestions(input),
+    experienceAssessments,
+    followUpQuestions: ensureFollowUpCoverage(
+      buildFollowUpQuestions(input),
+      experienceAssessments,
+      input.jobStage
+    ),
     optimizedItems: buildOptimizedItems(optimizeStyle, input),
-    finalResume: buildFinalResume(input),
+    finalResume: enforceExperienceRetention(
+      buildFinalResume(input),
+      experienceAssessments,
+      input.jobStage
+    ),
     finalResumeScore: input.jobStage === "校招" ? 76 : 78,
     interviewPrep: buildInterviewPrep(),
   };
@@ -696,14 +808,21 @@ export async function runMockResumeAnalysis(
 
 export async function runMockRegenerateOptimizedItems(
   input: UserInput,
-  style: OptimizeStyle
+  style: OptimizeStyle,
+  _followUpQuestions: FollowUpQuestion[] = [],
+  experienceAssessments: ExperienceAssessment[] = []
 ): Promise<
   Pick<AnalysisResult, "optimizedItems" | "finalResume" | "finalResumeScore" | "interviewPrep">
 > {
+  void _followUpQuestions;
   await delay(800);
   return {
     optimizedItems: buildOptimizedItems(style, input),
-    finalResume: buildFinalResume(input),
+    finalResume: enforceExperienceRetention(
+      buildFinalResume(input),
+      experienceAssessments,
+      input.jobStage
+    ),
     finalResumeScore: input.jobStage === "校招" ? 76 : 78,
     interviewPrep: buildInterviewPrep(),
   };

@@ -41,6 +41,7 @@ export function OptimizeStep() {
         optimizeStyle,
         analysisResult.diagnosis,
         analysisResult.followUpQuestions,
+        analysisResult.experienceAssessments,
         exampleMode
       );
       applyOptimizationVariant(optimizeStyle, variant);

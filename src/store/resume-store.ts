@@ -54,6 +54,7 @@ interface ResumeStore {
   setOptimizeStyle: (style: OptimizeStyle) => void;
   updateFollowUpAnswer: (id: string, answer: string) => void;
   setFollowUpBullet: (id: string, bullet: string) => void;
+  setExperienceDecision: (experienceId: string, decision: "retain" | "remove") => void;
   getStepStatus: (step: StepId) => StepStatus;
   setCopied: (copied: boolean) => void;
 }
@@ -266,6 +267,24 @@ Axure、Figma、SQL、Jira、Confluence、数据分析
             q.id === id ? { ...q, generatedBullet: bullet } : q
           ),
         },
+        perfectionPlan: null,
+        perfectionError: null,
+      };
+    }),
+
+  setExperienceDecision: (experienceId, decision) =>
+    set((state) => {
+      if (!state.analysisResult) return state;
+      return {
+        analysisResult: {
+          ...state.analysisResult,
+          experienceAssessments: state.analysisResult.experienceAssessments.map((item) =>
+            item.experienceId === experienceId
+              ? { ...item, userDecision: decision }
+              : item
+          ),
+        },
+        optimizationCache: {},
         perfectionPlan: null,
         perfectionError: null,
       };

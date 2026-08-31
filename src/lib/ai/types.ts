@@ -28,6 +28,7 @@ export interface OptimizeRequestBody {
   input: import("@/types/resume").UserInput;
   style: import("@/types/resume").OptimizeStyle;
   followUpQuestions?: import("@/types/resume").FollowUpQuestion[];
+  experienceAssessments?: import("@/types/resume").ExperienceAssessment[];
   diagnosis: import("@/types/resume").ResumeDiagnosis;
   exampleMode?: boolean;
   checkpoint?: OptimizationCheckpoint;

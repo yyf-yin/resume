@@ -306,7 +306,7 @@ export function InputStep() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="校招">校招</SelectItem>
+                  <SelectItem value="校招">校招/实习</SelectItem>
                   <SelectItem value="社招-初级">社招-初级</SelectItem>
                   <SelectItem value="社招-中级">社招-中级</SelectItem>
                   <SelectItem value="社招-高级">社招-高级</SelectItem>

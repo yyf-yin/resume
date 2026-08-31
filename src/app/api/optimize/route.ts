@@ -12,6 +12,7 @@ export async function POST(request: Request) {
       input,
       style,
       followUpQuestions = [],
+      experienceAssessments = [],
       diagnosis,
       exampleMode = false,
       checkpoint,
@@ -31,6 +32,7 @@ export async function POST(request: Request) {
         style,
         diagnosis,
         followUpQuestions,
+        experienceAssessments,
         exampleMode,
         checkpoint
       );
