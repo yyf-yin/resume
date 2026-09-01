@@ -16,8 +16,9 @@ import { cn } from "@/lib/utils";
 import { useResumeStore } from "@/store/resume-store";
 
 export function TopNav() {
-  const { exampleMode, setExampleMode } = useResumeStore();
+  const { exampleMode, isAnalyzing, isOptimizing, setExampleMode } = useResumeStore();
   const [exampleNoticeOpen, setExampleNoticeOpen] = useState(false);
+  const workflowRunning = isAnalyzing || isOptimizing;
 
   const enableExampleMode = () => {
     if (exampleMode) return;
@@ -55,10 +56,13 @@ export function TopNav() {
           <button
             type="button"
             aria-pressed={exampleMode}
+            disabled={workflowRunning}
             onClick={enableExampleMode}
             className={cn(
               "flex h-5 items-center rounded px-1.5 text-[10px] font-medium transition-colors",
-              exampleMode
+              workflowRunning
+                ? "cursor-not-allowed text-neutral-300"
+                : exampleMode
                 ? "bg-white text-neutral-900 shadow-sm"
                 : "text-neutral-400 hover:text-neutral-700"
             )}
@@ -68,10 +72,13 @@ export function TopNav() {
           <button
             type="button"
             aria-pressed={!exampleMode}
+            disabled={workflowRunning}
             onClick={disableExampleMode}
             className={cn(
               "flex h-5 items-center rounded px-1.5 text-[10px] font-medium transition-colors",
-              !exampleMode
+              workflowRunning
+                ? "cursor-not-allowed text-neutral-300"
+                : !exampleMode
                 ? "bg-white text-neutral-900 shadow-sm"
                 : "text-neutral-400 hover:text-neutral-700"
             )}

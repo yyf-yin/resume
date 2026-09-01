@@ -1,5 +1,6 @@
 "use client";
 
+import { Loader2 } from "lucide-react";
 import { useResumeStore } from "@/store/resume-store";
 import { InputStep } from "@/components/steps/input-step";
 import { JDAnalysisStep } from "@/components/steps/jd-analysis-step";
@@ -13,30 +14,63 @@ import { InterviewStep } from "@/components/steps/interview-step";
 import { ExportStep } from "@/components/steps/export-step";
 
 export function StepContent() {
-  const currentStep = useResumeStore((s) => s.currentStep);
+  const { currentStep, runningStage } = useResumeStore();
+  const stageLabels = {
+    jd: "正在解析目标岗位 JD",
+    "diagnosis-match": "正在生成简历诊断与匹配分析",
+    "experience-inventory": "正在盘点简历经历",
+    "follow-ups": "正在生成经历追问",
+    "optimized-items": "正在根据追问生成优化建议",
+    "final-resume": "正在生成最终简历",
+    "final-score": "正在评估优化后匹配度",
+    interview: "正在生成面试准备建议",
+  } as const;
 
+  let content;
   switch (currentStep) {
     case "input":
-      return <InputStep />;
+      content = <InputStep />;
+      break;
     case "jd-analysis":
-      return <JDAnalysisStep />;
+      content = <JDAnalysisStep />;
+      break;
     case "diagnosis":
-      return <DiagnosisStep />;
+      content = <DiagnosisStep />;
+      break;
     case "match":
-      return <MatchStep />;
+      content = <MatchStep />;
+      break;
     case "follow-up":
-      return <FollowUpStep />;
+      content = <FollowUpStep />;
+      break;
     case "optimize":
-      return <OptimizeStep />;
+      content = <OptimizeStep />;
+      break;
     case "final-resume":
-      return <FinalResumeStep />;
+      content = <FinalResumeStep />;
+      break;
     case "perfection":
-      return <PerfectionStep />;
+      content = <PerfectionStep />;
+      break;
     case "interview":
-      return <InterviewStep />;
+      content = <InterviewStep />;
+      break;
     case "export":
-      return <ExportStep />;
+      content = <ExportStep />;
+      break;
     default:
-      return <InputStep />;
+      content = <InputStep />;
   }
+
+  return (
+    <>
+      {runningStage && (
+        <div className="mb-4 flex items-center gap-2 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700">
+          <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
+          <span>{stageLabels[runningStage]}…</span>
+        </div>
+      )}
+      {content}
+    </>
+  );
 }

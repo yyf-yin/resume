@@ -1,11 +1,14 @@
 import type {
   AnalysisCheckpoint,
+  AnalysisStage,
   AnalyzeErrorResponse,
-  AnalyzeResponseBody,
+  AnalyzeStageResponseBody,
   FollowUpBulletResponseBody,
   OptimizationCheckpoint,
+  OptimizationStage,
   OptimizeErrorResponse,
   OptimizeResponseBody,
+  OptimizeStageResponseBody,
   PerfectionResponseBody,
 } from "@/lib/ai/types";
 import type {
@@ -133,8 +136,10 @@ export async function runResumeAnalysis(
   input: UserInput,
   optimizeStyle: OptimizeStyle = "professional-match",
   exampleMode = false,
-  resumePending = false
-): Promise<AnalysisResult> {
+  resumePending = false,
+  onStage?: (stage: AnalysisStage, checkpoint: AnalysisCheckpoint) => void,
+  onStageStart?: (stage: AnalysisStage) => void
+): Promise<AnalysisCheckpoint> {
   const fingerprint = buildAnalysisFingerprint(input, optimizeStyle, exampleMode);
   const saved = readPendingAnalysis();
   const pending: PendingAnalysis =
@@ -153,32 +158,211 @@ export async function runResumeAnalysis(
 
   writePendingAnalysis(pending);
 
+  let checkpoint = pending.checkpoint;
+  const stages: AnalysisStage[] = [
+    "jd",
+    "diagnosis-match",
+    "experience-inventory",
+    "follow-ups",
+  ];
+  const isAnalysisStageComplete = (stage: AnalysisStage) => {
+    if (stage === "jd") return Boolean(checkpoint.jdAnalysis);
+    if (stage === "diagnosis-match") {
+      return Boolean(checkpoint.diagnosis && checkpoint.matchItems);
+    }
+    if (stage === "experience-inventory") {
+      return Boolean(checkpoint.experienceAssessments);
+    }
+    return Boolean(checkpoint.followUpQuestions);
+  };
+
+  for (const stage of stages) {
+    if (isAnalysisStageComplete(stage)) {
+      onStage?.(stage, checkpoint);
+      continue;
+    }
+    try {
+      onStageStart?.(stage);
+      const response = await fetch("/api/analyze/stage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ input, stage, exampleMode, checkpoint }),
+      });
+      const data = (await response.json()) as AnalyzeStageResponseBody | AnalyzeErrorResponse;
+      if (!response.ok || !("stage" in data)) {
+        const savedCheckpoint = "checkpoint" in data ? data.checkpoint : undefined;
+        if (savedCheckpoint) {
+          checkpoint = { ...checkpoint, ...savedCheckpoint };
+          writePendingAnalysis({ ...pending, checkpoint });
+        }
+        throw new ResumeAgentClientError(USER_FACING_ERROR_MESSAGE);
+      }
+      checkpoint = data.checkpoint;
+      writePendingAnalysis({ ...pending, checkpoint });
+      onStage?.(stage, checkpoint);
+    } catch {
+      throw new ResumeAgentClientError(USER_FACING_ERROR_MESSAGE);
+    }
+  }
+
+  clearPendingAnalysis();
+  return checkpoint;
+}
+
+function readPendingOptimization(): PendingOptimization | null {
+  if (typeof window === "undefined") return null;
   try {
-    const response = await fetch("/api/analyze", {
+    const stored = window.sessionStorage.getItem(PENDING_OPTIMIZATION_STORAGE_KEY);
+    return stored ? (JSON.parse(stored) as PendingOptimization) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writePendingOptimization(pending: PendingOptimization): void {
+  try {
+    window.sessionStorage.setItem(PENDING_OPTIMIZATION_STORAGE_KEY, JSON.stringify(pending));
+  } catch {
+    // A storage failure must not prevent generation.
+  }
+}
+
+function clearPendingOptimization(): void {
+  try {
+    window.sessionStorage.removeItem(PENDING_OPTIMIZATION_STORAGE_KEY);
+  } catch {
+    // Ignore unavailable browser storage.
+  }
+}
+
+function buildOptimizationFingerprint(
+  input: UserInput,
+  style: OptimizeStyle,
+  diagnosis: ResumeDiagnosis,
+  followUpQuestions: FollowUpQuestion[],
+  experienceAssessments: ExperienceAssessment[],
+  exampleMode: boolean
+): string {
+  return JSON.stringify({
+    input,
+    style,
+    diagnosis,
+    followUpQuestions,
+    experienceAssessments,
+    exampleMode,
+  });
+}
+
+export async function runResumeOptimization(
+  input: UserInput,
+  style: OptimizeStyle,
+  diagnosis: ResumeDiagnosis,
+  followUpQuestions: FollowUpQuestion[] = [],
+  experienceAssessments: ExperienceAssessment[] = [],
+  exampleMode = false,
+  onStage?: (stage: OptimizationStage, checkpoint: OptimizationCheckpoint) => void,
+  onStageError?: (stage: OptimizationStage, message: string) => void,
+  onStageStart?: (stage: OptimizationStage) => void
+): Promise<OptimizationCheckpoint> {
+  const fingerprint = buildOptimizationFingerprint(
+    input,
+    style,
+    diagnosis,
+    followUpQuestions,
+    experienceAssessments,
+    exampleMode
+  );
+  const saved = readPendingOptimization();
+  const pending: PendingOptimization =
+    saved?.fingerprint === fingerprint ? saved : { fingerprint, checkpoint: {} };
+  let checkpoint = pending.checkpoint;
+
+  const requestStage = async (
+    stage: OptimizationStage,
+    sourceCheckpoint: OptimizationCheckpoint
+  ) => {
+    const response = await fetch("/api/optimize/stage", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         input,
-        optimizeStyle,
+        style,
+        stage,
+        diagnosis,
+        followUpQuestions,
+        experienceAssessments,
         exampleMode,
-        checkpoint: pending.checkpoint,
+        checkpoint: sourceCheckpoint,
       }),
     });
-    const data = (await response.json()) as AnalyzeResponseBody | AnalyzeErrorResponse;
-
-    if (!response.ok || !("result" in data)) {
-      const checkpoint = "checkpoint" in data ? data.checkpoint : undefined;
-      if (checkpoint) {
-        writePendingAnalysis({ ...pending, checkpoint });
+    const data = (await response.json()) as OptimizeStageResponseBody | OptimizeErrorResponse;
+    if (!response.ok || !("stage" in data)) {
+      const savedCheckpoint = "checkpoint" in data ? data.checkpoint : undefined;
+      if (savedCheckpoint) {
+        checkpoint = { ...checkpoint, ...savedCheckpoint };
+        writePendingOptimization({ fingerprint, checkpoint });
       }
       throw new ResumeAgentClientError(USER_FACING_ERROR_MESSAGE);
     }
+    return data.checkpoint;
+  };
 
-    clearPendingAnalysis();
-    return data.result;
-  } catch {
-    throw new ResumeAgentClientError(USER_FACING_ERROR_MESSAGE);
+  const isOptimizationStageComplete = (stage: OptimizationStage) => {
+    if (stage === "optimized-items") return Boolean(checkpoint.optimizedItems);
+    if (stage === "final-resume") return Boolean(checkpoint.finalResume);
+    if (stage === "final-score") return typeof checkpoint.finalResumeScore === "number";
+    return Boolean(checkpoint.interviewPrep);
+  };
+
+  for (const stage of ["optimized-items", "final-resume"] as OptimizationStage[]) {
+    if (isOptimizationStageComplete(stage)) {
+      onStage?.(stage, checkpoint);
+      continue;
+    }
+    try {
+      onStageStart?.(stage);
+      checkpoint = { ...checkpoint, ...(await requestStage(stage, checkpoint)) };
+      writePendingOptimization({ fingerprint, checkpoint });
+      onStage?.(stage, checkpoint);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : USER_FACING_ERROR_MESSAGE;
+      onStageError?.(stage, message);
+      throw new ResumeAgentClientError(message);
+    }
   }
+
+  const finalBase = checkpoint;
+  const lateStages = ["final-score", "interview"] as OptimizationStage[];
+  const pendingLateStages = lateStages.filter((stage) => {
+    if (isOptimizationStageComplete(stage)) {
+      onStage?.(stage, checkpoint);
+      return false;
+    }
+    onStageStart?.(stage);
+    return true;
+  });
+  const lateResults = await Promise.allSettled(
+    pendingLateStages.map(async (stage) => ({
+      stage,
+      checkpoint: await requestStage(stage, finalBase),
+    }))
+  );
+
+  lateResults.forEach((result, index) => {
+    const stage = pendingLateStages[index];
+    if (result.status === "fulfilled") {
+      checkpoint = { ...checkpoint, ...result.value.checkpoint };
+      writePendingOptimization({ fingerprint, checkpoint });
+      onStage?.(stage, checkpoint);
+    } else {
+      onStageError?.(stage, USER_FACING_ERROR_MESSAGE);
+    }
+  });
+
+  if (typeof checkpoint.finalResumeScore === "number" && checkpoint.interviewPrep) {
+    clearPendingOptimization();
+  }
+  return checkpoint;
 }
 
 export async function regenerateOptimizedItems(
@@ -191,32 +375,22 @@ export async function regenerateOptimizedItems(
 ): Promise<
   Pick<AnalysisResult, "optimizedItems" | "finalResume" | "finalResumeScore" | "interviewPrep">
 > {
-  const fingerprint = JSON.stringify({
+  const fingerprint = buildOptimizationFingerprint(
     input,
     style,
     diagnosis,
     followUpQuestions,
     experienceAssessments,
-    exampleMode,
-  });
-  let saved: PendingOptimization | null = null;
-  try {
-    const stored = window.sessionStorage.getItem(PENDING_OPTIMIZATION_STORAGE_KEY);
-    saved = stored ? (JSON.parse(stored) as PendingOptimization) : null;
-  } catch {
-    // Continue without a saved checkpoint.
-  }
+    exampleMode
+  );
+  const saved = readPendingOptimization();
 
   const pending: PendingOptimization =
     saved?.fingerprint === fingerprint
       ? saved
       : { fingerprint, checkpoint: {} };
 
-  try {
-    window.sessionStorage.setItem(PENDING_OPTIMIZATION_STORAGE_KEY, JSON.stringify(pending));
-  } catch {
-    // A storage failure must not prevent regeneration.
-  }
+  writePendingOptimization(pending);
 
   try {
     const response = await fetch("/api/optimize", {
@@ -237,23 +411,12 @@ export async function regenerateOptimizedItems(
     if (!response.ok || !("optimizedItems" in data)) {
       const checkpoint = "checkpoint" in data ? data.checkpoint : undefined;
       if (checkpoint) {
-        try {
-          window.sessionStorage.setItem(
-            PENDING_OPTIMIZATION_STORAGE_KEY,
-            JSON.stringify({ ...pending, checkpoint })
-          );
-        } catch {
-          // Continue surfacing the generic error if storage is unavailable.
-        }
+        writePendingOptimization({ ...pending, checkpoint });
       }
       throw new ResumeAgentClientError(USER_FACING_ERROR_MESSAGE);
     }
 
-    try {
-      window.sessionStorage.removeItem(PENDING_OPTIMIZATION_STORAGE_KEY);
-    } catch {
-      // Ignore unavailable browser storage.
-    }
+    clearPendingOptimization();
 
     return {
       optimizedItems: data.optimizedItems,

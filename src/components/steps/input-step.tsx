@@ -30,6 +30,7 @@ import {
   runResumeAnalysis,
 } from "@/services/ai/resumeAgent";
 import type { CompanyType, JobStage } from "@/types/resume";
+import type { AnalysisStage } from "@/lib/ai/types";
 
 export function InputStep() {
   const [hasPendingAnalysis, setHasPendingAnalysis] = useState(false);
@@ -45,10 +46,12 @@ export function InputStep() {
     setUserInput,
     loadExampleData,
     isAnalyzing,
-    analysisResult,
+    analysisCheckpoint,
     analysisError,
     setAnalyzing,
-    setAnalysisResult,
+    setAnalysisCheckpoint,
+    setRunningStage,
+    setStageError,
     resetAnalysisProgress,
     setAnalysisError,
     setCurrentStep,
@@ -82,22 +85,33 @@ export function InputStep() {
       return;
     }
     if (resumePending) setUserInput(input);
-    setAnalyzing(true);
+    setAnalyzing(true, !resumePending);
     setAnalysisError(null);
+    let activeStage: AnalysisStage = "jd";
     try {
-      const result = await runResumeAnalysis(
+      await runResumeAnalysis(
         input,
         "professional-match",
         exampleMode,
-        resumePending
+        resumePending,
+        (stage, checkpoint) => {
+          setAnalysisCheckpoint(checkpoint);
+          setStageError(stage, null);
+          if (stage === "jd") setCurrentStep("jd-analysis");
+        },
+        (stage) => {
+          activeStage = stage;
+          setRunningStage(stage);
+        }
       );
       setHasPendingAnalysis(false);
-      setAnalysisResult(result, "professional-match");
-      setCurrentStep("jd-analysis");
     } catch (error) {
       setHasPendingAnalysis(hasPendingResumeAnalysis());
-      setAnalysisError(error instanceof Error ? error.message : "分析失败，请稍后重试");
+      const message = error instanceof Error ? error.message : "分析失败，请稍后重试";
+      setAnalysisError(message);
+      setStageError(activeStage, message);
     } finally {
+      setRunningStage(null);
       setAnalyzing(false);
     }
   };
@@ -113,7 +127,8 @@ export function InputStep() {
     userInput.targetRole.trim() &&
     userInput.jobDescription.trim() &&
     userInput.originalResume.trim();
-  const hasAnalysisProgress = hasPendingAnalysis || analysisResult !== null;
+  const hasAnalysisProgress =
+    hasPendingAnalysis || Object.keys(analysisCheckpoint).length > 0;
   const isInputLocked = isAnalyzing || hasAnalysisProgress;
   const uploadDisabled = exampleMode || isInputLocked || isParsingResume;
 
@@ -193,10 +208,10 @@ export function InputStep() {
             <Button
               size="sm"
               onClick={() => {
-                if (analysisResult) {
-                  setCurrentStep("jd-analysis");
-                } else {
+                if (hasPendingAnalysis) {
                   void handleAnalyze(true);
+                } else if (analysisCheckpoint.jdAnalysis) {
+                  setCurrentStep("jd-analysis");
                 }
               }}
               disabled={isAnalyzing}

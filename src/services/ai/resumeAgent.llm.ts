@@ -9,7 +9,12 @@ import {
   AnalysisCheckpointError,
   OptimizationCheckpointError,
 } from "@/lib/ai/errors";
-import type { AnalysisCheckpoint, OptimizationCheckpoint } from "@/lib/ai/types";
+import type {
+  AnalysisCheckpoint,
+  AnalysisStage,
+  OptimizationCheckpoint,
+  OptimizationStage,
+} from "@/lib/ai/types";
 import {
   buildPerfectionPrompt,
   normalizePerfectionPlan,
@@ -69,6 +74,98 @@ async function runAnalysisStage<T>(
 ): Promise<T> {
   try {
     return await request();
+  } catch (error) {
+    throw new AnalysisCheckpointError(error, checkpoint);
+  }
+}
+
+export async function runLLMResumeAnalysisStage(
+  input: UserInput,
+  stage: AnalysisStage,
+  savedCheckpoint: AnalysisCheckpoint = {}
+): Promise<AnalysisCheckpoint> {
+  const checkpoint: AnalysisCheckpoint = { ...savedCheckpoint };
+
+  try {
+    if (stage === "jd") {
+      if (!checkpoint.jdAnalysis) {
+        const raw = await chatCompletionJSON<JDAnalysisResult>({
+          operation: "analyze:jd",
+          system: RESUME_AGENT_SYSTEM_PROMPT,
+          user: buildAnalyzeCorePrompt(input),
+          maxTokens: 12000,
+        });
+        checkpoint.jdAnalysis = normalizeAnalysisResult(raw as AnalysisResult, input).jdAnalysis;
+      }
+      return checkpoint;
+    }
+
+    if (stage === "diagnosis-match") {
+      if (!checkpoint.diagnosis || !checkpoint.matchItems) {
+        const raw = await chatCompletionJSON<DiagnosisMatchResult>({
+          operation: "analyze:diagnosis-match",
+          system: RESUME_AGENT_SYSTEM_PROMPT,
+          user: buildAnalyzeDiagnosisPrompt(input),
+          maxTokens: 16000,
+        });
+        const normalized = normalizeAnalysisResult(raw as AnalysisResult, input);
+        checkpoint.diagnosis = normalized.diagnosis;
+        checkpoint.matchItems = normalized.matchItems;
+      }
+      return checkpoint;
+    }
+
+    if (!checkpoint.diagnosis || !checkpoint.matchItems) {
+      throw new Error("请先完成简历诊断与匹配分析");
+    }
+
+    if (stage === "experience-inventory") {
+      if (!checkpoint.experienceAssessments) {
+        const raw = await chatCompletionJSON<ExperienceInventoryResult>({
+          operation: "analyze:experience-inventory",
+          system: RESUME_AGENT_SYSTEM_PROMPT,
+          user: buildAnalyzeExperienceInventoryPrompt(
+            input,
+            checkpoint.diagnosis,
+            checkpoint.matchItems
+          ),
+          temperature: 0,
+          maxTokens: 12000,
+        });
+        checkpoint.experienceAssessments = normalizeExperienceAssessments(
+          raw.experienceAssessments,
+          input.jobStage
+        );
+      }
+      return checkpoint;
+    }
+
+    if (!checkpoint.experienceAssessments) {
+      throw new Error("请先完成简历经历盘点");
+    }
+
+    if (!checkpoint.followUpQuestions) {
+      const raw = await chatCompletionJSON<FollowUpResult>({
+        operation: "analyze:followups",
+        system: RESUME_AGENT_SYSTEM_PROMPT,
+        user: buildAnalyzeFollowUpPrompt(
+          input,
+          checkpoint.diagnosis,
+          checkpoint.matchItems,
+          checkpoint.experienceAssessments
+        ),
+        maxTokens: 10000,
+      });
+      checkpoint.followUpQuestions = normalizeFollowUpQuestions(raw.followUpQuestions);
+    }
+    checkpoint.followUpQuestions = normalizeFollowUpQuestions(
+      ensureFollowUpCoverage(
+        checkpoint.followUpQuestions,
+        checkpoint.experienceAssessments,
+        input.jobStage
+      )
+    );
+    return checkpoint;
   } catch (error) {
     throw new AnalysisCheckpointError(error, checkpoint);
   }
@@ -282,6 +379,113 @@ export async function runLLMResumeAnalysis(
   };
 
   return normalizeAnalysisResult(raw, input);
+}
+
+export async function runLLMResumeOptimizationStage(
+  input: UserInput,
+  style: OptimizeStyle,
+  diagnosis: ResumeDiagnosis,
+  followUpQuestions: FollowUpQuestion[] = [],
+  experienceAssessments: AnalysisResult["experienceAssessments"] = [],
+  stage: OptimizationStage,
+  savedCheckpoint: OptimizationCheckpoint = {}
+): Promise<OptimizationCheckpoint> {
+  const checkpoint: OptimizationCheckpoint = { ...savedCheckpoint };
+
+  try {
+    if (stage === "optimized-items") {
+      if (!checkpoint.optimizedItems) {
+        const raw = await chatCompletionJSON<{
+          optimizedItems: AnalysisResult["optimizedItems"];
+        }>({
+          operation: "regenerate:optimization",
+          system: RESUME_AGENT_SYSTEM_PROMPT,
+          user: buildOptimizeUserPrompt(
+            input,
+            style,
+            followUpQuestions,
+            experienceAssessments
+          ),
+          temperature: 0.5,
+          maxTokens: 12000,
+        });
+        checkpoint.optimizedItems = normalizeOptimizedItems(raw.optimizedItems);
+      }
+      return checkpoint;
+    }
+
+    if (!checkpoint.optimizedItems) {
+      throw new Error("请先生成简历优化内容");
+    }
+
+    if (stage === "final-resume") {
+      if (!checkpoint.finalResume) {
+        const raw = await chatCompletionJSON<FinalResumeResult>({
+          operation: "regenerate:final-resume",
+          system: RESUME_AGENT_SYSTEM_PROMPT,
+          user: buildAnalyzeFinalResumePrompt(
+            input,
+            style,
+            "",
+            checkpoint.optimizedItems,
+            followUpQuestions,
+            experienceAssessments
+          ),
+          maxTokens: 16000,
+        });
+        const normalized = normalizeAnalysisResult(
+          { finalResume: raw.finalResume } as AnalysisResult,
+          input
+        ).finalResume;
+        checkpoint.finalResume = enforceExperienceRetention(
+          normalized,
+          experienceAssessments,
+          input.jobStage
+        );
+      }
+      return checkpoint;
+    }
+
+    if (!checkpoint.finalResume) {
+      throw new Error("请先生成最终简历");
+    }
+
+    if (stage === "final-score") {
+      if (typeof checkpoint.finalResumeScore !== "number") {
+        const raw = await chatCompletionJSON<FinalResumeScoreResult>({
+          operation: "regenerate:final-score",
+          system: RESUME_AGENT_SYSTEM_PROMPT,
+          user: buildFinalResumeScorePrompt(input, checkpoint.finalResume, diagnosis),
+          temperature: 0,
+          maxTokens: 4500,
+        });
+        checkpoint.finalResumeScore = applyOptimizedScoreFloor(
+          diagnosis.overallScore,
+          raw.overallScore
+        );
+      }
+      return checkpoint;
+    }
+
+    if (!checkpoint.interviewPrep) {
+      const raw = await chatCompletionJSON<InterviewResult>({
+        operation: "regenerate:interview",
+        system: RESUME_AGENT_SYSTEM_PROMPT,
+        user: buildAnalyzeInterviewPrompt(
+          input,
+          "",
+          checkpoint.finalResume,
+          checkpoint.optimizedItems,
+          followUpQuestions
+        ),
+        maxTokens: 12000,
+      });
+      checkpoint.interviewPrep = raw.interviewPrep;
+    }
+    return checkpoint;
+  } catch (error) {
+    throw new OptimizationCheckpointError(error, checkpoint);
+  }
 }
 
 export async function runLLMRegenerateOptimizedItems(

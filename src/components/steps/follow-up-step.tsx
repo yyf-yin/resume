@@ -11,10 +11,11 @@ import { VoiceInputButton } from "@/components/shared/voice-input-button";
 import { EmptyState, SectionTitle } from "@/components/shared/ui-helpers";
 import {
   generateFollowUpBullet,
-  regenerateOptimizedItems,
+  runResumeOptimization,
 } from "@/services/ai/resumeAgent";
 import { useResumeStore } from "@/store/resume-store";
 import type { ExperienceAssessment, FollowUpQuestion } from "@/types/resume";
+import type { OptimizationStage } from "@/lib/ai/types";
 
 const EXPERIENCE_TYPE_LABELS = {
   work: "工作经历",
@@ -83,28 +84,38 @@ function groupFollowUpQuestions(
 
 export function FollowUpStep() {
   const {
-    analysisResult,
+    analysisCheckpoint,
     userInput,
     optimizeStyle,
     exampleMode,
+    isOptimizing,
     updateFollowUpAnswer,
     setFollowUpBullet,
     setExperienceDecision,
-    setAnalysisResult,
+    setOptimizationCheckpoint,
+    setOptimizing,
+    setRunningStage,
+    setStageError,
     setCurrentStep,
   } = useResumeStore();
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [activeVoiceId, setActiveVoiceId] = useState<string | null>(null);
-  const [isSyncingFollowUps, setIsSyncingFollowUps] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  if (!analysisResult) {
+  const followUpQuestions = analysisCheckpoint.followUpQuestions;
+  const diagnosis = analysisCheckpoint.diagnosis;
+  if (!followUpQuestions || !diagnosis) {
     return <EmptyState message="请先完成输入材料并开始分析" />;
   }
 
-  const { followUpQuestions } = analysisResult;
-  const { experienceAssessments = [] } = analysisResult;
+  const experienceAssessments = analysisCheckpoint.experienceAssessments ?? [];
   const questionGroups = groupFollowUpQuestions(followUpQuestions, experienceAssessments);
+  const hasFollowUpEvidence = followUpQuestions.some(
+    (question) => question.userAnswer.trim() || question.generatedBullet.trim()
+  );
+  const hasApprovedRemoval = experienceAssessments.some(
+    (assessment) => assessment.userDecision === "remove"
+  );
 
   const handleGenerateBullet = async (id: string) => {
     const question = followUpQuestions.find((q) => q.id === id);
@@ -129,45 +140,43 @@ export function FollowUpStep() {
   };
 
   const handleContinue = async () => {
-    const hasFollowUpEvidence = followUpQuestions.some(
-      (question) => question.userAnswer.trim() || question.generatedBullet.trim()
-    );
-
-    const hasApprovedRemoval = experienceAssessments.some(
-      (assessment) => assessment.userDecision === "remove"
-    );
-
     if (!hasFollowUpEvidence && !hasApprovedRemoval) {
       const shouldContinue = window.confirm(
         "不回答追问会让最终简历质量降低，确定继续吗？"
       );
       if (!shouldContinue) return;
 
-      setCurrentStep("optimize");
-      return;
     }
 
-    setIsSyncingFollowUps(true);
+    setOptimizing(true);
     setError(null);
+    let activeStage: OptimizationStage = "optimized-items";
     try {
-      const { optimizedItems, finalResume, finalResumeScore, interviewPrep } =
-        await regenerateOptimizedItems(
-          userInput,
-          optimizeStyle,
-          analysisResult.diagnosis,
-          followUpQuestions,
-          experienceAssessments,
-          exampleMode
-        );
-      setAnalysisResult(
-        { ...analysisResult, optimizedItems, finalResume, finalResumeScore, interviewPrep },
-        optimizeStyle
+      await runResumeOptimization(
+        userInput,
+        optimizeStyle,
+        diagnosis,
+        followUpQuestions,
+        experienceAssessments,
+        exampleMode,
+        (stage, checkpoint) => {
+          setOptimizationCheckpoint(checkpoint, optimizeStyle);
+          setStageError(stage, null);
+          if (stage === "optimized-items") setCurrentStep("optimize");
+        },
+        (stage, message) => setStageError(stage, message),
+        (stage) => {
+          activeStage = stage;
+          setRunningStage(stage);
+        }
       );
-      setCurrentStep("optimize");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "追问信息同步失败");
+      const message = err instanceof Error ? err.message : "优化生成失败";
+      setError(message);
+      setStageError(activeStage, message);
     } finally {
-      setIsSyncingFollowUps(false);
+      setRunningStage(null);
+      setOptimizing(false);
     }
   };
 
@@ -232,6 +241,7 @@ export function FollowUpStep() {
                         <Button
                           variant="outline"
                           size="sm"
+                          disabled={isOptimizing}
                           onClick={() => setExperienceDecision(group.id, "retain")}
                         >
                           继续保留
@@ -239,6 +249,7 @@ export function FollowUpStep() {
                         <Button
                           variant="outline"
                           size="sm"
+                          disabled={isOptimizing}
                           onClick={() => setExperienceDecision(group.id, "remove")}
                         >
                           同意移除
@@ -252,6 +263,7 @@ export function FollowUpStep() {
                         <Button
                           variant="outline"
                           size="sm"
+                          disabled={isOptimizing}
                           onClick={() =>
                             setExperienceDecision(
                               group.id,
@@ -310,10 +322,11 @@ export function FollowUpStep() {
                         className="min-h-[80px] text-sm"
                         placeholder="填写具体经历、数据和方法..."
                         value={q.userAnswer}
+                        disabled={isOptimizing}
                         onChange={(e) => updateFollowUpAnswer(q.id, e.target.value)}
                       />
                       <VoiceInputButton
-                        disabled={activeVoiceId !== null && activeVoiceId !== q.id}
+                        disabled={isOptimizing || (activeVoiceId !== null && activeVoiceId !== q.id)}
                         onActiveChange={(active) => setActiveVoiceId(active ? q.id : null)}
                         onTranscript={(text) =>
                           updateFollowUpAnswer(
@@ -326,7 +339,7 @@ export function FollowUpStep() {
                     <Button
                       variant="outline"
                       size="sm"
-                      disabled={!q.userAnswer.trim() || loadingId === q.id}
+                      disabled={isOptimizing || !q.userAnswer.trim() || loadingId === q.id}
                       onClick={() => handleGenerateBullet(q.id)}
                     >
                       {loadingId === q.id ? (
@@ -364,17 +377,19 @@ export function FollowUpStep() {
         <Button
           variant="outline"
           size="sm"
-          disabled={isSyncingFollowUps || loadingId !== null || activeVoiceId !== null}
+          disabled={isOptimizing || loadingId !== null || activeVoiceId !== null}
           onClick={handleContinue}
         >
-          {isSyncingFollowUps ? (
+          {isOptimizing ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              正在同步追问信息...
+              正在生成简历优化...
             </>
           ) : (
             <>
-              下一步：简历优化
+              {hasFollowUpEvidence || hasApprovedRemoval
+                ? "根据追问生成优化结果"
+                : "跳过追问并生成优化结果"}
               <ChevronRight className="h-4 w-4" />
             </>
           )}

@@ -12,7 +12,7 @@ export type StepId =
   | "interview"
   | "export";
 
-export type StepStatus = "pending" | "active" | "completed" | "disabled";
+export type StepStatus = "pending" | "active" | "completed" | "disabled" | "running" | "error";
 
 export type EvidenceStrength = "strong" | "medium" | "weak" | "none";
 

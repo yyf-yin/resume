@@ -15,7 +15,7 @@ import { useResumeStore } from "@/store/resume-store";
 
 export function PerfectionStep() {
   const {
-    analysisResult,
+    analysisCheckpoint,
     userInput,
     perfectionPlan,
     isGeneratingPerfection,
@@ -26,11 +26,14 @@ export function PerfectionStep() {
     setPerfectionError,
   } = useResumeStore();
 
-  if (!analysisResult) {
+  const diagnosis = analysisCheckpoint.diagnosis;
+  const matchItems = analysisCheckpoint.matchItems;
+  const followUpQuestions = analysisCheckpoint.followUpQuestions;
+  if (!diagnosis || !matchItems || !followUpQuestions) {
     return <EmptyState message="请先完成输入材料并开始分析" />;
   }
 
-  const weakMatches = analysisResult.matchItems.filter(
+  const weakMatches = matchItems.filter(
     (item) =>
       item.needsSupplement || item.evidenceStrength === "weak" || item.evidenceStrength === "none"
   );
@@ -38,7 +41,7 @@ export function PerfectionStep() {
     new Set(
       weakMatches.length > 0
         ? weakMatches.map((item) => item.jdRequirement)
-        : analysisResult.diagnosis.mainIssues
+        : diagnosis.mainIssues
     )
   );
 
@@ -48,9 +51,9 @@ export function PerfectionStep() {
     try {
       const plan = await generatePerfectionPlan(
         userInput,
-        analysisResult.diagnosis,
-        analysisResult.matchItems,
-        analysisResult.followUpQuestions,
+        diagnosis,
+        matchItems,
+        followUpQuestions,
         exampleMode
       );
       setPerfectionPlan(plan);

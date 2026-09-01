@@ -9,25 +9,23 @@ import type {
   UserInput,
 } from "@/types/resume";
 import type { AIMode } from "@/lib/ai/types";
-
-const STEPS: StepId[] = [
-  "input",
-  "jd-analysis",
-  "diagnosis",
-  "match",
-  "follow-up",
-  "optimize",
-  "final-resume",
-  "interview",
-  "export",
-  "perfection",
-];
+import type {
+  AnalysisCheckpoint,
+  AnalysisStage,
+  OptimizationCheckpoint,
+  OptimizationStage,
+} from "@/lib/ai/types";
 
 interface ResumeStore {
   userInput: UserInput;
   currentStep: StepId;
   isAnalyzing: boolean;
+  isOptimizing: boolean;
   analysisResult: AnalysisResult | null;
+  analysisCheckpoint: AnalysisCheckpoint;
+  optimizationCheckpoint: OptimizationCheckpoint;
+  runningStage: AnalysisStage | OptimizationStage | null;
+  stageErrors: Partial<Record<AnalysisStage | OptimizationStage, string>>;
   optimizationCache: Partial<Record<OptimizeStyle, OptimizationVariant>>;
   analysisError: string | null;
   perfectionPlan: PerfectionPlan | null;
@@ -41,7 +39,15 @@ interface ResumeStore {
   setUserInput: (input: Partial<UserInput>) => void;
   loadExampleData: () => void;
   setCurrentStep: (step: StepId) => void;
-  setAnalyzing: (analyzing: boolean) => void;
+  setAnalyzing: (analyzing: boolean, reset?: boolean) => void;
+  setOptimizing: (optimizing: boolean) => void;
+  setRunningStage: (stage: AnalysisStage | OptimizationStage | null) => void;
+  setStageError: (stage: AnalysisStage | OptimizationStage, error: string | null) => void;
+  setAnalysisCheckpoint: (checkpoint: AnalysisCheckpoint) => void;
+  setOptimizationCheckpoint: (
+    checkpoint: OptimizationCheckpoint,
+    style?: OptimizeStyle
+  ) => void;
   setAnalysisResult: (result: AnalysisResult, style?: OptimizeStyle) => void;
   resetAnalysisProgress: () => void;
   applyOptimizationVariant: (style: OptimizeStyle, variant: OptimizationVariant) => void;
@@ -70,11 +76,64 @@ const defaultUserInput: UserInput = {
   additionalInfo: "",
 };
 
+function buildCompleteResult(
+  analysis: AnalysisCheckpoint,
+  optimization: OptimizationCheckpoint
+): AnalysisResult | null {
+  if (
+    !analysis.jdAnalysis ||
+    !analysis.diagnosis ||
+    !analysis.matchItems ||
+    !analysis.experienceAssessments ||
+    !analysis.followUpQuestions ||
+    !optimization.optimizedItems ||
+    !optimization.finalResume ||
+    typeof optimization.finalResumeScore !== "number" ||
+    !optimization.interviewPrep
+  ) {
+    return null;
+  }
+
+  return {
+    jdAnalysis: analysis.jdAnalysis,
+    diagnosis: analysis.diagnosis,
+    matchItems: analysis.matchItems,
+    experienceAssessments: analysis.experienceAssessments,
+    followUpQuestions: analysis.followUpQuestions,
+    optimizedItems: optimization.optimizedItems,
+    finalResume: optimization.finalResume,
+    finalResumeScore: optimization.finalResumeScore,
+    interviewPrep: optimization.interviewPrep,
+  };
+}
+
+function splitResult(result: AnalysisResult) {
+  const analysisCheckpoint: AnalysisCheckpoint = {
+    jdAnalysis: result.jdAnalysis,
+    diagnosis: result.diagnosis,
+    matchItems: result.matchItems,
+    experienceAssessments: result.experienceAssessments,
+    followUpQuestions: result.followUpQuestions,
+  };
+  const optimizationCheckpoint: OptimizationCheckpoint = {
+    optimizedItems: result.optimizedItems,
+    finalResume: result.finalResume,
+    finalResumeScore: result.finalResumeScore,
+    interviewPrep: result.interviewPrep,
+  };
+  return { analysisCheckpoint, optimizationCheckpoint };
+}
+
 export const useResumeStore = create<ResumeStore>((set, get) => ({
   userInput: defaultUserInput,
   currentStep: "input",
   isAnalyzing: false,
+  isOptimizing: false,
   analysisResult: null,
+  analysisCheckpoint: {},
+  optimizationCheckpoint: {},
+  runningStage: null,
+  stageErrors: {},
   optimizationCache: {},
   analysisError: null,
   perfectionPlan: null,
@@ -153,25 +212,78 @@ Axure、Figma、SQL、Jira、Confluence、数据分析
 
   setCurrentStep: (step) => set({ currentStep: step }),
 
-  setAnalyzing: (analyzing) =>
+  setAnalyzing: (analyzing, reset = false) =>
     set(
-      analyzing
+      analyzing && reset
         ? {
             isAnalyzing: true,
+            isOptimizing: false,
             analysisResult: null,
+            analysisCheckpoint: {},
+            optimizationCheckpoint: {},
+            runningStage: null,
+            stageErrors: {},
             optimizationCache: {},
             perfectionPlan: null,
             perfectionError: null,
             copied: false,
           }
-        : { isAnalyzing: false }
+        : { isAnalyzing: analyzing }
     ),
+
+  setOptimizing: (optimizing) => set({ isOptimizing: optimizing }),
+
+  setRunningStage: (stage) => set({ runningStage: stage }),
+
+  setStageError: (stage, error) =>
+    set((state) => {
+      const stageErrors = { ...state.stageErrors };
+      if (error) stageErrors[stage] = error;
+      else delete stageErrors[stage];
+      return { stageErrors };
+    }),
+
+  setAnalysisCheckpoint: (checkpoint) =>
+    set((state) => {
+      const analysisCheckpoint = { ...state.analysisCheckpoint, ...checkpoint };
+      return {
+        analysisCheckpoint,
+        analysisResult: buildCompleteResult(
+          analysisCheckpoint,
+          state.optimizationCheckpoint
+        ),
+      };
+    }),
+
+  setOptimizationCheckpoint: (checkpoint, style) =>
+    set((state) => {
+      const optimizationCheckpoint = { ...state.optimizationCheckpoint, ...checkpoint };
+      const resultStyle = style ?? state.optimizeStyle;
+      const analysisResult = buildCompleteResult(
+        state.analysisCheckpoint,
+        optimizationCheckpoint
+      );
+      return {
+        optimizationCheckpoint,
+        analysisResult,
+        optimizeStyle: resultStyle,
+        optimizationCache: analysisResult
+          ? {
+              ...state.optimizationCache,
+              [resultStyle]: optimizationCheckpoint as OptimizationVariant,
+            }
+          : state.optimizationCache,
+      };
+    }),
 
   setAnalysisResult: (result, style) =>
     set((state) => {
       const resultStyle = style ?? state.optimizeStyle;
+      const { analysisCheckpoint, optimizationCheckpoint } = splitResult(result);
       return {
         analysisResult: result,
+        analysisCheckpoint,
+        optimizationCheckpoint,
         optimizeStyle: resultStyle,
         optimizationCache: {
           [resultStyle]: {
@@ -191,7 +303,12 @@ Axure、Figma、SQL、Jira、Confluence、数据分析
     set({
       currentStep: "input",
       isAnalyzing: false,
+      isOptimizing: false,
       analysisResult: null,
+      analysisCheckpoint: {},
+      optimizationCheckpoint: {},
+      runningStage: null,
+      stageErrors: {},
       optimizationCache: {},
       analysisError: null,
       perfectionPlan: null,
@@ -203,18 +320,20 @@ Axure、Figma、SQL、Jira、Confluence、数据分析
     }),
 
   applyOptimizationVariant: (style, variant) =>
-    set((state) => ({
-      optimizeStyle: style,
-      optimizationCache: {
-        ...state.optimizationCache,
-        [style]: variant,
-      },
-      analysisResult: state.analysisResult
-        ? { ...state.analysisResult, ...variant }
-        : state.analysisResult,
-      perfectionPlan: null,
-      perfectionError: null,
-    })),
+    set((state) => {
+      const analysisResult = buildCompleteResult(state.analysisCheckpoint, variant);
+      return {
+        optimizeStyle: style,
+        optimizationCheckpoint: variant,
+        optimizationCache: {
+          ...state.optimizationCache,
+          [style]: variant,
+        },
+        analysisResult,
+        perfectionPlan: null,
+        perfectionError: null,
+      };
+    }),
 
   setAnalysisError: (error) => set({ analysisError: error }),
 
@@ -232,6 +351,11 @@ Axure、Figma、SQL、Jira、Confluence、数据分析
       exampleMode: enabled,
       currentStep: "input",
       analysisResult: null,
+      analysisCheckpoint: {},
+      optimizationCheckpoint: {},
+      runningStage: null,
+      stageErrors: {},
+      isOptimizing: false,
       optimizationCache: {},
       analysisError: null,
       perfectionPlan: null,
@@ -244,14 +368,16 @@ Axure、Figma、SQL、Jira、Confluence、数据分析
 
   updateFollowUpAnswer: (id, answer) =>
     set((state) => {
-      if (!state.analysisResult) return state;
+      if (!state.analysisCheckpoint.followUpQuestions) return state;
+      const followUpQuestions = state.analysisCheckpoint.followUpQuestions.map((q) =>
+        q.id === id ? { ...q, userAnswer: answer } : q
+      );
+      const analysisCheckpoint = { ...state.analysisCheckpoint, followUpQuestions };
       return {
-        analysisResult: {
-          ...state.analysisResult,
-          followUpQuestions: state.analysisResult.followUpQuestions.map((q) =>
-            q.id === id ? { ...q, userAnswer: answer } : q
-          ),
-        },
+        analysisCheckpoint,
+        analysisResult: null,
+        optimizationCheckpoint: {},
+        optimizationCache: {},
         perfectionPlan: null,
         perfectionError: null,
       };
@@ -259,14 +385,16 @@ Axure、Figma、SQL、Jira、Confluence、数据分析
 
   setFollowUpBullet: (id, bullet) =>
     set((state) => {
-      if (!state.analysisResult) return state;
+      if (!state.analysisCheckpoint.followUpQuestions) return state;
+      const followUpQuestions = state.analysisCheckpoint.followUpQuestions.map((q) =>
+        q.id === id ? { ...q, generatedBullet: bullet } : q
+      );
+      const analysisCheckpoint = { ...state.analysisCheckpoint, followUpQuestions };
       return {
-        analysisResult: {
-          ...state.analysisResult,
-          followUpQuestions: state.analysisResult.followUpQuestions.map((q) =>
-            q.id === id ? { ...q, generatedBullet: bullet } : q
-          ),
-        },
+        analysisCheckpoint,
+        analysisResult: null,
+        optimizationCheckpoint: {},
+        optimizationCache: {},
         perfectionPlan: null,
         perfectionError: null,
       };
@@ -274,16 +402,14 @@ Axure、Figma、SQL、Jira、Confluence、数据分析
 
   setExperienceDecision: (experienceId, decision) =>
     set((state) => {
-      if (!state.analysisResult) return state;
+      if (!state.analysisCheckpoint.experienceAssessments) return state;
+      const experienceAssessments = state.analysisCheckpoint.experienceAssessments.map((item) =>
+        item.experienceId === experienceId ? { ...item, userDecision: decision } : item
+      );
       return {
-        analysisResult: {
-          ...state.analysisResult,
-          experienceAssessments: state.analysisResult.experienceAssessments.map((item) =>
-            item.experienceId === experienceId
-              ? { ...item, userDecision: decision }
-              : item
-          ),
-        },
+        analysisCheckpoint: { ...state.analysisCheckpoint, experienceAssessments },
+        analysisResult: null,
+        optimizationCheckpoint: {},
         optimizationCache: {},
         perfectionPlan: null,
         perfectionError: null,
@@ -291,20 +417,53 @@ Axure、Figma、SQL、Jira、Confluence、数据分析
     }),
 
   getStepStatus: (step) => {
-    const { currentStep, analysisResult } = get();
-    const stepIndex = STEPS.indexOf(step);
-    const currentIndex = STEPS.indexOf(currentStep);
+    const {
+      currentStep,
+      analysisCheckpoint,
+      optimizationCheckpoint,
+      runningStage,
+      stageErrors,
+    } = get();
 
     if (step === "input") {
       if (currentStep === "input") return "active";
-      return analysisResult ? "completed" : "pending";
+      return Object.keys(analysisCheckpoint).length > 0 ? "completed" : "pending";
     }
 
-    if (!analysisResult) return "disabled";
+    const available: Record<Exclude<StepId, "input">, boolean> = {
+      "jd-analysis": Boolean(analysisCheckpoint.jdAnalysis),
+      diagnosis: Boolean(analysisCheckpoint.diagnosis),
+      match: Boolean(analysisCheckpoint.matchItems),
+      "follow-up": Boolean(
+        analysisCheckpoint.experienceAssessments && analysisCheckpoint.followUpQuestions
+      ),
+      optimize: Boolean(optimizationCheckpoint.optimizedItems),
+      "final-resume": Boolean(optimizationCheckpoint.finalResume),
+      interview: Boolean(optimizationCheckpoint.interviewPrep),
+      export: Boolean(optimizationCheckpoint.finalResume),
+      perfection: Boolean(optimizationCheckpoint.finalResume),
+    };
 
-    if (stepIndex < currentIndex) return "completed";
-    if (stepIndex === currentIndex) return "active";
-    return "pending";
+    if (available[step]) return step === currentStep ? "active" : "completed";
+
+    const stageStep: Partial<Record<AnalysisStage | OptimizationStage, StepId>> = {
+      jd: "jd-analysis",
+      "diagnosis-match": "diagnosis",
+      "experience-inventory": "follow-up",
+      "follow-ups": "follow-up",
+      "optimized-items": "optimize",
+      "final-resume": "final-resume",
+      "final-score": "export",
+      interview: "interview",
+    };
+
+    if (runningStage && stageStep[runningStage] === step) return "running";
+    const hasError = Object.entries(stageErrors).some(
+      ([stage]) => stageStep[stage as AnalysisStage | OptimizationStage] === step
+    );
+    if (hasError) return "error";
+
+    return "disabled";
   },
 
   setCopied: (copied) => set({ copied }),

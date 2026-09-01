@@ -24,6 +24,25 @@ export interface AnalyzeRequestBody {
 
 export type AnalysisCheckpoint = Partial<import("@/types/resume").AnalysisResult>;
 
+export type AnalysisStage =
+  | "jd"
+  | "diagnosis-match"
+  | "experience-inventory"
+  | "follow-ups";
+
+export interface AnalyzeStageRequestBody {
+  input: import("@/types/resume").UserInput;
+  stage: AnalysisStage;
+  exampleMode?: boolean;
+  checkpoint?: AnalysisCheckpoint;
+}
+
+export interface AnalyzeStageResponseBody {
+  stage: AnalysisStage;
+  checkpoint: AnalysisCheckpoint;
+  mode: AIMode;
+}
+
 export interface OptimizeRequestBody {
   input: import("@/types/resume").UserInput;
   style: import("@/types/resume").OptimizeStyle;
@@ -37,6 +56,29 @@ export interface OptimizeRequestBody {
 export type OptimizationCheckpoint = Partial<
   import("@/types/resume").OptimizationVariant
 >;
+
+export type OptimizationStage =
+  | "optimized-items"
+  | "final-resume"
+  | "final-score"
+  | "interview";
+
+export interface OptimizeStageRequestBody {
+  input: import("@/types/resume").UserInput;
+  style: import("@/types/resume").OptimizeStyle;
+  stage: OptimizationStage;
+  diagnosis: import("@/types/resume").ResumeDiagnosis;
+  followUpQuestions?: import("@/types/resume").FollowUpQuestion[];
+  experienceAssessments?: import("@/types/resume").ExperienceAssessment[];
+  exampleMode?: boolean;
+  checkpoint?: OptimizationCheckpoint;
+}
+
+export interface OptimizeStageResponseBody {
+  stage: OptimizationStage;
+  checkpoint: OptimizationCheckpoint;
+  mode: AIMode;
+}
 
 export interface FollowUpBulletRequestBody {
   input: import("@/types/resume").UserInput;

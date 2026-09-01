@@ -2,19 +2,25 @@ import { getAIConfig } from "@/lib/ai/config";
 import type {
   AIMode,
   AnalysisCheckpoint,
+  AnalysisStage,
   OptimizationCheckpoint,
+  OptimizationStage,
 } from "@/lib/ai/types";
 import {
   runMockFollowUpBullet,
   runMockPerfectionPlan,
   runMockRegenerateOptimizedItems,
   runMockResumeAnalysis,
+  runMockResumeAnalysisStage,
+  runMockResumeOptimizationStage,
 } from "@/services/ai/resumeAgent.mock";
 import {
   runLLMFollowUpBullet,
   runLLMPerfectionPlan,
   runLLMRegenerateOptimizedItems,
   runLLMResumeAnalysis,
+  runLLMResumeAnalysisStage,
+  runLLMResumeOptimizationStage,
 } from "@/services/ai/resumeAgent.llm";
 import type {
   AnalysisResult,
@@ -29,6 +35,52 @@ import type {
 
 function currentMode(forceMock = false): AIMode {
   return forceMock ? "mock" : getAIConfig().mode;
+}
+
+export async function analyzeResumeStageServer(
+  input: UserInput,
+  stage: AnalysisStage,
+  forceMock = false,
+  checkpoint: AnalysisCheckpoint = {}
+): Promise<{ checkpoint: AnalysisCheckpoint; mode: AIMode }> {
+  const mode = currentMode(forceMock);
+  const nextCheckpoint =
+    mode === "llm"
+      ? await runLLMResumeAnalysisStage(input, stage, checkpoint)
+      : await runMockResumeAnalysisStage(input, stage, checkpoint);
+  return { checkpoint: nextCheckpoint, mode };
+}
+
+export async function optimizeResumeStageServer(
+  input: UserInput,
+  style: OptimizeStyle,
+  diagnosis: ResumeDiagnosis,
+  followUpQuestions: FollowUpQuestion[],
+  experienceAssessments: ExperienceAssessment[],
+  stage: OptimizationStage,
+  forceMock = false,
+  checkpoint: OptimizationCheckpoint = {}
+): Promise<{ checkpoint: OptimizationCheckpoint; mode: AIMode }> {
+  const mode = currentMode(forceMock);
+  const nextCheckpoint =
+    mode === "llm"
+      ? await runLLMResumeOptimizationStage(
+          input,
+          style,
+          diagnosis,
+          followUpQuestions,
+          experienceAssessments,
+          stage,
+          checkpoint
+        )
+      : await runMockResumeOptimizationStage(
+          input,
+          style,
+          stage,
+          experienceAssessments,
+          checkpoint
+        );
+  return { checkpoint: nextCheckpoint, mode };
 }
 
 export async function analyzeResumeServer(

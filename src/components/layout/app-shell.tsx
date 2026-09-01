@@ -5,6 +5,7 @@ import { StepSidebar } from "@/components/layout/step-sidebar";
 import { TopNav } from "@/components/layout/top-nav";
 import { StepContent } from "@/components/steps/step-content";
 import { useResumeStore } from "@/store/resume-store";
+import type { AnalysisResult } from "@/types/resume";
 
 const WORKFLOW_STORAGE_KEY = "resume-expert:workflow";
 
@@ -13,9 +14,30 @@ export function AppShell() {
     try {
       const stored = window.sessionStorage.getItem(WORKFLOW_STORAGE_KEY);
       if (stored) {
+        const parsed = JSON.parse(stored) as Record<string, unknown> & {
+          analysisResult?: AnalysisResult | null;
+        };
+        if (parsed.analysisResult && !parsed.analysisCheckpoint) {
+          const result = parsed.analysisResult;
+          parsed.analysisCheckpoint = {
+            jdAnalysis: result.jdAnalysis,
+            diagnosis: result.diagnosis,
+            matchItems: result.matchItems,
+            experienceAssessments: result.experienceAssessments,
+            followUpQuestions: result.followUpQuestions,
+          };
+          parsed.optimizationCheckpoint = {
+            optimizedItems: result.optimizedItems,
+            finalResume: result.finalResume,
+            finalResumeScore: result.finalResumeScore,
+            interviewPrep: result.interviewPrep,
+          };
+        }
         useResumeStore.setState({
-          ...JSON.parse(stored),
+          ...parsed,
           isAnalyzing: false,
+          isOptimizing: false,
+          runningStage: null,
           isGeneratingPerfection: false,
           copied: false,
         });
@@ -26,7 +48,10 @@ export function AppShell() {
 
     return useResumeStore.subscribe((state) => {
       try {
-        if (!state.analysisResult) {
+        if (
+          Object.keys(state.analysisCheckpoint).length === 0 &&
+          Object.keys(state.optimizationCheckpoint).length === 0
+        ) {
           window.sessionStorage.removeItem(WORKFLOW_STORAGE_KEY);
           return;
         }
@@ -37,6 +62,9 @@ export function AppShell() {
             userInput: state.userInput,
             currentStep: state.currentStep,
             analysisResult: state.analysisResult,
+            analysisCheckpoint: state.analysisCheckpoint,
+            optimizationCheckpoint: state.optimizationCheckpoint,
+            stageErrors: state.stageErrors,
             optimizationCache: state.optimizationCache,
             analysisError: state.analysisError,
             perfectionPlan: state.perfectionPlan,

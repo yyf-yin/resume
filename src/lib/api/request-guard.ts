@@ -1,4 +1,6 @@
-const DEFAULT_MAX_REQUESTS = 20;
+// A complete staged analysis can legitimately use 8 requests, plus optional
+// follow-up bullet generation and retries. Keep enough headroom for one workflow.
+const DEFAULT_MAX_REQUESTS = 40;
 const DEFAULT_WINDOW_MS = 10 * 60 * 1000;
 const DEFAULT_MAX_BODY_BYTES = 1024 * 1024;
 

@@ -16,13 +16,13 @@ import { EmptyState, EvidenceBadge, SectionTitle } from "@/components/shared/ui-
 import { useResumeStore } from "@/store/resume-store";
 
 export function MatchStep() {
-  const { analysisResult, setCurrentStep } = useResumeStore();
+  const { analysisCheckpoint, setCurrentStep, getStepStatus } = useResumeStore();
+  const matchItems = analysisCheckpoint.matchItems;
 
-  if (!analysisResult) {
+  if (!matchItems) {
     return <EmptyState message="请先完成输入材料并开始分析" />;
   }
-
-  const { matchItems } = analysisResult;
+  const nextStatus = getStepStatus("follow-up");
 
   return (
     <div>
@@ -68,8 +68,13 @@ export function MatchStep() {
       </Card>
 
       <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-        <Button variant="outline" size="sm" onClick={() => setCurrentStep("follow-up")}>
-          下一步：经历追问
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={nextStatus === "disabled" || nextStatus === "running" || nextStatus === "error"}
+          onClick={() => setCurrentStep("follow-up")}
+        >
+          {nextStatus === "running" ? "经历追问生成中…" : "下一步：经历追问"}
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>

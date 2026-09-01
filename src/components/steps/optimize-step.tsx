@@ -18,17 +18,21 @@ import { regenerateOptimizedItems } from "@/services/ai/resumeAgent";
 
 export function OptimizeStep() {
   const {
-    analysisResult,
+    analysisCheckpoint,
+    optimizationCheckpoint,
     userInput,
     optimizeStyle,
     exampleMode,
     applyOptimizationVariant,
     setCurrentStep,
+    getStepStatus,
   } = useResumeStore();
   const [regenerating, setRegenerating] = useState(false);
   const [optimizeError, setOptimizeError] = useState<string | null>(null);
 
-  if (!analysisResult) {
+  const diagnosis = analysisCheckpoint.diagnosis;
+  const optimizedItems = optimizationCheckpoint.optimizedItems;
+  if (!diagnosis || !optimizedItems) {
     return <EmptyState message="请先完成输入材料并开始分析" />;
   }
 
@@ -39,9 +43,9 @@ export function OptimizeStep() {
       const variant = await regenerateOptimizedItems(
         userInput,
         optimizeStyle,
-        analysisResult.diagnosis,
-        analysisResult.followUpQuestions,
-        analysisResult.experienceAssessments,
+        diagnosis,
+        analysisCheckpoint.followUpQuestions,
+        analysisCheckpoint.experienceAssessments,
         exampleMode
       );
       applyOptimizationVariant(optimizeStyle, variant);
@@ -52,7 +56,7 @@ export function OptimizeStep() {
     }
   };
 
-  const { optimizedItems } = analysisResult;
+  const nextStatus = getStepStatus("final-resume");
 
   return (
     <div>
@@ -120,8 +124,13 @@ export function OptimizeStep() {
       </Card>
 
       <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-        <Button variant="outline" size="sm" onClick={() => setCurrentStep("final-resume")}>
-          下一步：最终简历
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={nextStatus === "disabled" || nextStatus === "running" || nextStatus === "error"}
+          onClick={() => setCurrentStep("final-resume")}
+        >
+          {nextStatus === "running" ? "最终简历生成中…" : "下一步：最终简历"}
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>

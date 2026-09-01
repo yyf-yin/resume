@@ -13,13 +13,12 @@ import {
 import { useResumeStore } from "@/store/resume-store";
 
 export function DiagnosisStep() {
-  const { analysisResult, setCurrentStep } = useResumeStore();
+  const { analysisCheckpoint, setCurrentStep } = useResumeStore();
+  const diagnosis = analysisCheckpoint.diagnosis;
 
-  if (!analysisResult) {
+  if (!diagnosis) {
     return <EmptyState message="请先完成输入材料并开始分析" />;
   }
-
-  const { diagnosis } = analysisResult;
 
   return (
     <div>

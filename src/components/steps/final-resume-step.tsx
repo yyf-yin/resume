@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight } from "lucide-react";
+import { ArrowRight, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -84,13 +84,24 @@ function SkillsSection({ title, skills }: { title: string; skills: string[] }) {
 }
 
 export function FinalResumeStep() {
-  const { analysisResult, setCurrentStep } = useResumeStore();
+  const {
+    analysisCheckpoint,
+    optimizationCheckpoint,
+    setCurrentStep,
+    getStepStatus,
+  } = useResumeStore();
+  const finalResume = optimizationCheckpoint.finalResume;
 
-  if (!analysisResult) {
+  if (!finalResume) {
     return <EmptyState message="请先完成输入材料并开始分析" />;
   }
-
-  const { finalResume } = analysisResult;
+  const nextStatus = getStepStatus("interview");
+  const originalScore = analysisCheckpoint.diagnosis?.overallScore;
+  const finalScore = optimizationCheckpoint.finalResumeScore;
+  const scoreImprovement =
+    typeof originalScore === "number" && typeof finalScore === "number"
+      ? finalScore - originalScore
+      : null;
   const { personalInfo } = finalResume;
   const isCampusTemplate = finalResume.template === "campus";
   const workEntries = finalResume.workExperience.map((item) => ({
@@ -119,6 +130,33 @@ export function FinalResumeStep() {
         title="最终简历"
         description="基于分析与优化生成的完整简历"
       />
+
+      {typeof originalScore === "number" && typeof finalScore === "number" && (
+        <Card className="mb-4 border-emerald-200 bg-emerald-50/40">
+          <CardContent className="flex flex-wrap items-center justify-between gap-4 p-4">
+            <div>
+              <p className="text-xs text-neutral-500">匹配度变化</p>
+              <div className="mt-1 flex items-center gap-3 tabular-nums">
+                <div>
+                  <span className="mr-1 text-xs text-neutral-400">原始</span>
+                  <span className="text-xl font-semibold text-neutral-500">{originalScore}</span>
+                </div>
+                <ArrowRight className="h-4 w-4 text-neutral-300" />
+                <div>
+                  <span className="mr-1 text-xs text-emerald-600">优化后</span>
+                  <span className="text-2xl font-semibold text-emerald-700">{finalScore}</span>
+                  <span className="ml-1 text-xs text-neutral-400">/100</span>
+                </div>
+              </div>
+            </div>
+            <Badge variant="success" className="px-3 py-1 text-sm font-medium">
+              {scoreImprovement !== null && scoreImprovement > 0
+                ? `提升 +${scoreImprovement} 分`
+                : `变化 ${scoreImprovement ?? 0} 分`}
+            </Badge>
+          </CardContent>
+        </Card>
+      )}
 
       <Card className="mb-6">
         <CardContent className="p-4 sm:p-6">
@@ -191,8 +229,13 @@ export function FinalResumeStep() {
       </Card>
 
       <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-        <Button variant="outline" size="sm" onClick={() => setCurrentStep("interview")}>
-          下一步：面试准备
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={nextStatus === "disabled" || nextStatus === "running" || nextStatus === "error"}
+          onClick={() => setCurrentStep("interview")}
+        >
+          {nextStatus === "running" ? "面试准备生成中…" : "下一步：面试准备"}
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>

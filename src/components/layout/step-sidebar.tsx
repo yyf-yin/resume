@@ -2,6 +2,8 @@
 
 import {
   Brain,
+  AlertCircle,
+  ArrowRight,
   Check,
   Circle,
   ClipboardList,
@@ -10,6 +12,7 @@ import {
   FileText,
   GitCompare,
   MessageSquare,
+  Loader2,
   Rocket,
   Sparkles,
   Target,
@@ -32,17 +35,22 @@ const STEPS: { id: StepId; label: string; icon: React.ElementType }[] = [
 ];
 
 export function StepSidebar() {
-  const { currentStep, setCurrentStep, getStepStatus, analysisResult } = useResumeStore();
+  const {
+    currentStep,
+    setCurrentStep,
+    getStepStatus,
+    analysisCheckpoint,
+    optimizationCheckpoint,
+  } = useResumeStore();
   const showFinalResumeScore = ["final-resume", "interview", "export", "perfection"].includes(
     currentStep
   );
-  const displayedScore =
-    analysisResult && showFinalResumeScore
-      ? analysisResult.finalResumeScore
-      : analysisResult?.diagnosis.overallScore;
-  const scoreImprovement = analysisResult
-    ? analysisResult.finalResumeScore - analysisResult.diagnosis.overallScore
-    : 0;
+  const originalScore = analysisCheckpoint.diagnosis?.overallScore;
+  const finalScore = optimizationCheckpoint.finalResumeScore;
+  const scoreImprovement =
+    typeof finalScore === "number" && typeof originalScore === "number"
+      ? finalScore - originalScore
+      : null;
 
   return (
     <aside className="flex w-full shrink-0 flex-col border-b border-neutral-200 bg-white md:w-56 md:border-b-0 md:border-r">
@@ -53,7 +61,7 @@ export function StepSidebar() {
         {STEPS.map((step, index) => {
           const status = getStepStatus(step.id);
           const Icon = step.icon;
-          const isDisabled = status === "disabled";
+          const isDisabled = status === "disabled" || status === "running" || status === "error";
 
           return (
             <button
@@ -68,7 +76,9 @@ export function StepSidebar() {
                 status === "active" && "bg-neutral-100 text-neutral-900",
                 status === "completed" && "text-neutral-600 hover:bg-neutral-50",
                 status === "pending" && "text-neutral-500 hover:bg-neutral-50",
-                status === "disabled" && "cursor-not-allowed text-neutral-300"
+                status === "disabled" && "cursor-not-allowed text-neutral-300",
+                status === "running" && "cursor-wait bg-blue-50 text-blue-600",
+                status === "error" && "cursor-not-allowed bg-red-50 text-red-500"
               )}
             >
               <span className="flex h-5 w-5 shrink-0 items-center justify-center">
@@ -76,6 +86,10 @@ export function StepSidebar() {
                   <Check className="h-3.5 w-3.5 text-emerald-600" />
                 ) : status === "active" ? (
                   <Icon className="h-3.5 w-3.5" />
+                ) : status === "running" ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : status === "error" ? (
+                  <AlertCircle className="h-3.5 w-3.5" />
                 ) : (
                   <Circle className="h-3 w-3" />
                 )}
@@ -86,28 +100,44 @@ export function StepSidebar() {
           );
         })}
       </nav>
-      {analysisResult && (
+      {typeof originalScore === "number" && (
         <div className="hidden border-t border-neutral-200 p-3 md:block">
-          <p className="text-xs text-neutral-400">
-            {showFinalResumeScore ? "优化后匹配度" : "整体匹配度"}
-          </p>
-          <p className="text-2xl font-semibold tabular-nums text-neutral-900">
-            {displayedScore}
-            <span className="text-sm font-normal text-neutral-400">/100</span>
-          </p>
-          {showFinalResumeScore && (
-            <p className="mt-1 text-xs tabular-nums text-neutral-400">
-              原始 {analysisResult.diagnosis.overallScore}
-              <span
+          {showFinalResumeScore && typeof finalScore === "number" ? (
+            <>
+              <p className="text-xs text-neutral-400">匹配度变化</p>
+              <div className="mt-1 flex items-end gap-1.5 tabular-nums">
+                <div>
+                  <p className="text-[10px] text-neutral-400">原始</p>
+                  <p className="text-xl font-semibold text-neutral-500">{originalScore}</p>
+                </div>
+                <ArrowRight className="mb-1 h-3.5 w-3.5 text-neutral-300" />
+                <div>
+                  <p className="text-[10px] text-emerald-600">优化后</p>
+                  <p className="text-2xl font-semibold text-emerald-700">{finalScore}</p>
+                </div>
+                <span className="mb-1 text-xs text-neutral-400">/100</span>
+              </div>
+              <p
                 className={cn(
-                  "ml-2",
-                  scoreImprovement > 0 && "text-emerald-600",
-                  scoreImprovement < 0 && "text-red-500"
+                  "mt-1 text-xs tabular-nums",
+                  scoreImprovement !== null && scoreImprovement > 0
+                    ? "text-emerald-600"
+                    : "text-neutral-400"
                 )}
               >
-                {scoreImprovement > 0 ? `提升 +${scoreImprovement}` : `变化 ${scoreImprovement}`}
-              </span>
-            </p>
+                {scoreImprovement !== null && scoreImprovement > 0
+                  ? `提升 +${scoreImprovement} 分`
+                  : `变化 ${scoreImprovement ?? 0} 分`}
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-xs text-neutral-400">原始匹配度</p>
+              <p className="text-2xl font-semibold tabular-nums text-neutral-900">
+                {originalScore}
+                <span className="text-sm font-normal text-neutral-400">/100</span>
+              </p>
+            </>
           )}
         </div>
       )}

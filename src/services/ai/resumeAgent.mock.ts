@@ -1,4 +1,10 @@
 import { delay } from "@/lib/utils";
+import type {
+  AnalysisCheckpoint,
+  AnalysisStage,
+  OptimizationCheckpoint,
+  OptimizationStage,
+} from "@/lib/ai/types";
 import { getCampusExperiencePolicy } from "@/lib/campus-experience-policy";
 import {
   enforceExperienceRetention,
@@ -804,6 +810,62 @@ export async function runMockResumeAnalysis(
     finalResumeScore: input.jobStage === "校招" ? 76 : 78,
     interviewPrep: buildInterviewPrep(),
   };
+}
+
+export async function runMockResumeAnalysisStage(
+  input: UserInput,
+  stage: AnalysisStage,
+  savedCheckpoint: AnalysisCheckpoint = {}
+): Promise<AnalysisCheckpoint> {
+  await delay(450);
+  const checkpoint: AnalysisCheckpoint = { ...savedCheckpoint };
+
+  if (stage === "jd") {
+    checkpoint.jdAnalysis ??= buildJDAnalysis(input);
+  } else if (stage === "diagnosis-match") {
+    checkpoint.diagnosis ??= buildDiagnosis();
+    checkpoint.matchItems ??= buildMatchItems();
+  } else if (stage === "experience-inventory") {
+    checkpoint.experienceAssessments ??= buildExperienceAssessments(input);
+  } else {
+    const experienceAssessments =
+      checkpoint.experienceAssessments ?? buildExperienceAssessments(input);
+    checkpoint.experienceAssessments = experienceAssessments;
+    checkpoint.followUpQuestions ??= ensureFollowUpCoverage(
+      buildFollowUpQuestions(input),
+      experienceAssessments,
+      input.jobStage
+    );
+  }
+
+  return checkpoint;
+}
+
+export async function runMockResumeOptimizationStage(
+  input: UserInput,
+  style: OptimizeStyle,
+  stage: OptimizationStage,
+  experienceAssessments: ExperienceAssessment[] = [],
+  savedCheckpoint: OptimizationCheckpoint = {}
+): Promise<OptimizationCheckpoint> {
+  await delay(400);
+  const checkpoint: OptimizationCheckpoint = { ...savedCheckpoint };
+
+  if (stage === "optimized-items") {
+    checkpoint.optimizedItems ??= buildOptimizedItems(style, input);
+  } else if (stage === "final-resume") {
+    checkpoint.finalResume ??= enforceExperienceRetention(
+      buildFinalResume(input),
+      experienceAssessments,
+      input.jobStage
+    );
+  } else if (stage === "final-score") {
+    checkpoint.finalResumeScore ??= input.jobStage === "校招" ? 76 : 78;
+  } else {
+    checkpoint.interviewPrep ??= buildInterviewPrep();
+  }
+
+  return checkpoint;
 }
 
 export async function runMockRegenerateOptimizedItems(

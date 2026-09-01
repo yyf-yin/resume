@@ -21,13 +21,13 @@ import {
 import { useResumeStore } from "@/store/resume-store";
 
 export function JDAnalysisStep() {
-  const { analysisResult, setCurrentStep } = useResumeStore();
+  const { analysisCheckpoint, setCurrentStep, getStepStatus } = useResumeStore();
+  const jdAnalysis = analysisCheckpoint.jdAnalysis;
 
-  if (!analysisResult) {
+  if (!jdAnalysis) {
     return <EmptyState message="请先完成输入材料并开始分析" />;
   }
-
-  const { jdAnalysis } = analysisResult;
+  const nextStatus = getStepStatus("diagnosis");
 
   return (
     <div>
@@ -112,8 +112,13 @@ export function JDAnalysisStep() {
       </Card>
 
       <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-        <Button variant="outline" size="sm" onClick={() => setCurrentStep("diagnosis")}>
-          下一步：简历诊断
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={nextStatus === "disabled" || nextStatus === "running" || nextStatus === "error"}
+          onClick={() => setCurrentStep("diagnosis")}
+        >
+          {nextStatus === "running" ? "简历诊断生成中…" : "下一步：简历诊断"}
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>

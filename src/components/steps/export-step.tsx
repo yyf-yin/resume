@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, ChevronRight, Copy, Download, FileText } from "lucide-react";
+import { ArrowRight, Check, ChevronRight, Copy, Download, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -18,14 +18,27 @@ import { useResumeStore } from "@/store/resume-store";
 import { copyToClipboard, formatResumeAsText } from "@/lib/utils";
 
 export function ExportStep() {
-  const { analysisResult, copied, setCopied, setCurrentStep } = useResumeStore();
+  const {
+    analysisCheckpoint,
+    optimizationCheckpoint,
+    copied,
+    setCopied,
+    setCurrentStep,
+  } = useResumeStore();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const finalResume = optimizationCheckpoint.finalResume;
+  const originalScore = analysisCheckpoint.diagnosis?.overallScore;
+  const finalScore = optimizationCheckpoint.finalResumeScore;
+  const scoreImprovement =
+    typeof originalScore === "number" && typeof finalScore === "number"
+      ? finalScore - originalScore
+      : null;
 
-  if (!analysisResult) {
+  if (!finalResume) {
     return <EmptyState message="请先完成输入材料并开始分析" />;
   }
 
-  const resumeText = formatResumeAsText(analysisResult.finalResume);
+  const resumeText = formatResumeAsText(finalResume);
 
   const handleCopy = async () => {
     const success = await copyToClipboard(resumeText);
@@ -116,23 +129,36 @@ export function ExportStep() {
         </CardHeader>
         <CardContent className="grid gap-3 sm:grid-cols-3">
           <div className="rounded-md border border-neutral-100 p-3">
-            <p className="text-xs text-neutral-400">匹配度评分</p>
-            <p className="text-2xl font-semibold tabular-nums">
-              {analysisResult.diagnosis.overallScore}
-              <span className="text-sm font-normal text-neutral-400">/100</span>
-            </p>
+            <p className="text-xs text-neutral-400">匹配度变化</p>
+            <div className="mt-1 flex items-center gap-2 tabular-nums">
+              <div>
+                <p className="text-[10px] text-neutral-400">原始</p>
+                <p className="text-xl font-semibold text-neutral-500">{originalScore ?? "--"}</p>
+              </div>
+              <ArrowRight className="h-4 w-4 text-neutral-300" />
+              <div>
+                <p className="text-[10px] text-emerald-600">优化后</p>
+                <p className="text-2xl font-semibold text-emerald-700">{finalScore ?? "--"}</p>
+              </div>
+              <span className="text-xs text-neutral-400">/100</span>
+            </div>
+            {scoreImprovement !== null && (
+              <p className="mt-1 text-xs font-medium text-emerald-600">
+                {scoreImprovement > 0 ? `提升 +${scoreImprovement} 分` : `变化 ${scoreImprovement} 分`}
+              </p>
+            )}
           </div>
           <div className="rounded-md border border-neutral-100 p-3">
             <p className="text-xs text-neutral-400">匹配项分析</p>
             <p className="text-2xl font-semibold tabular-nums">
-              {analysisResult.matchItems.length}
+              {analysisCheckpoint.matchItems?.length ?? 0}
               <span className="text-sm font-normal text-neutral-400"> 条</span>
             </p>
           </div>
           <div className="rounded-md border border-neutral-100 p-3">
             <p className="text-xs text-neutral-400">优化修改</p>
             <p className="text-2xl font-semibold tabular-nums">
-              {analysisResult.optimizedItems.length}
+              {optimizationCheckpoint.optimizedItems?.length ?? 0}
               <span className="text-sm font-normal text-neutral-400"> 处</span>
             </p>
           </div>
