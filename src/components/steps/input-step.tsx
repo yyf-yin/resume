@@ -1,7 +1,7 @@
 "use client";
 
 import { ChangeEvent, DragEvent, useEffect, useState } from "react";
-import { Eye, FileText, Loader2, Sparkles, Upload, Wand2, X } from "lucide-react";
+import { Eye, FileText, Loader2, Upload, Wand2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,17 +23,9 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SectionTitle } from "@/components/shared/ui-helpers";
 import { useResumeStore } from "@/store/resume-store";
-import {
-  discardPendingResumeAnalysis,
-  getPendingResumeAnalysisInput,
-  hasPendingResumeAnalysis,
-  runResumeAnalysis,
-} from "@/services/ai/resumeAgent";
 import type { CompanyType, JobStage } from "@/types/resume";
-import type { AnalysisStage } from "@/lib/ai/types";
 
 export function InputStep() {
-  const [hasPendingAnalysis, setHasPendingAnalysis] = useState(false);
   const [isParsingResume, setIsParsingResume] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
@@ -46,23 +38,11 @@ export function InputStep() {
     setUserInput,
     loadExampleData,
     isAnalyzing,
+    hasPendingAnalysis,
     analysisCheckpoint,
     analysisError,
-    setAnalyzing,
-    setAnalysisCheckpoint,
-    setRunningStage,
-    setStageError,
-    resetAnalysisProgress,
-    setAnalysisError,
-    setCurrentStep,
     exampleMode,
   } = useResumeStore();
-
-  useEffect(() => {
-    const pendingInput = getPendingResumeAnalysisInput();
-    if (pendingInput) setUserInput(pendingInput);
-    setHasPendingAnalysis(hasPendingResumeAnalysis());
-  }, [setUserInput]);
 
   useEffect(() => {
     const preventFileNavigation = (event: globalThis.DragEvent) => {
@@ -79,54 +59,6 @@ export function InputStep() {
     };
   }, []);
 
-  const handleAnalyze = async (resumePending = false) => {
-    const input = resumePending ? getPendingResumeAnalysisInput() ?? userInput : userInput;
-    if (!input.targetRole || !input.jobDescription || !input.originalResume) {
-      return;
-    }
-    if (resumePending) setUserInput(input);
-    setAnalyzing(true, !resumePending);
-    setAnalysisError(null);
-    let activeStage: AnalysisStage = "jd";
-    try {
-      await runResumeAnalysis(
-        input,
-        "professional-match",
-        exampleMode,
-        resumePending,
-        (stage, checkpoint) => {
-          setAnalysisCheckpoint(checkpoint);
-          setStageError(stage, null);
-          if (stage === "jd") setCurrentStep("jd-analysis");
-        },
-        (stage) => {
-          activeStage = stage;
-          setRunningStage(stage);
-        }
-      );
-      setHasPendingAnalysis(false);
-    } catch (error) {
-      setHasPendingAnalysis(hasPendingResumeAnalysis());
-      const message = error instanceof Error ? error.message : "分析失败，请稍后重试";
-      setAnalysisError(message);
-      setStageError(activeStage, message);
-    } finally {
-      setRunningStage(null);
-      setAnalyzing(false);
-    }
-  };
-
-  const handleRestart = () => {
-    if (!window.confirm("是否确认放弃当前进度重新开始")) return;
-    discardPendingResumeAnalysis();
-    setHasPendingAnalysis(false);
-    resetAnalysisProgress();
-  };
-
-  const canAnalyze =
-    userInput.targetRole.trim() &&
-    userInput.jobDescription.trim() &&
-    userInput.originalResume.trim();
   const hasAnalysisProgress =
     hasPendingAnalysis || Object.keys(analysisCheckpoint).length > 0;
   const isInputLocked = isAnalyzing || hasAnalysisProgress;
@@ -203,59 +135,6 @@ export function InputStep() {
           <Wand2 className="h-3.5 w-3.5" />
           使用示例数据
         </Button>
-        {hasAnalysisProgress ? (
-          <>
-            <Button
-              size="sm"
-              onClick={() => {
-                if (hasPendingAnalysis) {
-                  void handleAnalyze(true);
-                } else if (analysisCheckpoint.jdAnalysis) {
-                  setCurrentStep("jd-analysis");
-                }
-              }}
-              disabled={isAnalyzing}
-            >
-              {isAnalyzing ? (
-                <>
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  分析中...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-3.5 w-3.5" />
-                  继续分析
-                </>
-              )}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRestart}
-              disabled={isAnalyzing}
-            >
-              重新开始
-            </Button>
-          </>
-        ) : (
-          <Button
-            size="sm"
-            onClick={() => void handleAnalyze(false)}
-            disabled={!canAnalyze || isAnalyzing}
-          >
-            {isAnalyzing ? (
-              <>
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                分析中...
-              </>
-            ) : (
-              <>
-                <Sparkles className="h-3.5 w-3.5" />
-                开始分析
-              </>
-            )}
-          </Button>
-        )}
       </div>
 
       {analysisError && (

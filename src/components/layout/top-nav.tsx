@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { WorkflowActionBar } from "@/components/layout/workflow-action-bar";
 import { cn } from "@/lib/utils";
 import { useResumeStore } from "@/store/resume-store";
 
@@ -36,8 +37,8 @@ export function TopNav() {
   };
 
   return (
-    <header className="flex h-12 shrink-0 items-center justify-between border-b border-neutral-200 bg-white px-2.5 sm:px-4">
-      <div className="flex min-w-0 items-center gap-1.5 sm:gap-2.5">
+    <header className="grid shrink-0 grid-cols-1 border-b border-neutral-200 bg-white lg:grid-cols-[minmax(0,1fr)_auto]">
+      <div className="flex h-12 min-w-0 items-center gap-1.5 px-2.5 sm:gap-2.5 sm:px-4">
         <div className="flex h-7 w-7 items-center justify-center rounded-md border border-neutral-200 bg-neutral-50">
           <FileText className="h-3.5 w-3.5 text-neutral-700" />
         </div>
@@ -88,9 +89,12 @@ export function TopNav() {
         </div>
         <ThemeToggle />
       </div>
-      <p className="hidden text-xs text-neutral-400 sm:block">
-        基于目标岗位 JD · 诊断 · 匹配 · 优化 · 面试准备
-      </p>
+      <div className="flex h-11 items-center justify-end gap-4 border-t border-neutral-200 px-2.5 sm:px-4 lg:h-12 lg:border-t-0 lg:pl-0">
+        <p className="hidden text-xs text-neutral-400 2xl:block">
+          基于目标岗位 JD · 诊断 · 匹配 · 优化 · 面试准备
+        </p>
+        <WorkflowActionBar />
+      </div>
 
       <Dialog open={exampleNoticeOpen} onOpenChange={setExampleNoticeOpen}>
         <DialogContent className="max-w-sm">

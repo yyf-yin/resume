@@ -20,6 +20,7 @@ interface ResumeStore {
   userInput: UserInput;
   currentStep: StepId;
   isAnalyzing: boolean;
+  hasPendingAnalysis: boolean;
   isOptimizing: boolean;
   analysisResult: AnalysisResult | null;
   analysisCheckpoint: AnalysisCheckpoint;
@@ -40,6 +41,7 @@ interface ResumeStore {
   loadExampleData: () => void;
   setCurrentStep: (step: StepId) => void;
   setAnalyzing: (analyzing: boolean, reset?: boolean) => void;
+  setHasPendingAnalysis: (pending: boolean) => void;
   setOptimizing: (optimizing: boolean) => void;
   setRunningStage: (stage: AnalysisStage | OptimizationStage | null) => void;
   setStageError: (stage: AnalysisStage | OptimizationStage, error: string | null) => void;
@@ -128,6 +130,7 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
   userInput: defaultUserInput,
   currentStep: "input",
   isAnalyzing: false,
+  hasPendingAnalysis: false,
   isOptimizing: false,
   analysisResult: null,
   analysisCheckpoint: {},
@@ -231,6 +234,8 @@ Axure、Figma、SQL、Jira、Confluence、数据分析
         : { isAnalyzing: analyzing }
     ),
 
+  setHasPendingAnalysis: (pending) => set({ hasPendingAnalysis: pending }),
+
   setOptimizing: (optimizing) => set({ isOptimizing: optimizing }),
 
   setRunningStage: (stage) => set({ runningStage: stage }),
@@ -303,6 +308,7 @@ Axure、Figma、SQL、Jira、Confluence、数据分析
     set({
       currentStep: "input",
       isAnalyzing: false,
+      hasPendingAnalysis: false,
       isOptimizing: false,
       analysisResult: null,
       analysisCheckpoint: {},
@@ -355,6 +361,7 @@ Axure、Figma、SQL、Jira、Confluence、数据分析
       optimizationCheckpoint: {},
       runningStage: null,
       stageErrors: {},
+      hasPendingAnalysis: false,
       isOptimizing: false,
       optimizationCache: {},
       analysisError: null,

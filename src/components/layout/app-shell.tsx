@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect } from "react";
 import { StepSidebar } from "@/components/layout/step-sidebar";
 import { TopNav } from "@/components/layout/top-nav";
@@ -91,7 +92,7 @@ export function AppShell() {
           </div>
         </main>
       </div>
-      <footer className="flex h-8 shrink-0 items-center justify-center border-t border-neutral-200 bg-white px-3 pb-[env(safe-area-inset-bottom)] text-[10px] text-neutral-500 sm:h-9 sm:px-4 sm:text-[11px]">
+      <footer className="flex shrink-0 flex-col items-center justify-center gap-1 border-t border-neutral-200 bg-white px-3 pb-[calc(0.25rem+env(safe-area-inset-bottom))] pt-1 text-[10px] leading-none text-neutral-500 sm:px-4 sm:text-[11px]">
         <a
           href="https://beian.miit.gov.cn/"
           target="_blank"
@@ -99,6 +100,21 @@ export function AppShell() {
           className="transition-colors hover:text-neutral-900"
         >
           苏ICP备2026058202号
+        </a>
+        <a
+          href="https://beian.mps.gov.cn/#/query/webSearch?code=32011602010755"
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-1 transition-colors hover:text-neutral-900"
+        >
+          <Image
+            src="/beian-icon.png"
+            alt=""
+            width={14}
+            height={14}
+            aria-hidden="true"
+          />
+          苏公网安备32011602010755号
         </a>
       </footer>
     </div>
