@@ -1,0 +1,255 @@
+{
+  "jdAnalysis": {
+    "responsibilities": [
+      "协助项目组整理审计底稿，完成底稿引用、索引与资料归档",
+      "执行函证跟踪，包括准备询证函、登记发函与回函状态并跟进缺失资料",
+      "参与存货监盘，记录盘点数量与账面数量并整理差异",
+      "使用Excel核对数据，配合项目负责人复核",
+      "在团队中明确本人承担的任务与交付内容"
+    ],
+    "hardRequirements": [
+      "会计、审计或财务管理专业本科应届毕业生",
+      "能够使用Excel核对数据",
+      "工作细致，注重细节核对",
+      "能说明本人在团队中的任务和交付"
+    ],
+    "implicitRequirements": [
+      "具备会计师事务所实习经历者优先",
+      "通过CPA部分科目者优先",
+      "理解审计助理的辅助定位，不越权确定审计意见或签署文件",
+      "资料缺失时能及时向带教同事或项目负责人反馈",
+      "能适应项目组节奏，服从项目经理安排并接受复核",
+      "具备基本的底稿索引与档案整理意识"
+    ],
+    "keywords": [
+      "审计底稿",
+      "函证",
+      "存货监盘",
+      "Excel",
+      "细节核对",
+      "数据核对",
+      "团队协作",
+      "复核",
+      "审计助理",
+      "校招"
+    ],
+    "idealCandidate": "审计、会计或财务管理专业本科应届生，有会计师事务所审计实习经历，能熟练使用Excel核对数据，做事细致，能清晰说明自己在团队中的具体任务与交付成果，了解底稿整理、函证跟踪与存货监盘的基本流程，并有CPA部分科目通过记录，且清楚审计助理的辅助角色与复核机制。",
+    "coreCompetencies": [
+      {
+        "name": "底稿整理与索引",
+        "importance": "high",
+        "description": "能按项目组要求整理凭证附件、往来明细与审计底稿，维护底稿引用和索引的准确性与完整性"
+      },
+      {
+        "name": "函证支持",
+        "importance": "high",
+        "description": "能协助准备询证函，登记发函与回函状态，跟踪缺失资料并向带教同事反馈"
+      },
+      {
+        "name": "细节核对",
+        "importance": "high",
+        "description": "工作细致，能使用Excel核对数据，识别数量、金额与账面记录之间的差异并如实记录"
+      },
+      {
+        "name": "存货监盘参与",
+        "importance": "medium",
+        "description": "能随项目组参与存货监盘，记录盘点数量与账面数量，整理差异资料，不独立确定审计意见"
+      },
+      {
+        "name": "团队任务说明与交付",
+        "importance": "medium",
+        "description": "能清晰说明本人在团队中承担的任务和交付成果，配合项目负责人复核"
+      },
+      {
+        "name": "专业基础与学习意愿",
+        "importance": "medium",
+        "description": "具备审计、会计专业基础，有CPA部分科目通过记录，愿意在复核机制下持续学习"
+      }
+    ]
+  },
+  "diagnosis": {
+    "overallScore": 79,
+    "dimensionScores": [
+      {
+        "dimension": "JD 硬性条件匹配",
+        "score": 90,
+        "comment": "审计学本科2026届应届，符合会计、审计或财务管理本科应届要求；已有会计师事务所审计实习，CPA通过会计一科为加分项，岗位未要求执业资格或签字权，硬性条件匹配度高。"
+      },
+      {
+        "dimension": "核心职责与项目证据",
+        "score": 75,
+        "comment": "实习中直接涉及底稿整理、询证函准备与状态登记、存货监盘与差异整理，与审计助理核心职责高度相关；但职责以协助和基础执行为主，由项目负责人复核，缺少独立负责模块或复杂审计程序证据。"
+      },
+      {
+        "dimension": "成果与证据强度",
+        "score": 62,
+        "comment": "经历可验证且边界清晰，但成果多为过程性描述，缺少底稿数量、函证数量、差异条数、核对效率等量化交付；课程项目为模拟案例，不能等同于真实客户项目成果。"
+      },
+      {
+        "dimension": "JD 关键词与专业能力覆盖",
+        "score": 85,
+        "comment": "覆盖审计底稿、底稿索引、凭证附件、往来明细、询证函、发函回函状态、存货监盘、Excel、数据透视表、细节核对等关键词；CPA仅通过会计一科，关键词覆盖较好但深度有限。"
+      },
+      {
+        "dimension": "表达质量与信息结构",
+        "score": 82,
+        "comment": "简历结构清晰，时间、角色、任务和复核机制表达明确，并主动声明未独立确定审计意见、无签字权，专业边界良好；可进一步按“任务—行动—交付—复核”组织并前置目标岗位关键词。"
+      }
+    ],
+    "mainIssues": [
+      "实习职责较基础，缺少独立负责或主导的审计底稿、函证跟踪、存货监盘模块，所有资料均由项目组或带教复核。",
+      "成果描述偏过程性，缺少底稿份数、函证数量、回函状态比例、盘点差异条数、核对效率等可验证量化结果。",
+      "课程项目为非真实客户模拟案例，商业审计项目证据有限，不能替代事务所真实项目经验。",
+      "CPA仅通过会计一科，虽有加分但未形成多科通过优势，且无CPA资格和签字权。",
+      "简历尚未充分按目标JD组织“细节核对”“团队任务与交付”“Excel核对数据”等关键词，重点顺序可优化。"
+    ],
+    "prioritySuggestions": [
+      "在不编造事实的前提下，为实习经历补充具体数量或范围，如整理凭证附件或往来明细的份数、登记函证的份数、监盘差异条数及复核反馈。",
+      "用“任务—个人行动—交付物—复核人”结构改写每段经历，突出本人负责部分与团队协作边界。",
+      "将“审计底稿整理、底稿索引核对、函证跟踪、Excel数据核对、存货监盘差异整理”等关键词前置到个人摘要或技能栏。",
+      "保留“未独立确定审计意见、无CPA资格、无签字权”等合规边界，避免夸大为主导项目或出具意见。",
+      "课程项目可补充核对表、账龄数据、课程报告等交付物细节，但需标注为模拟案例，强调可迁移技能。",
+      "若真实存在CPA其他科目备考或通过计划，可写“已通过会计，备考审计或税法中”，不宣称未取得资格。"
+    ]
+  },
+  "matchItems": [
+    {
+      "jdRequirement": "会计、审计或财务管理本科应届毕业生",
+      "resumeEvidence": "钱塘商学院审计学本科，2022.09—2026.06，2026届校招应届。",
+      "evidenceStrength": "strong",
+      "needsSupplement": false,
+      "optimizationSuggestion": "在教育背景中直接标注“2026届审计学本科应届”，可补充与审计相关的真实主修课程，但不要虚构成绩或排名。"
+    },
+    {
+      "jdRequirement": "能够使用Excel核对数据，工作细致",
+      "resumeEvidence": "技能栏列有Excel、数据透视表；实习中整理凭证附件与往来明细并核对底稿引用和索引；课程练习中制作核对表、整理账龄数据。",
+      "evidenceStrength": "medium",
+      "needsSupplement": true,
+      "optimizationSuggestion": "补充使用Excel核对的数据类型、规模、核对维度和差异处理方式；若真实使用VLOOKUP、数据透视表等功能可写明，不编造未用过的技能。"
+    },
+    {
+      "jdRequirement": "协助项目组整理审计底稿",
+      "resumeEvidence": "在项目经理安排下为一家制造业客户整理凭证附件与往来明细，核对底稿引用和索引，资料经项目组复核。",
+      "evidenceStrength": "strong",
+      "needsSupplement": true,
+      "optimizationSuggestion": "按“整理凭证附件或往来明细—核对底稿引用和索引—交付项目组复核”改写，并补充底稿册数、附件份数或客户行业等真实范围。"
+    },
+    {
+      "jdRequirement": "执行函证跟踪",
+      "resumeEvidence": "协助准备询证函、登记发函与回函状态，遇到缺少资料时向带教同事反馈。",
+      "evidenceStrength": "medium",
+      "needsSupplement": true,
+      "optimizationSuggestion": "补充函证份数、发函与回函状态登记方式、缺少资料时的反馈和跟进动作，体现跟踪闭环，但不要声称独立完成函证结论。"
+    },
+    {
+      "jdRequirement": "参与存货监盘并核对资料",
+      "resumeEvidence": "随项目组参与存货监盘，记录盘点数量与账面数量并整理差异，未独立确定审计意见。",
+      "evidenceStrength": "medium",
+      "needsSupplement": true,
+      "optimizationSuggestion": "补充监盘地点、存货品类、盘点差异条数或差异处理方式，突出记录、核对和差异整理动作，同时保留“未独立确定审计意见”的边界。"
+    },
+    {
+      "jdRequirement": "事务所实习经历为加分项",
+      "resumeEvidence": "晟明会计师事务所审计实习生，2025.12—2026.03。",
+      "evidenceStrength": "strong",
+      "needsSupplement": false,
+      "optimizationSuggestion": "在实习标题下补充项目组规模、客户行业和直接带教角色，突出真实事务所环境中的协作与复核流程。"
+    },
+    {
+      "jdRequirement": "CPA考试部分科目通过为加分项",
+      "resumeEvidence": "CPA考试只通过会计一科，无CPA资格，无签字权。",
+      "evidenceStrength": "medium",
+      "needsSupplement": true,
+      "optimizationSuggestion": "如实写为“已通过CPA会计科目，无CPA资格和签字权”，若正在备考其他科目可注明备考科目，不宣称全部通过或执业资格。"
+    },
+    {
+      "jdRequirement": "能说明本人在团队中的任务和交付",
+      "resumeEvidence": "实习中由项目经理安排任务、向带教同事反馈、资料经项目组复核；课程项目担任课程组员；校园经历中配合同学完成签到。",
+      "evidenceStrength": "medium",
+      "needsSupplement": true,
+      "optimizationSuggestion": "每段经历用“我负责、我交付、由谁复核”句式明确个人任务与交付物，区分团队成果和个人贡献，避免只写团队动作。"
+    }
+  ],
+  "experienceAssessments": [
+    {
+      "experienceId": "exp-1",
+      "experienceType": "internship",
+      "experienceTitle": "审计实习生",
+      "organization": "晟明会计师事务所",
+      "role": "审计实习生",
+      "period": "2025.12—2026.03",
+      "originalBullets": [
+        "在项目经理安排下为一家制造业客户整理凭证附件与往来明细，核对底稿引用和索引，资料经项目组复核。",
+        "协助准备询证函、登记发函与回函状态，遇到缺少资料时向带教同事反馈。",
+        "随项目组参与存货监盘，记录盘点数量与账面数量并整理差异，未独立确定审计意见。"
+      ],
+      "directRelevance": "low",
+      "transferableValue": "medium",
+      "evidenceCompleteness": "complete",
+      "missingDimensions": [],
+      "suggestedAction": "retain",
+      "removalReason": "",
+      "userDecision": "retain"
+    },
+    {
+      "experienceId": "exp-2",
+      "experienceType": "project",
+      "experienceTitle": "应收账款审计课程练习",
+      "organization": "",
+      "role": "课程组员",
+      "period": "2025.04—2025.06",
+      "originalBullets": [
+        "基于教师提供的模拟案例制作核对表、整理账龄数据，完成课程报告。非真实客户项目。"
+      ],
+      "directRelevance": "low",
+      "transferableValue": "medium",
+      "evidenceCompleteness": "complete",
+      "missingDimensions": [],
+      "suggestedAction": "retain",
+      "removalReason": "",
+      "userDecision": "retain"
+    },
+    {
+      "experienceId": "exp-3",
+      "experienceType": "campus",
+      "experienceTitle": "学院学术协会资料干事",
+      "organization": "学院学术协会",
+      "role": "资料干事",
+      "period": "2023.10—2024.06",
+      "originalBullets": [
+        "整理活动报名表与讲座资料，配合同学完成会场签到。"
+      ],
+      "directRelevance": "low",
+      "transferableValue": "medium",
+      "evidenceCompleteness": "partial",
+      "missingDimensions": [],
+      "suggestedAction": "retain",
+      "removalReason": "",
+      "userDecision": "retain"
+    }
+  ],
+  "followUpQuestions": [
+    {
+      "id": "fu-6",
+      "experienceId": "exp-3",
+      "experienceType": "campus",
+      "experienceTitle": "学院学术协会资料干事",
+      "evidenceDimension": "scale",
+      "question": "在学院学术协会担任资料干事期间，你整理的活动报名表和讲座资料涉及多少场活动、多少份材料？会场签到覆盖多少人？",
+      "purpose": "补充工作规模证据",
+      "userAnswer": "在学院学术协会，我整理过2场讲座的报名表与会场签到，累计签到74人次，按两场签到求和，不是74名不同的人；我负责资料与签到，不负责讲座策划或协会管理。",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-7",
+      "experienceId": "exp-3",
+      "experienceType": "campus",
+      "experienceTitle": "学院学术协会资料干事",
+      "evidenceDimension": "result",
+      "question": "你整理的报名表与讲座资料最终使用效果如何？会场签到是否顺利完成？同学或老师对你的工作有何反馈？",
+      "purpose": "补充可验证的结果",
+      "userAnswer": "在学院学术协会，我整理过2场讲座的报名表与会场签到，累计签到74人次，按两场签到求和，不是74名不同的人；我负责资料与签到，不负责讲座策划或协会管理。",
+      "generatedBullet": ""
+    }
+  ]
+}

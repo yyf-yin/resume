@@ -67,6 +67,12 @@ export interface MatchItem {
   optimizationSuggestion: string;
 }
 
+/** Shared recruiting judgment; optional for checkpoints created by older clients. */
+export interface ResumeTargetingContext {
+  jdAnalysis?: JDAnalysis;
+  matchItems?: MatchItem[];
+}
+
 export type ExperienceType =
   | "work"
   | "internship"

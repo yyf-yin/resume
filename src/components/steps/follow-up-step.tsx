@@ -168,6 +168,10 @@ export function FollowUpStep() {
         (stage) => {
           activeStage = stage;
           setRunningStage(stage);
+        },
+        {
+          jdAnalysis: analysisCheckpoint.jdAnalysis,
+          matchItems: analysisCheckpoint.matchItems,
         }
       );
     } catch (err) {

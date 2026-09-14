@@ -1,0 +1,674 @@
+import { chatCompletionJSON } from "@/lib/ai/client";
+import { applyOptimizedScoreFloor } from "@/lib/ai/score-policy";
+import {
+  enforceExperienceRetention,
+  ensureFollowUpCoverage,
+  normalizeExperienceAssessments,
+} from "@/lib/experience-assessment";
+import {
+  AnalysisCheckpointError,
+  OptimizationCheckpointError,
+} from "@/lib/ai/errors";
+import type {
+  AnalysisCheckpoint,
+  AnalysisStage,
+  OptimizationCheckpoint,
+  OptimizationStage,
+} from "@/lib/ai/types";
+import {
+  buildPerfectionPrompt,
+  normalizePerfectionPlan,
+  PERFECTION_SYSTEM_PROMPT,
+} from "@/lib/ai/perfection";
+import {
+  RESUME_AGENT_SYSTEM_PROMPT,
+  buildAnalyzeCorePrompt,
+  buildAnalyzeDiagnosisPrompt,
+  buildAnalyzeExperienceInventoryPrompt,
+  buildAnalyzeFollowUpPrompt,
+  buildAnalyzeFinalResumePrompt,
+  buildAnalyzeInterviewPrompt,
+  buildAnalyzeOutputPrompt,
+  buildFinalResumeScorePrompt,
+  buildFollowUpBulletPrompt,
+  buildOptimizeUserPrompt,
+  normalizeAnalysisResult,
+  normalizeFollowUpQuestions,
+  normalizeOptimizedItems,
+} from "@/lib/ai/prompts";
+import type {
+  AnalysisResult,
+  FollowUpQuestion,
+  MatchItem,
+  OptimizeStyle,
+  PerfectionPlan,
+  ResumeDiagnosis,
+  ResumeTargetingContext,
+  UserInput,
+} from "@/types/resume";
+
+type JDAnalysisResult = Pick<AnalysisResult, "jdAnalysis">;
+type DiagnosisMatchResult = Pick<AnalysisResult, "diagnosis" | "matchItems">;
+type ExperienceInventoryResult = Pick<AnalysisResult, "experienceAssessments">;
+type FollowUpResult = Pick<AnalysisResult, "followUpQuestions">;
+type OptimizeResult = Pick<AnalysisResult, "optimizedItems">;
+type FinalResumeResult = Pick<AnalysisResult, "finalResume">;
+type FinalResumeScoreResult = { overallScore: number };
+type InterviewResult = Pick<AnalysisResult, "interviewPrep">;
+
+function buildCoreSummary(parts: DiagnosisMatchResult): string {
+  return [
+    `匹配度：${parts.diagnosis.overallScore}/100`,
+    `主要问题：${parts.diagnosis.mainIssues.slice(0, 3).join("；") || "无"}`,
+    `优先建议：${parts.diagnosis.prioritySuggestions.slice(0, 3).join("；") || "无"}`,
+    `已有优势证据：${parts.matchItems
+      .filter((item) => item.evidenceStrength === "strong" || item.evidenceStrength === "medium")
+      .slice(0, 5)
+      .map((item) => `${item.jdRequirement}：${item.resumeEvidence}`)
+      .join("；") || "暂无充分证据"}`,
+    `关键缺口：${parts.matchItems
+      .filter((item) => item.needsSupplement)
+      .slice(0, 4)
+      .map((item) => item.jdRequirement)
+      .join("；") || "无"}`,
+  ].join("\n");
+}
+
+async function runAnalysisStage<T>(
+  checkpoint: AnalysisCheckpoint,
+  request: () => Promise<T>
+): Promise<T> {
+  try {
+    return await request();
+  } catch (error) {
+    throw new AnalysisCheckpointError(error, checkpoint);
+  }
+}
+
+export async function runLLMResumeAnalysisStage(
+  input: UserInput,
+  stage: AnalysisStage,
+  savedCheckpoint: AnalysisCheckpoint = {}
+): Promise<AnalysisCheckpoint> {
+  const checkpoint: AnalysisCheckpoint = { ...savedCheckpoint };
+
+  try {
+    if (stage === "jd") {
+      if (!checkpoint.jdAnalysis) {
+        const raw = await chatCompletionJSON<JDAnalysisResult>({
+          operation: "analyze:jd",
+          system: RESUME_AGENT_SYSTEM_PROMPT,
+          user: buildAnalyzeCorePrompt(input),
+          maxTokens: 12000,
+        });
+        checkpoint.jdAnalysis = normalizeAnalysisResult(raw as AnalysisResult, input).jdAnalysis;
+      }
+      return checkpoint;
+    }
+
+    if (stage === "diagnosis-match") {
+      if (!checkpoint.diagnosis || !checkpoint.matchItems) {
+        const raw = await chatCompletionJSON<DiagnosisMatchResult>({
+          operation: "analyze:diagnosis-match",
+          system: RESUME_AGENT_SYSTEM_PROMPT,
+          user: buildAnalyzeDiagnosisPrompt(input, checkpoint.jdAnalysis),
+          maxTokens: 16000,
+        });
+        const normalized = normalizeAnalysisResult(raw as AnalysisResult, input);
+        checkpoint.diagnosis = normalized.diagnosis;
+        checkpoint.matchItems = normalized.matchItems;
+      }
+      return checkpoint;
+    }
+
+    if (!checkpoint.diagnosis || !checkpoint.matchItems) {
+      throw new Error("请先完成简历诊断与匹配分析");
+    }
+
+    if (stage === "experience-inventory") {
+      if (!checkpoint.experienceAssessments) {
+        const raw = await chatCompletionJSON<ExperienceInventoryResult>({
+          operation: "analyze:experience-inventory",
+          system: RESUME_AGENT_SYSTEM_PROMPT,
+          user: buildAnalyzeExperienceInventoryPrompt(
+            input,
+            checkpoint.diagnosis,
+            checkpoint.matchItems,
+            checkpoint.jdAnalysis
+          ),
+          temperature: 0,
+          maxTokens: 12000,
+        });
+        checkpoint.experienceAssessments = normalizeExperienceAssessments(
+          raw.experienceAssessments,
+          input.jobStage
+        );
+      }
+      return checkpoint;
+    }
+
+    if (!checkpoint.experienceAssessments) {
+      throw new Error("请先完成简历经历盘点");
+    }
+
+    if (!checkpoint.followUpQuestions) {
+      const raw = await chatCompletionJSON<FollowUpResult>({
+        operation: "analyze:followups",
+        system: RESUME_AGENT_SYSTEM_PROMPT,
+        user: buildAnalyzeFollowUpPrompt(
+          input,
+          checkpoint.diagnosis,
+          checkpoint.matchItems,
+          checkpoint.experienceAssessments,
+          checkpoint.jdAnalysis
+        ),
+        maxTokens: 10000,
+      });
+      checkpoint.followUpQuestions = normalizeFollowUpQuestions(raw.followUpQuestions);
+    }
+    checkpoint.followUpQuestions = normalizeFollowUpQuestions(
+      ensureFollowUpCoverage(
+        checkpoint.followUpQuestions,
+        checkpoint.experienceAssessments,
+        input.jobStage
+      )
+    );
+    return checkpoint;
+  } catch (error) {
+    throw new AnalysisCheckpointError(error, checkpoint);
+  }
+}
+
+export async function runLLMResumeAnalysis(
+  input: UserInput,
+  optimizeStyle: OptimizeStyle = "professional-match",
+  savedCheckpoint: AnalysisCheckpoint = {}
+): Promise<AnalysisResult> {
+  const checkpoint: AnalysisCheckpoint = { ...savedCheckpoint };
+  if (checkpoint.followUpQuestions) {
+    checkpoint.followUpQuestions = normalizeFollowUpQuestions(checkpoint.followUpQuestions);
+  }
+
+  if (!checkpoint.jdAnalysis) {
+    const jd = await runAnalysisStage(checkpoint, () =>
+      chatCompletionJSON<JDAnalysisResult>({
+        operation: "analyze:jd",
+        system: RESUME_AGENT_SYSTEM_PROMPT,
+        user: buildAnalyzeCorePrompt(input),
+        maxTokens: 12000,
+      })
+    );
+    checkpoint.jdAnalysis = jd.jdAnalysis;
+  }
+
+  if (!checkpoint.diagnosis || !checkpoint.matchItems) {
+    const diagnosisMatch = await runAnalysisStage(checkpoint, () =>
+      chatCompletionJSON<DiagnosisMatchResult>({
+        operation: "analyze:diagnosis-match",
+        system: RESUME_AGENT_SYSTEM_PROMPT,
+        user: buildAnalyzeDiagnosisPrompt(input, checkpoint.jdAnalysis),
+        maxTokens: 16000,
+      })
+    );
+    checkpoint.diagnosis = diagnosisMatch.diagnosis;
+    checkpoint.matchItems = diagnosisMatch.matchItems;
+  }
+
+  if (!checkpoint.experienceAssessments) {
+    const inventory = await runAnalysisStage(checkpoint, () =>
+      chatCompletionJSON<ExperienceInventoryResult>({
+        operation: "analyze:experience-inventory",
+        system: RESUME_AGENT_SYSTEM_PROMPT,
+        user: buildAnalyzeExperienceInventoryPrompt(
+          input,
+          checkpoint.diagnosis!,
+          checkpoint.matchItems!,
+          checkpoint.jdAnalysis
+        ),
+        temperature: 0,
+        maxTokens: 12000,
+      })
+    );
+    checkpoint.experienceAssessments = normalizeExperienceAssessments(
+      inventory.experienceAssessments,
+      input.jobStage
+    );
+  } else {
+    checkpoint.experienceAssessments = normalizeExperienceAssessments(
+      checkpoint.experienceAssessments,
+      input.jobStage
+    );
+  }
+
+  if (!checkpoint.followUpQuestions) {
+    const followUps = await runAnalysisStage(checkpoint, () =>
+      chatCompletionJSON<FollowUpResult>({
+        operation: "analyze:followups",
+        system: RESUME_AGENT_SYSTEM_PROMPT,
+        user: buildAnalyzeFollowUpPrompt(
+          input,
+          checkpoint.diagnosis!,
+          checkpoint.matchItems!,
+          checkpoint.experienceAssessments!,
+          checkpoint.jdAnalysis
+        ),
+        maxTokens: 10000,
+      })
+    );
+    checkpoint.followUpQuestions = normalizeFollowUpQuestions(followUps.followUpQuestions);
+  }
+  checkpoint.followUpQuestions = normalizeFollowUpQuestions(
+    ensureFollowUpCoverage(
+      checkpoint.followUpQuestions,
+      checkpoint.experienceAssessments,
+      input.jobStage
+    )
+  );
+
+  const diagnosisMatch: DiagnosisMatchResult = {
+    diagnosis: checkpoint.diagnosis,
+    matchItems: checkpoint.matchItems,
+  };
+
+  const coreSummary = buildCoreSummary(diagnosisMatch);
+  const targetingContext: ResumeTargetingContext = {
+    jdAnalysis: checkpoint.jdAnalysis,
+    matchItems: checkpoint.matchItems,
+  };
+
+  if (!checkpoint.optimizedItems) {
+    const optimize = await runAnalysisStage(checkpoint, () =>
+      chatCompletionJSON<OptimizeResult>({
+        operation: "analyze:optimization",
+        system: RESUME_AGENT_SYSTEM_PROMPT,
+        user: buildAnalyzeOutputPrompt(
+          input,
+          optimizeStyle,
+          coreSummary,
+          checkpoint.experienceAssessments,
+          targetingContext
+        ),
+        maxTokens: 12000,
+      })
+    );
+    checkpoint.optimizedItems = optimize.optimizedItems;
+  }
+
+  if (!checkpoint.finalResume) {
+    const finalResume = await runAnalysisStage(checkpoint, () =>
+      chatCompletionJSON<FinalResumeResult>({
+        operation: "analyze:final-resume",
+        system: RESUME_AGENT_SYSTEM_PROMPT,
+        user: buildAnalyzeFinalResumePrompt(
+          input,
+          optimizeStyle,
+          coreSummary,
+          checkpoint.optimizedItems!,
+          checkpoint.followUpQuestions,
+          checkpoint.experienceAssessments,
+          targetingContext
+        ),
+        maxTokens: 16000,
+      })
+    );
+    const normalizedFinalResume = normalizeAnalysisResult(
+      {
+        finalResume: finalResume.finalResume,
+      } as AnalysisResult,
+      input
+    ).finalResume;
+    checkpoint.finalResume = enforceExperienceRetention(
+      normalizedFinalResume,
+      checkpoint.experienceAssessments,
+      input.jobStage
+    );
+  }
+  checkpoint.finalResume = enforceExperienceRetention(
+    checkpoint.finalResume,
+    checkpoint.experienceAssessments,
+    input.jobStage
+  );
+
+  const scoreRequest =
+    typeof checkpoint.finalResumeScore === "number"
+      ? Promise.resolve<FinalResumeScoreResult | null>(null)
+      : chatCompletionJSON<FinalResumeScoreResult>({
+          operation: "analyze:final-score",
+          system: RESUME_AGENT_SYSTEM_PROMPT,
+          user: buildFinalResumeScorePrompt(
+            input,
+            checkpoint.finalResume,
+            diagnosisMatch.diagnosis
+          ),
+          temperature: 0,
+          maxTokens: 4500,
+        });
+  const interviewRequest = checkpoint.interviewPrep
+    ? Promise.resolve<InterviewResult | null>(null)
+    : chatCompletionJSON<InterviewResult>({
+        operation: "analyze:interview",
+        system: RESUME_AGENT_SYSTEM_PROMPT,
+        user: buildAnalyzeInterviewPrompt(
+          input,
+          coreSummary,
+          checkpoint.finalResume,
+          checkpoint.optimizedItems,
+          checkpoint.followUpQuestions,
+          targetingContext
+        ),
+        maxTokens: 12000,
+      });
+
+  const [scoreResult, interviewResult] = await Promise.allSettled([
+    scoreRequest,
+    interviewRequest,
+  ]);
+
+  if (scoreResult.status === "fulfilled" && scoreResult.value) {
+    checkpoint.finalResumeScore = scoreResult.value.overallScore;
+  }
+  if (interviewResult.status === "fulfilled" && interviewResult.value) {
+    checkpoint.interviewPrep = interviewResult.value.interviewPrep;
+  }
+
+  const finalStageError =
+    scoreResult.status === "rejected"
+      ? scoreResult.reason
+      : interviewResult.status === "rejected"
+        ? interviewResult.reason
+        : null;
+  if (finalStageError) {
+    throw new AnalysisCheckpointError(finalStageError, checkpoint);
+  }
+
+  const raw: AnalysisResult = {
+    jdAnalysis: checkpoint.jdAnalysis,
+    diagnosis: diagnosisMatch.diagnosis,
+    matchItems: diagnosisMatch.matchItems,
+    experienceAssessments: checkpoint.experienceAssessments,
+    followUpQuestions: checkpoint.followUpQuestions,
+    optimizedItems: checkpoint.optimizedItems,
+    finalResume: checkpoint.finalResume,
+    finalResumeScore: applyOptimizedScoreFloor(
+      diagnosisMatch.diagnosis.overallScore,
+      checkpoint.finalResumeScore!
+    ),
+    interviewPrep: checkpoint.interviewPrep!,
+  };
+
+  return normalizeAnalysisResult(raw, input);
+}
+
+export async function runLLMResumeOptimizationStage(
+  input: UserInput,
+  style: OptimizeStyle,
+  diagnosis: ResumeDiagnosis,
+  followUpQuestions: FollowUpQuestion[] = [],
+  experienceAssessments: AnalysisResult["experienceAssessments"] = [],
+  stage: OptimizationStage,
+  savedCheckpoint: OptimizationCheckpoint = {},
+  targetingContext?: ResumeTargetingContext
+): Promise<OptimizationCheckpoint> {
+  const checkpoint: OptimizationCheckpoint = { ...savedCheckpoint };
+
+  try {
+    if (stage === "optimized-items") {
+      if (!checkpoint.optimizedItems) {
+        const raw = await chatCompletionJSON<{
+          optimizedItems: AnalysisResult["optimizedItems"];
+        }>({
+          operation: "regenerate:optimization",
+          system: RESUME_AGENT_SYSTEM_PROMPT,
+          user: buildOptimizeUserPrompt(
+            input,
+            style,
+            followUpQuestions,
+            experienceAssessments,
+            targetingContext
+          ),
+          temperature: 0.5,
+          maxTokens: 12000,
+        });
+        checkpoint.optimizedItems = normalizeOptimizedItems(raw.optimizedItems);
+      }
+      return checkpoint;
+    }
+
+    if (!checkpoint.optimizedItems) {
+      throw new Error("请先生成简历优化内容");
+    }
+
+    if (stage === "final-resume") {
+      if (!checkpoint.finalResume) {
+        const raw = await chatCompletionJSON<FinalResumeResult>({
+          operation: "regenerate:final-resume",
+          system: RESUME_AGENT_SYSTEM_PROMPT,
+          user: buildAnalyzeFinalResumePrompt(
+            input,
+            style,
+            "",
+            checkpoint.optimizedItems,
+            followUpQuestions,
+            experienceAssessments,
+            targetingContext
+          ),
+          maxTokens: 16000,
+        });
+        const normalized = normalizeAnalysisResult(
+          { finalResume: raw.finalResume } as AnalysisResult,
+          input
+        ).finalResume;
+        checkpoint.finalResume = enforceExperienceRetention(
+          normalized,
+          experienceAssessments,
+          input.jobStage
+        );
+      }
+      return checkpoint;
+    }
+
+    if (!checkpoint.finalResume) {
+      throw new Error("请先生成最终简历");
+    }
+
+    if (stage === "final-score") {
+      if (typeof checkpoint.finalResumeScore !== "number") {
+        const raw = await chatCompletionJSON<FinalResumeScoreResult>({
+          operation: "regenerate:final-score",
+          system: RESUME_AGENT_SYSTEM_PROMPT,
+          user: buildFinalResumeScorePrompt(input, checkpoint.finalResume, diagnosis),
+          temperature: 0,
+          maxTokens: 4500,
+        });
+        checkpoint.finalResumeScore = applyOptimizedScoreFloor(
+          diagnosis.overallScore,
+          raw.overallScore
+        );
+      }
+      return checkpoint;
+    }
+
+    if (!checkpoint.interviewPrep) {
+      const raw = await chatCompletionJSON<InterviewResult>({
+        operation: "regenerate:interview",
+        system: RESUME_AGENT_SYSTEM_PROMPT,
+        user: buildAnalyzeInterviewPrompt(
+          input,
+          "",
+          checkpoint.finalResume,
+          checkpoint.optimizedItems,
+          followUpQuestions,
+          targetingContext
+        ),
+        maxTokens: 12000,
+      });
+      checkpoint.interviewPrep = raw.interviewPrep;
+    }
+    return checkpoint;
+  } catch (error) {
+    throw new OptimizationCheckpointError(error, checkpoint);
+  }
+}
+
+export async function runLLMRegenerateOptimizedItems(
+  input: UserInput,
+  style: OptimizeStyle,
+  diagnosis: ResumeDiagnosis,
+  followUpQuestions: FollowUpQuestion[] = [],
+  experienceAssessments: AnalysisResult["experienceAssessments"] = [],
+  savedCheckpoint: OptimizationCheckpoint = {},
+  targetingContext?: ResumeTargetingContext
+): Promise<
+  Pick<AnalysisResult, "optimizedItems" | "finalResume" | "finalResumeScore" | "interviewPrep">
+> {
+  const checkpoint: OptimizationCheckpoint = { ...savedCheckpoint };
+
+  try {
+    if (!checkpoint.optimizedItems) {
+      const raw = await chatCompletionJSON<{
+        optimizedItems: AnalysisResult["optimizedItems"];
+      }>({
+        operation: "regenerate:optimization",
+        system: RESUME_AGENT_SYSTEM_PROMPT,
+        user: buildOptimizeUserPrompt(
+          input,
+          style,
+          followUpQuestions,
+          experienceAssessments,
+          targetingContext
+        ),
+        temperature: 0.5,
+        maxTokens: 12000,
+      });
+      checkpoint.optimizedItems = normalizeOptimizedItems(raw.optimizedItems);
+    }
+
+    if (!checkpoint.finalResume) {
+      const finalResume = await chatCompletionJSON<FinalResumeResult>({
+        operation: "regenerate:final-resume",
+        system: RESUME_AGENT_SYSTEM_PROMPT,
+        user: buildAnalyzeFinalResumePrompt(
+          input,
+          style,
+          "",
+          checkpoint.optimizedItems,
+          followUpQuestions,
+          experienceAssessments,
+          targetingContext
+        ),
+        maxTokens: 16000,
+      });
+      const normalizedFinalResume = normalizeAnalysisResult(
+        {
+          finalResume: finalResume.finalResume,
+        } as AnalysisResult,
+        input
+      ).finalResume;
+      checkpoint.finalResume = enforceExperienceRetention(
+        normalizedFinalResume,
+        experienceAssessments,
+        input.jobStage
+      );
+    }
+  } catch (error) {
+    throw new OptimizationCheckpointError(error, checkpoint);
+  }
+
+  checkpoint.finalResume = enforceExperienceRetention(
+    checkpoint.finalResume!,
+    experienceAssessments,
+    input.jobStage
+  );
+
+  const scoreRequest =
+    typeof checkpoint.finalResumeScore === "number"
+      ? Promise.resolve<FinalResumeScoreResult | null>(null)
+      : chatCompletionJSON<FinalResumeScoreResult>({
+          operation: "regenerate:final-score",
+          system: RESUME_AGENT_SYSTEM_PROMPT,
+          user: buildFinalResumeScorePrompt(input, checkpoint.finalResume, diagnosis),
+          temperature: 0,
+          maxTokens: 4500,
+        });
+  const interviewRequest = checkpoint.interviewPrep
+    ? Promise.resolve<InterviewResult | null>(null)
+    : chatCompletionJSON<InterviewResult>({
+        operation: "regenerate:interview",
+        system: RESUME_AGENT_SYSTEM_PROMPT,
+        user: buildAnalyzeInterviewPrompt(
+          input,
+          "",
+          checkpoint.finalResume,
+          checkpoint.optimizedItems,
+          followUpQuestions,
+          targetingContext
+        ),
+        maxTokens: 12000,
+      });
+
+  const [scoreResult, interviewResult] = await Promise.allSettled([
+    scoreRequest,
+    interviewRequest,
+  ]);
+  if (scoreResult.status === "fulfilled" && scoreResult.value) {
+    checkpoint.finalResumeScore = scoreResult.value.overallScore;
+  }
+  if (interviewResult.status === "fulfilled" && interviewResult.value) {
+    checkpoint.interviewPrep = interviewResult.value.interviewPrep;
+  }
+
+  const finalStageError =
+    scoreResult.status === "rejected"
+      ? scoreResult.reason
+      : interviewResult.status === "rejected"
+        ? interviewResult.reason
+        : null;
+  if (finalStageError) {
+    throw new OptimizationCheckpointError(finalStageError, checkpoint);
+  }
+
+  return {
+    optimizedItems: checkpoint.optimizedItems,
+    finalResume: checkpoint.finalResume,
+    finalResumeScore: applyOptimizedScoreFloor(
+      diagnosis.overallScore,
+      checkpoint.finalResumeScore!
+    ),
+    interviewPrep: checkpoint.interviewPrep!,
+  };
+}
+
+export async function runLLMFollowUpBullet(
+  input: UserInput,
+  question: string,
+  purpose: string,
+  userAnswer: string
+): Promise<string> {
+  const raw = await chatCompletionJSON<{ bullet: string }>({
+    operation: "follow-up:bullet",
+    system: RESUME_AGENT_SYSTEM_PROMPT,
+    user: buildFollowUpBulletPrompt(input, question, purpose, userAnswer),
+    temperature: 0.3,
+    maxTokens: 500,
+    thinking: "disabled",
+  });
+
+  return raw.bullet?.trim() ?? "";
+}
+
+export async function runLLMPerfectionPlan(
+  input: UserInput,
+  diagnosis: ResumeDiagnosis,
+  matchItems: MatchItem[],
+  followUpQuestions: FollowUpQuestion[] = []
+): Promise<PerfectionPlan> {
+  const raw = await chatCompletionJSON<{ plan: PerfectionPlan }>({
+    operation: "perfection:recommendations",
+    system: PERFECTION_SYSTEM_PROMPT,
+    user: buildPerfectionPrompt(input, diagnosis, matchItems, followUpQuestions),
+    temperature: 0.4,
+    maxTokens: 5000,
+  });
+
+  return normalizePerfectionPlan(raw.plan);
+}

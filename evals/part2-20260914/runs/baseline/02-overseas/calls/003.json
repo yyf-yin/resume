@@ -1,0 +1,24 @@
+{
+  "stage": "jd",
+  "startedAt": "2026-09-13T16:51:21.802Z",
+  "elapsedMs": 6,
+  "request": {
+    "model": "deepseek-v4-flash",
+    "temperature": 0.3,
+    "max_tokens": 12000,
+    "response_format": {
+      "type": "json_object"
+    },
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是「简历专家」，一位 JD 定制简历优化 Agent。\n你的任务是基于目标岗位 JD 与用户原始简历，输出结构化 JSON 分析结果。\n要求：\n1. 所有内容使用中文\n2. 分析必须基于用户提供的 JD 与简历，不得编造无法从材料推断的虚假经历\n3. 对缺失证据要明确标注 needsSupplement 或 evidenceStrength 为 weak/none\n4. followUpQuestions 必须按简历中的独立经历及其证据缺口生成；每段与目标岗位相关的经历生成 0-3 条，不设置固定总题数，id 格式 fu-1, fu-2...\n5. optimizedItems 通常生成 5 条左右，id 格式 opt-1, opt-2...；真实材料不足时允许更少，不得为凑数量虚构或重复内容\n6. interviewPrep.likelyQuestions 恰好 10 条\n7. overallScore 与各 dimensionScores.score 必须是 0-100 范围内的整数；即使证据不足也必须给出保守评分，不得省略或返回 null\n8. 当前任务指定的所有顶层字段、嵌套字段和数组元素字段均为必填项，任何情况下都不得省略或返回 null\n9. 没有内容的数组返回 []，无法从材料确定的字符串返回 \"\"，但字段本身必须保留\n10. 只输出一个合法 JSON 对象，不要 markdown 代码块、解释、思考过程或前后缀文本\n11. 不得增加 result、data、analysis、output 等额外包裹层\n12. 输出前逐项检查任务列出的所有必填字段，确认完整后再输出"
+      },
+      {
+        "role": "user",
+        "content": "请完成 JD 解析（第一部分）。\n【目标岗位】AI 产品经理（出海方向）\n【行业】消费互联网\n【公司类型】创业公司\n【求职阶段】社招-中级\n【希望突出能力】海外用户研究、增长实验\n\n【目标 JD】\n远帆应用招聘 AI 产品经理（出海方向）：负责面向欧美个人用户的应用需求研究、订阅转化与迭代。硬性要求：本科及以上、3年以上产品经验、实际欧美市场产品经历、能够以英语完成用户访谈。熟悉订阅漏斗与数据分析。有 AIGC 应用经验优先，对 AI 产品有浓厚兴趣即可，不要求模型训练或 RAG 工程经验。\n\n【原始简历】\n林悦｜深圳｜lin.yue@example.com｜13800000002\n海外产品经理，关注用户研究及订阅转化。\n工作经历：航迹科技（海外效率工具开发商）｜产品经理｜2022.07—2026.08\n负责英文笔记应用的需求整理和版本迭代，面向美国及英国用户以英语开展28次远程访谈，将发现的问题整理为需求池。\n梳理注册到订阅的转化漏斗，设计新手引导改版并与研发和设计协作上线，完成A/B测试，订阅转化率有所提升，具体数据待确认。\n参与英文帮助中心建设，协调客服与研发整理常见问题并更新文档。\n项目经历：定价页改版｜产品经理｜2025.03—2025.06\n整理竞品订阅方案、制定原型与埋点需求，推进上线并观察用户反馈。\n技能：英语访谈、SQL、Figma、漏斗分析、A/B测试。平时体验生成式AI写作工具。\n教育：南方商务大学｜商务英语本科｜2018.09—2022.06\n\n【补充信息】\n没有负责过AI应用上线，没有RAG、模型训练和算法开发经验。本次不回答任何追问，不补充转化率数值。\n\n【强制输出契约】\n- 以下字段全部为必填项，任何情况下都不得省略或返回 null：\n  - jdAnalysis\n  - jdAnalysis.responsibilities\n  - jdAnalysis.hardRequirements\n  - jdAnalysis.implicitRequirements\n  - jdAnalysis.keywords\n  - jdAnalysis.idealCandidate\n  - jdAnalysis.coreCompetencies\n  - jdAnalysis.coreCompetencies[].name\n  - jdAnalysis.coreCompetencies[].importance\n  - jdAnalysis.coreCompetencies[].description\n- 数组没有内容时返回 []；字符串无法确定时返回 \"\"；数值和布尔值必须返回符合要求的有效值\n- 只允许输出一个 JSON 对象，不得添加 result、data、analysis、output 等包裹层\n- 不得输出 Markdown、解释文字或思考过程\n- 下方内容是合法 JSON 结构示例，必须用用户材料生成真实内容，不得照抄示例值\n- 输出前逐项自检上述字段；只有全部存在且 JSON 合法后才能输出\n\n输出结构示例：\n{\n  \"jdAnalysis\": {\n    \"responsibilities\": [\"负责核心产品规划与迭代\"],\n    \"hardRequirements\": [\"具备相关岗位经验\"],\n    \"implicitRequirements\": [\"能够推动跨团队协作\"],\n    \"keywords\": [\"产品规划\", \"数据驱动\"],\n    \"idealCandidate\": \"具备相关行业经验并能独立推动项目落地的候选人\",\n    \"coreCompetencies\": [\n      {\n        \"name\": \"产品规划\",\n        \"importance\": \"high\",\n        \"description\": \"能够完成从需求分析到产品落地的完整工作\"\n      }\n    ]\n  }\n}"
+      }
+    ]
+  },
+  "error": "TypeError: fetch failed"
+}

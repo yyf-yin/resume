@@ -19,6 +19,7 @@ import type {
   OptimizeStyle,
   PerfectionPlan,
   ResumeDiagnosis,
+  ResumeTargetingContext,
   UserInput,
 } from "@/types/resume";
 
@@ -241,7 +242,8 @@ function buildOptimizationFingerprint(
   diagnosis: ResumeDiagnosis,
   followUpQuestions: FollowUpQuestion[],
   experienceAssessments: ExperienceAssessment[],
-  exampleMode: boolean
+  exampleMode: boolean,
+  targetingContext?: ResumeTargetingContext
 ): string {
   return JSON.stringify({
     input,
@@ -250,6 +252,7 @@ function buildOptimizationFingerprint(
     followUpQuestions,
     experienceAssessments,
     exampleMode,
+    targetingContext,
   });
 }
 
@@ -262,7 +265,8 @@ export async function runResumeOptimization(
   exampleMode = false,
   onStage?: (stage: OptimizationStage, checkpoint: OptimizationCheckpoint) => void,
   onStageError?: (stage: OptimizationStage, message: string) => void,
-  onStageStart?: (stage: OptimizationStage) => void
+  onStageStart?: (stage: OptimizationStage) => void,
+  targetingContext?: ResumeTargetingContext
 ): Promise<OptimizationCheckpoint> {
   const fingerprint = buildOptimizationFingerprint(
     input,
@@ -270,7 +274,8 @@ export async function runResumeOptimization(
     diagnosis,
     followUpQuestions,
     experienceAssessments,
-    exampleMode
+    exampleMode,
+    targetingContext
   );
   const saved = readPendingOptimization();
   const pending: PendingOptimization =
@@ -293,6 +298,7 @@ export async function runResumeOptimization(
         experienceAssessments,
         exampleMode,
         checkpoint: sourceCheckpoint,
+        targetingContext,
       }),
     });
     const data = (await response.json()) as OptimizeStageResponseBody | OptimizeErrorResponse;
@@ -371,7 +377,8 @@ export async function regenerateOptimizedItems(
   diagnosis: ResumeDiagnosis,
   followUpQuestions: FollowUpQuestion[] = [],
   experienceAssessments: ExperienceAssessment[] = [],
-  exampleMode = false
+  exampleMode = false,
+  targetingContext?: ResumeTargetingContext
 ): Promise<
   Pick<AnalysisResult, "optimizedItems" | "finalResume" | "finalResumeScore" | "interviewPrep">
 > {
@@ -381,7 +388,8 @@ export async function regenerateOptimizedItems(
     diagnosis,
     followUpQuestions,
     experienceAssessments,
-    exampleMode
+    exampleMode,
+    targetingContext
   );
   const saved = readPendingOptimization();
 
@@ -404,6 +412,7 @@ export async function regenerateOptimizedItems(
         diagnosis,
         exampleMode,
         checkpoint: pending.checkpoint,
+        targetingContext,
       }),
     });
     const data = (await response.json()) as OptimizeResponseBody | OptimizeErrorResponse;

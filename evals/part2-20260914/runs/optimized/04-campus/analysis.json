@@ -1,0 +1,459 @@
+{
+  "jdAnalysis": {
+    "responsibilities": [
+      "协助开展教师工具的用户访谈",
+      "整理用户需求并形成需求清单或优先级",
+      "参与教师工具的原型设计",
+      "进行基础数据分析以支持需求判断"
+    ],
+    "hardRequirements": [
+      "面向在校本科生",
+      "逻辑清晰",
+      "能够说明个人贡献",
+      "有团队协作经验",
+      "课程、竞赛或校园项目均可作为相关证据",
+      "不要求商业项目经验"
+    ],
+    "implicitRequirements": [
+      "推断：需要能与产品经理、教师或其他相关方配合沟通；JD依据：协助教师工具的用户访谈、需求整理；待确认点：团队协作的具体对象、汇报关系和协作流程未说明",
+      "推断：需要具备基础的数据意识，能用数据辅助需求判断；JD依据：数据分析；待确认点：使用的数据工具、分析深度和指标范围未说明",
+      "推断：需要具备基础的原型表达能力，能将需求转化为可讨论的原型；JD依据：原型设计；待确认点：原型工具、保真度和交付标准未说明",
+      "推断：对教育场景或教师工具的理解会构成加分；JD依据：教师工具；待确认点：是否要求教育行业经验或教师场景认知未说明",
+      "推断：对AI工具的实际使用意识会受到关注；JD依据：了解AI工具加分；待确认点：AI工具的具体范围、使用场景和深度未说明",
+      "推断：实习岗位可能希望候选人能稳定投入一定时间；JD依据：产品经理实习生、面向在校本科生；待确认点：每周到岗天数、实习周期和远程安排未说明"
+    ],
+    "keywords": [
+      "产品经理实习生",
+      "教师工具",
+      "用户访谈",
+      "需求整理",
+      "原型设计",
+      "数据分析",
+      "逻辑清晰",
+      "个人贡献",
+      "团队协作",
+      "课程项目",
+      "竞赛项目",
+      "校园项目",
+      "AI工具",
+      "教育科技"
+    ],
+    "idealCandidate": "对教育科技或教师工作场景有基本理解，能通过课程、竞赛或校园项目展示对用户需求的理解；具备用户访谈与需求整理能力，能设计访谈并归纳需求；能完成基础原型设计与数据分析，输出原型稿或分析结论；逻辑清晰，能结构化说明项目背景、个人行动与结果；有团队协作经验，能描述协作角色与交付成果，并能说明AI工具如何辅助产品工作。",
+    "coreCompetencies": [
+      {
+        "name": "用户访谈与需求整理",
+        "importance": "high",
+        "description": "能围绕教师工具设计并执行用户访谈，整理访谈记录，归纳为可执行的需求清单或问题优先级。"
+      },
+      {
+        "name": "原型设计",
+        "importance": "high",
+        "description": "能使用原型工具绘制教师工具的关键流程或界面原型，清晰表达交互逻辑，便于团队讨论与验证。"
+      },
+      {
+        "name": "数据分析",
+        "importance": "high",
+        "description": "能收集和整理访谈、问卷或产品使用数据，做基础统计与归纳，输出支持需求判断的结论。"
+      },
+      {
+        "name": "逻辑表达与个人贡献说明",
+        "importance": "high",
+        "description": "能结构化陈述项目背景、个人行动与结果，明确区分个人贡献与团队成果，逻辑清晰。"
+      },
+      {
+        "name": "团队协作",
+        "importance": "high",
+        "description": "能在课程、竞赛或校园项目中与他人分工协作，说明沟通、推进和交付过程。"
+      },
+      {
+        "name": "教育/教师场景理解",
+        "importance": "medium",
+        "description": "对教师工作场景和教育科技产品有基本理解，能结合场景提出合理的产品问题与需求假设。"
+      },
+      {
+        "name": "AI工具应用意识",
+        "importance": "low",
+        "description": "能使用AI工具辅助资料整理、信息归纳、原型草稿或分析，并理解其适用边界。"
+      }
+    ]
+  },
+  "diagnosis": {
+    "overallScore": 65,
+    "dimensionScores": [
+      {
+        "dimension": "JD硬性条件匹配",
+        "score": 80,
+        "comment": "在校本科生身份、课程/校园项目作为证据、不要求商业项目经验等硬性门槛均满足，无公司实习经历不构成硬性不符；学历与阶段完全对应岗位面向在校本科生的定位。但硬性要求中的“逻辑清晰”“能说明个人贡献”在简历中只有角色标签，缺少可验证的逻辑与贡献证据。"
+      },
+      {
+        "dimension": "核心职责与项目证据",
+        "score": 62,
+        "comment": "原型设计有较直接的证据（校园问答Demo、图书预约原型、二手书小程序原型，使用Figma）；需求相关只有“负责需求”的笼统表述，无需求清单或优先级产出；数据分析仅有课程问卷Excel整理与SQL看板练习，且为公开模拟数据；用户访谈完全无直接证据。整体是课程/练习层面的职责覆盖，缺少教师工具场景下的实际职责证据。"
+      },
+      {
+        "dimension": "成果与证据强度",
+        "score": 50,
+        "comment": "五段项目均为课程项目或个人练习，无上线、无真实用户验证；除“邀请同学试用”“完成课程展示”“提交调研报告”外基本无量化结果；个人贡献与团队成果边界不清，同一段经历中“负责需求与提示词调试”与“邀请同学试用”混叙，证据完整性偏弱。"
+      },
+      {
+        "dimension": "JD关键词与专业能力覆盖",
+        "score": 65,
+        "comment": "有效覆盖了原型设计、数据分析（Excel/SQL基础）、需求、AI工具（提示词调试）、团队协作等关键词，与岗位关键词有一定重合；但“用户访谈”“教师工具”“教育科技”“需求优先级”等高权重关键词无真实证据支撑，覆盖停留在工具与动作层面。"
+      },
+      {
+        "dimension": "表达质量与信息结构",
+        "score": 62,
+        "comment": "基本信息、教育、项目、校园、技能分层清楚，时间倒序排列，可读性尚可；但每段项目仅一到两句，缺少“背景—行动—结果”结构，未标注量化信息，重点顺序未向产品经理岗位倾斜，技能栏为简单罗列。"
+      }
+    ],
+    "mainIssues": [
+      "缺少用户访谈的直接证据：无访谈对象、访谈提纲、访谈记录或访谈结论的相关描述，而这是JD的第一条职责",
+      "需求整理只写到“负责需求”，没有需求来源、整理方式、需求清单或优先级排序的产出证据",
+      "数据分析经历（食堂满意度调研、学习数据看板）均基于课程问卷或公开模拟数据，且简历自述“不代表真实用户行为”，无法体现用数据支持需求判断的闭环",
+      "AI工具使用仅有“提示词调试”四个字，未说明用AI解决了什么具体问题、效果如何，难以支撑JD的加分项",
+      "五段项目均为课程原型或个人练习，无上线与真实用户验证，也没有可量化的交付结果（人数、题量、页数、迭代次数）",
+      "所有项目描述都缺少“背景—个人行动—结果”结构，个人贡献与团队成果边界模糊，无法支撑“能说明个人贡献”这条硬性要求",
+      "完全没有教育科技、教师工具或教学场景相关的经验与认知描述，“教育/教师场景理解”这一项无任何证据"
+    ],
+    "prioritySuggestions": [
+      "在校园问答Demo中补充访谈或试用的具体过程：邀请了几位同学、收集到哪些反馈、如何把反馈归纳成需求并调整提示词，这是最接近JD“用户访谈+需求整理+AI工具”的一条主线，应重点做实",
+      "在食堂满意度调研中补充问卷题量、回收样本量、用Excel发现的具体结论，以及该结论如何影响调研报告的建议方向，把“整理数据”升级为“用数据支撑判断”",
+      "为图书预约原型和二手书小程序原型补充个人负责的具体模块、梳理出的流程节点数、Figma原型页数与迭代次数，并明确标注“我负责……”，区分个人贡献与团队成果",
+      "统一用STAR结构重写五段项目，每段至少写清项目背景、我的具体行动、可验证的结果，优先保证校园问答Demo和图书预约原型两段展开充分",
+      "技能栏按岗位关键词重组为“需求整理、用户调研、Figma原型、Excel/SQL基础、AI提示词调试”，并在AI部分补一句具体使用场景与边界，呼应JD的AI加分项",
+      "如有家教、助教、课程辅导、教师访谈等任何接触教学场景的经历，应补充为教育场景理解的证据；若确实没有，可在求职意向或项目选择中说明对教师工具场景的兴趣与理解来源，但不要编造行业经验",
+      "删除或弱化“未开发上线”“不代表真实用户行为”这类自我否定的表述，改为客观说明项目性质与产出物，避免在简历中提前否定证据价值"
+    ]
+  },
+  "matchItems": [
+    {
+      "jdRequirement": "面向在校本科生，课程、竞赛、校园项目均可作为证据，不要求商业项目经验",
+      "resumeEvidence": "金陵信息大学信息管理本科在读，2023.09—2027.06；五个项目均为课程项目或个人练习，另有校读书协会活动干事经历；简历明确说明无公司实习经历、无获奖证书",
+      "evidenceStrength": "strong",
+      "needsSupplement": false,
+      "optimizationSuggestion": "保持学历与在读时间的清晰呈现，并在项目标题中直接标注“课程项目/个人练习”，让招聘方一眼确认证据类型符合JD允许范围，无需为缺少商业经验做任何修饰"
+    },
+    {
+      "jdRequirement": "协助开展教师工具的用户访谈",
+      "resumeEvidence": "无任何访谈经历描述；最接近的是校园问答Demo中“邀请同学试用”，以及食堂满意度调研中“参与问卷设计”，两者均未说明访谈/试用对象、问题设计和记录方式",
+      "evidenceStrength": "none",
+      "needsSupplement": true,
+      "optimizationSuggestion": "把“邀请同学试用”补写成一次小规模用户验证：试用人数、提出的问题、获得的反馈条目与结论；若做过任何形式的面对面问询，可视为轻量访谈并在简历中明确写为“访谈/试用反馈收集”，但不得虚构为正式教师用户访谈"
+    },
+    {
+      "jdRequirement": "整理用户需求并形成需求清单或优先级",
+      "resumeEvidence": "校园问答Demo中“负责需求与提示词调试”，是唯一涉及需求的表述；图书预约原型中“整理预约流程”，可视为需求梳理的弱相关动作；均未说明需求来源、整理方法和产出形式",
+      "evidenceStrength": "weak",
+      "needsSupplement": true,
+      "optimizationSuggestion": "在校园问答Demo中明确写清需求来源（同学试用的反馈）、整理方式（归类为几条需求）和优先级判断依据；在图书预约原型中把“整理预约流程”改写为“梳理预约环节并归纳为X个核心需求点”，补上清单或优先级的可见产出"
+    },
+    {
+      "jdRequirement": "参与原型设计，能将需求转化为可讨论的原型",
+      "resumeEvidence": "校园问答Demo制作问答原型；图书预约原型使用Figma制作原型并完成课程展示；二手书小程序设计负责发布信息页面与交易状态流程的原型设计",
+      "evidenceStrength": "medium",
+      "needsSupplement": true,
+      "optimizationSuggestion": "补充原型工具（Figma）、个人负责的页面或流程数量、迭代次数与被讨论/修改的过程，并在校园问答Demo中把需求与原型调整对应起来，体现“需求→原型”的转化链路；保持“未开发上线”的客观表述，不夸大为上线产品"
+    },
+    {
+      "jdRequirement": "进行基础数据分析以支持需求判断",
+      "resumeEvidence": "食堂满意度调研参与问卷设计、用Excel整理数据并提交调研报告；学习数据看板用公开模拟数据制作学习时长看板、练习SQL查询，简历自述不代表真实用户行为；技能栏列出Excel、SQL基础",
+      "evidenceStrength": "weak",
+      "needsSupplement": true,
+      "optimizationSuggestion": "补充问卷题量与样本量、Excel中做的具体统计（如占比、排序）以及得出的结论如何影响报告建议；学习数据看板明确标注为模拟数据练习的同时，写清用SQL完成了哪些查询与看板呈现了哪些指标，突出可迁移的数据处理能力而非真实用户结论"
+    },
+    {
+      "jdRequirement": "逻辑清晰，能说明个人贡献",
+      "resumeEvidence": "各项目均标注了角色（负责人、成员、个人练习），但每段仅一到两句，未区分个人与团队成果，也未说明背景、决策过程与结果，如“负责需求与提示词调试”“参与问卷设计”均为无结果的动词短语",
+      "evidenceStrength": "weak",
+      "needsSupplement": true,
+      "optimizationSuggestion": "按“项目背景—我负责的具体动作—产出/结果”重写每段经历，统一以“我负责……”开头，并明确写出该动作带来的可见产出（原型稿、需求点、调研报告结论），把负责人与成员角色的差异讲清楚"
+    },
+    {
+      "jdRequirement": "有团队协作经验",
+      "resumeEvidence": "图书预约原型为交互课程成员、食堂满意度调研为统计课程成员、二手书小程序设计为课程项目成员，校园问答Demo担任课程项目负责人；校读书协会活动干事，组织读书分享会、协调场地和报名",
+      "evidenceStrength": "medium",
+      "needsSupplement": true,
+      "optimizationSuggestion": "在课程项目中补充协作方式：与几位成员分工、我承担的部分、如何对齐进度与交付时间；读书协会经历补充组织场次、参与人数与协调事项，把“协调场地和报名”具体化为可验证的推进动作"
+    },
+    {
+      "jdRequirement": "了解AI工具加分",
+      "resumeEvidence": "校园问答Demo中负责提示词调试，技能栏列出“提示词调试”；但未说明使用的AI工具名称、解决的具体问题以及调试带来的效果变化",
+      "evidenceStrength": "medium",
+      "needsSupplement": true,
+      "optimizationSuggestion": "在校园问答Demo中写清使用的AI工具、调试前后回答质量或覆盖范围的变化，以及AI输出被如何使用和人工修正，体现工具应用的意识与边界认知，不要只保留“提示词调试”这一孤立的技能词"
+    },
+    {
+      "jdRequirement": "对教育科技或教师工具场景的理解（隐性加分）",
+      "resumeEvidence": "简历中无教育科技、教师工具或教学场景相关的经历与表述；读书协会属于校园活动组织，与教师工作场景无关",
+      "evidenceStrength": "none",
+      "needsSupplement": true,
+      "optimizationSuggestion": "若有过家教、助教、课程辅导、教师沟通等经历，可作为理解教学场景的证据补充进来；若没有，可在项目选择上说明为何关注教师工具类产品，用真实的动机与观察代替行业经验，不要编造教育行业经历"
+    }
+  ],
+  "experienceAssessments": [
+    {
+      "experienceId": "exp-1",
+      "experienceType": "project",
+      "experienceTitle": "校园问答Demo",
+      "organization": "金陵信息大学（课程项目）",
+      "role": "课程项目负责人",
+      "period": "2026.04—2026.06",
+      "originalBullets": [
+        "用公开校园资料制作问答原型，负责需求与提示词调试，邀请同学试用。"
+      ],
+      "directRelevance": "low",
+      "transferableValue": "medium",
+      "evidenceCompleteness": "partial",
+      "missingDimensions": [],
+      "suggestedAction": "retain",
+      "removalReason": "",
+      "userDecision": "retain"
+    },
+    {
+      "experienceId": "exp-2",
+      "experienceType": "project",
+      "experienceTitle": "图书预约原型",
+      "organization": "金陵信息大学（交互课程）",
+      "role": "课程成员",
+      "period": "2025.10—2025.12",
+      "originalBullets": [
+        "整理预约流程并制作Figma原型，完成课程展示。"
+      ],
+      "directRelevance": "low",
+      "transferableValue": "medium",
+      "evidenceCompleteness": "partial",
+      "missingDimensions": [],
+      "suggestedAction": "retain",
+      "removalReason": "",
+      "userDecision": "retain"
+    },
+    {
+      "experienceId": "exp-3",
+      "experienceType": "project",
+      "experienceTitle": "食堂满意度调研",
+      "organization": "金陵信息大学（统计课程）",
+      "role": "课程成员",
+      "period": "2025.05—2025.06",
+      "originalBullets": [
+        "参与问卷设计，用Excel整理数据并提交调研报告。"
+      ],
+      "directRelevance": "low",
+      "transferableValue": "medium",
+      "evidenceCompleteness": "partial",
+      "missingDimensions": [],
+      "suggestedAction": "retain",
+      "removalReason": "",
+      "userDecision": "retain"
+    },
+    {
+      "experienceId": "exp-4",
+      "experienceType": "project",
+      "experienceTitle": "二手书小程序设计",
+      "organization": "金陵信息大学（课程项目）",
+      "role": "课程项目成员",
+      "period": "2024.11—2024.12",
+      "originalBullets": [
+        "负责发布信息页面与交易状态流程的原型设计，未开发上线。"
+      ],
+      "directRelevance": "low",
+      "transferableValue": "medium",
+      "evidenceCompleteness": "partial",
+      "missingDimensions": [],
+      "suggestedAction": "retain",
+      "removalReason": "",
+      "userDecision": "retain"
+    },
+    {
+      "experienceId": "exp-5",
+      "experienceType": "project",
+      "experienceTitle": "学习数据看板",
+      "organization": "个人练习",
+      "role": "个人练习",
+      "period": "2024.07—2024.08",
+      "originalBullets": [
+        "用公开模拟数据制作学习时长看板，练习SQL查询，不代表真实用户行为。"
+      ],
+      "directRelevance": "low",
+      "transferableValue": "medium",
+      "evidenceCompleteness": "partial",
+      "missingDimensions": [],
+      "suggestedAction": "retain",
+      "removalReason": "",
+      "userDecision": "retain"
+    },
+    {
+      "experienceId": "exp-6",
+      "experienceType": "campus",
+      "experienceTitle": "校读书协会",
+      "organization": "校读书协会",
+      "role": "活动干事",
+      "period": "2024.09—2025.06",
+      "originalBullets": [
+        "组织读书分享会，协调场地和报名。"
+      ],
+      "directRelevance": "low",
+      "transferableValue": "medium",
+      "evidenceCompleteness": "partial",
+      "missingDimensions": [],
+      "suggestedAction": "retain",
+      "removalReason": "",
+      "userDecision": "retain"
+    }
+  ],
+  "followUpQuestions": [
+    {
+      "id": "fu-1",
+      "experienceId": "exp-1",
+      "experienceType": "project",
+      "experienceTitle": "校园问答Demo",
+      "evidenceDimension": "action",
+      "question": "在校园问答Demo里你负责的“需求”工作具体是怎么做的？需求来自哪里（如同学反馈、自己的观察、公开资料），你用什么方式记录和归类，最后形成了什么形式的产出（如需求清单、几条核心问题）？",
+      "purpose": "对应JD“整理用户需求并形成需求清单”和“逻辑清晰、能说明个人贡献”的要求，补足需求来源、整理方法与可见产出的证据，把“负责需求”这句笼统表述做实",
+      "userAnswer": "",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-2",
+      "experienceId": "exp-1",
+      "experienceType": "project",
+      "experienceTitle": "校园问答Demo",
+      "evidenceDimension": "scale",
+      "question": "你邀请了多少位同学试用这个问答原型？他们一共提出了多少条反馈，主要集中在哪些问题上？试用时你是当面问询、发放问卷还是线上收集？",
+      "purpose": "对应JD“协助开展用户访谈”职责，把“邀请同学试用”补充为可核对的小规模用户验证规模（人数、反馈条数、收集方式），在无法虚构教师访谈的前提下提供最接近的访谈类比证据",
+      "userAnswer": "",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-3",
+      "experienceId": "exp-1",
+      "experienceType": "project",
+      "experienceTitle": "校园问答Demo",
+      "evidenceDimension": "result",
+      "question": "这些试用反馈最终如何影响了原型或提示词的调整（改了哪几处、为什么改）？项目最后交付了什么，是否得到老师或同学的正式评价？",
+      "purpose": "对应JD“了解AI工具加分”与“逻辑清晰、能说明个人贡献”，补足AI工具使用效果和需求到方案调整的闭环证据，避免只留下“提示词调试”这一孤立技能词",
+      "userAnswer": "",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-4",
+      "experienceId": "exp-2",
+      "experienceType": "project",
+      "experienceTitle": "图书预约原型",
+      "evidenceDimension": "role",
+      "question": "在图书预约原型的课程小组中，一共几位成员、如何分工？你个人负责了哪些页面或哪些预约环节的设计与判断，哪些决定是你做的？",
+      "purpose": "对应JD“能说明个人贡献”与“团队协作经验”两条硬性要求，划清个人贡献与团队成果的边界",
+      "userAnswer": "",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-5",
+      "experienceId": "exp-2",
+      "experienceType": "project",
+      "experienceTitle": "图书预约原型",
+      "evidenceDimension": "result",
+      "question": "这个Figma原型最终交付了什么（如多少个页面、几条完整流程、迭代了几版）？课程展示时老师或同学给了什么反馈，之后是否做过修改或继续沿用？",
+      "purpose": "对应JD“参与原型设计”职责，补足原型交付物规模与被讨论、被修改的过程证据，体现需求到原型的转化链路",
+      "userAnswer": "",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-6",
+      "experienceId": "exp-3",
+      "experienceType": "project",
+      "experienceTitle": "食堂满意度调研",
+      "evidenceDimension": "action",
+      "question": "在食堂满意度调研中，你用Excel具体做了哪些处理？例如计算了哪些占比或均值、做了排序、分类汇总或图表？这些处理是你独立完成还是与成员分工？",
+      "purpose": "对应JD“进行基础数据分析以支持需求判断”职责，把“用Excel整理数据”具体化为可验证的分析动作，支撑数据意识这一核心能力",
+      "userAnswer": "",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-7",
+      "experienceId": "exp-3",
+      "experienceType": "project",
+      "experienceTitle": "食堂满意度调研",
+      "evidenceDimension": "scale",
+      "question": "这份问卷大约设计了多少道题、最终回收了多少份有效样本？调查覆盖了哪些人群（如哪个食堂、哪个年级）？",
+      "purpose": "对应JD“数据分析”能力要求，补充真实的样本量与覆盖范围，说明数据结论的可信度来源",
+      "userAnswer": "",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-8",
+      "experienceId": "exp-3",
+      "experienceType": "project",
+      "experienceTitle": "食堂满意度调研",
+      "evidenceDimension": "result",
+      "question": "从Excel整理的结果中你得出什么结论，这个结论如何影响了调研报告的建议方向？报告最终提交给谁、有没有得到正式反馈或评价？",
+      "purpose": "对应JD“用数据支持需求判断”的隐含要求，补足从数据到结论、再到建议的闭环结果证据，避免只停留在“整理数据”的动作层",
+      "userAnswer": "",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-9",
+      "experienceId": "exp-4",
+      "experienceType": "project",
+      "experienceTitle": "二手书小程序设计",
+      "evidenceDimension": "scale",
+      "question": "在二手书小程序设计中，你负责的发布信息页面和交易状态流程一共画了多少个页面、多少个交易状态节点？原型一共迭代了几版？",
+      "purpose": "对应JD“参与原型设计”职责，补充原型的实际工作量与流程复杂度，说明你能把一段业务流程拆成可讨论的原型",
+      "userAnswer": "",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-10",
+      "experienceId": "exp-4",
+      "experienceType": "project",
+      "experienceTitle": "二手书小程序设计",
+      "evidenceDimension": "result",
+      "question": "这个原型最终以什么形式交付（如Figma文件、课程展示、组内评审）？团队或老师给出的反馈是什么，后续有没有据此修改或影响同一小组的其他设计？",
+      "purpose": "对应JD“参与原型设计”与“能说明个人贡献”，在保持“未开发上线”客观表述的前提下，提供可验证的交付物与反馈结果",
+      "userAnswer": "",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-11",
+      "experienceId": "exp-5",
+      "experienceType": "project",
+      "experienceTitle": "学习数据看板",
+      "evidenceDimension": "action",
+      "question": "在学习数据看板练习中，你用SQL具体写了哪些查询（如分组统计、筛选、排序、聚合）？看板最终呈现了哪几个指标，指标口径是你自己定义的吗？",
+      "purpose": "对应JD“进行基础数据分析”职责，明确模拟数据练习中可迁移的数据处理能力边界，而非真实用户结论",
+      "userAnswer": "",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-12",
+      "experienceId": "exp-5",
+      "experienceType": "project",
+      "experienceTitle": "学习数据看板",
+      "evidenceDimension": "other",
+      "question": "这个看板最终以什么形式产出（如可视化图表、分析小结、课程或社团展示）？你是否基于看板总结过一条结论并向他人说明过？",
+      "purpose": "对应JD“用数据支持判断”的隐含要求，补充练习类经历可验证的交付形式与表达结果，避免只有动作没有产出",
+      "userAnswer": "",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-13",
+      "experienceId": "exp-6",
+      "experienceType": "campus",
+      "experienceTitle": "校读书协会",
+      "evidenceDimension": "other",
+      "question": "在担任读书协会活动干事期间，你参与或负责组织了几场读书分享会？每场大约有多少人报名或到场？场地和报名是你独立协调还是与其他人一起完成？",
+      "purpose": "对应JD“有团队协作经验”的硬性要求，用活动场次与参与人数把“组织读书分享会、协调场地和报名”补充为可核对的协作规模证据",
+      "userAnswer": "",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-14",
+      "experienceId": "exp-6",
+      "experienceType": "campus",
+      "experienceTitle": "校读书协会",
+      "evidenceDimension": "other",
+      "question": "这些读书分享会办完之后有什么可验证的结果或反馈？例如参与人数变化、同学或协会负责人的评价、活动是否延续到下一学期？",
+      "purpose": "对应JD“说明个人贡献”与“团队协作”要求，补充校园经历的可验证结果与正式反馈，作为通用能力（组织、推进、协调）的支撑证据",
+      "userAnswer": "",
+      "generatedBullet": ""
+    }
+  ]
+}

@@ -1,0 +1,244 @@
+"use client";
+
+import { ArrowRight, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { EmptyState, SectionTitle } from "@/components/shared/ui-helpers";
+import { useResumeStore } from "@/store/resume-store";
+
+interface ResumeEntry {
+  name: string;
+  role: string;
+  period: string;
+  bullets: string[];
+}
+
+function EntrySection({ title, entries }: { title: string; entries: ResumeEntry[] }) {
+  if (entries.length === 0) return null;
+
+  return (
+    <section className="mb-5">
+      <h4 className="mb-3 text-xs font-medium uppercase tracking-wider text-neutral-400">
+        {title}
+      </h4>
+      <div className="space-y-4">
+        {entries.map((entry) => (
+          <div key={`${entry.name}-${entry.period}`}>
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <p className="text-sm font-medium">
+                {entry.name} · {entry.role}
+              </p>
+              <span className="text-xs text-neutral-400">{entry.period}</span>
+            </div>
+            <ul className="mt-2 space-y-1">
+              {entry.bullets.map((bullet, index) => (
+                <li key={index} className="flex gap-2 text-sm text-neutral-600">
+                  <span className="text-neutral-300">•</span>
+                  <span>{bullet}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function EducationSection({
+  education,
+}: {
+  education: { school: string; degree: string; period: string };
+}) {
+  return (
+    <section className="mb-5">
+      <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-neutral-400">
+        教育背景
+      </h4>
+      <p className="text-sm">
+        {education.school} · {education.degree} · {education.period}
+      </p>
+    </section>
+  );
+}
+
+function SkillsSection({ title, skills }: { title: string; skills: string[] }) {
+  if (skills.length === 0) return null;
+
+  return (
+    <section className="mb-5">
+      <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-neutral-400">
+        {title}
+      </h4>
+      <div className="flex flex-wrap gap-1.5">
+        {skills.map((skill) => (
+          <Badge key={skill} variant="secondary" className="font-normal">
+            {skill}
+          </Badge>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+export function FinalResumeStep() {
+  const {
+    analysisCheckpoint,
+    optimizationCheckpoint,
+    setCurrentStep,
+    getStepStatus,
+  } = useResumeStore();
+  const finalResume = optimizationCheckpoint.finalResume;
+
+  if (!finalResume) {
+    return <EmptyState message="请先完成输入材料并开始分析" />;
+  }
+  const nextStatus = getStepStatus("interview");
+  const originalScore = analysisCheckpoint.diagnosis?.overallScore;
+  const finalScore = optimizationCheckpoint.finalResumeScore;
+  const scoreImprovement =
+    typeof originalScore === "number" && typeof finalScore === "number"
+      ? finalScore - originalScore
+      : null;
+  const { personalInfo } = finalResume;
+  const isCampusTemplate = finalResume.template === "campus";
+  const workEntries = finalResume.workExperience.map((item) => ({
+    name: item.company,
+    role: item.role,
+    period: item.period,
+    bullets: item.bullets,
+  }));
+  const projectEntries = finalResume.projectExperience.map((item) => ({
+    name: item.name,
+    role: item.role,
+    period: item.period,
+    bullets: item.bullets,
+  }));
+  const campusEntries = finalResume.campusExperience.map((item) => ({
+    name: item.organization,
+    role: item.role,
+    period: item.period,
+    bullets: item.bullets,
+  }));
+  const showCampusExperience = campusEntries.length > 0;
+
+  return (
+    <div>
+      <SectionTitle
+        title="最终简历"
+        description="基于分析与优化生成的完整简历"
+      />
+
+      {typeof originalScore === "number" && typeof finalScore === "number" && (
+        <Card className="mb-4 border-emerald-200 bg-emerald-50/40">
+          <CardContent className="flex flex-wrap items-center justify-between gap-4 p-4">
+            <div>
+              <p className="text-xs text-neutral-500">匹配度变化</p>
+              <div className="mt-1 flex items-center gap-3 tabular-nums">
+                <div>
+                  <span className="mr-1 text-xs text-neutral-400">原始</span>
+                  <span className="text-xl font-semibold text-neutral-500">{originalScore}</span>
+                </div>
+                <ArrowRight className="h-4 w-4 text-neutral-300" />
+                <div>
+                  <span className="mr-1 text-xs text-emerald-600">优化后</span>
+                  <span className="text-2xl font-semibold text-emerald-700">{finalScore}</span>
+                  <span className="ml-1 text-xs text-neutral-400">/100</span>
+                </div>
+              </div>
+            </div>
+            <Badge variant="success" className="px-3 py-1 text-sm font-medium">
+              {scoreImprovement !== null && scoreImprovement > 0
+                ? `提升 +${scoreImprovement} 分`
+                : `变化 ${scoreImprovement ?? 0} 分`}
+            </Badge>
+          </CardContent>
+        </Card>
+      )}
+
+      <Card className="mb-6">
+        <CardContent className="p-4 sm:p-6">
+          <div className="mb-4">
+            <h3 className="text-xl font-semibold">{personalInfo.name}</h3>
+            <p className="mt-1 text-sm text-neutral-500">
+              {personalInfo.email} · {personalInfo.phone} · {personalInfo.location}
+            </p>
+          </div>
+
+          <Separator className="my-4" />
+
+          <section className="mb-5">
+            <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-neutral-400">
+              求职意向
+            </h4>
+            <p className="text-sm">{finalResume.jobIntent}</p>
+          </section>
+
+          {isCampusTemplate && <EducationSection education={finalResume.education} />}
+
+          {!isCampusTemplate && finalResume.summary && (
+            <section className="mb-5">
+              <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-neutral-400">
+                职业摘要
+              </h4>
+              <p className="text-sm leading-relaxed text-neutral-700">{finalResume.summary}</p>
+            </section>
+          )}
+
+          <SkillsSection
+            title={isCampusTemplate ? "专业能力" : "核心能力"}
+            skills={finalResume.coreSkills}
+          />
+
+          <EntrySection
+            title={isCampusTemplate ? "实习经历" : "工作经历"}
+            entries={workEntries}
+          />
+
+          <EntrySection title="项目经历" entries={projectEntries} />
+
+          {showCampusExperience && <EntrySection title="校园经历" entries={campusEntries} />}
+
+          {isCampusTemplate && finalResume.awardsAndCertificates.length > 0 && (
+            <section className="mb-5">
+              <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-neutral-400">
+                获奖证书
+              </h4>
+              <ul className="space-y-1">
+                {finalResume.awardsAndCertificates.map((award) => (
+                  <li key={award} className="flex gap-2 text-sm text-neutral-600">
+                    <span className="text-neutral-300">•</span>
+                    <span>{award}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          <section className="mb-5">
+            <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-neutral-400">
+              技能工具
+            </h4>
+            <p className="text-sm text-neutral-600">{finalResume.skillsAndTools.join(" · ")}</p>
+          </section>
+
+          {!isCampusTemplate && <EducationSection education={finalResume.education} />}
+        </CardContent>
+      </Card>
+
+      <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={nextStatus === "disabled" || nextStatus === "running" || nextStatus === "error"}
+          onClick={() => setCurrentStep("interview")}
+        >
+          {nextStatus === "running" ? "面试准备生成中…" : "下一步：面试准备"}
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+}

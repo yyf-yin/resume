@@ -1,0 +1,477 @@
+{
+  "jdAnalysis": {
+    "responsibilities": [
+      "协助教师工具的用户访谈，参与访谈准备、记录与信息归纳",
+      "整理用户需求，将访谈与反馈转化为可执行的需求描述",
+      "参与原型设计，配合完成教师工具相关界面或流程原型",
+      "协助数据分析，对访谈、试用或产品数据做基础整理与解读",
+      "与团队协作推进教师工具相关任务，说明个人在其中的具体贡献"
+    ],
+    "hardRequirements": [
+      "在校本科生",
+      "逻辑清晰，能结构化表达问题与结论",
+      "能清楚说明个人贡献，区分团队成果与自身工作",
+      "有团队协作经验",
+      "课程、竞赛、校园项目均可作为经历证据",
+      "了解AI工具为加分项",
+      "不要求商业项目经验"
+    ],
+    "implicitRequirements": [
+      "对教育科技与教师工具有基本兴趣和理解意愿",
+      "能在无正式实习经历的情况下用课程与校园项目证明能力",
+      "具备主动沟通和访谈他人的意愿与基本技巧",
+      "对需求真伪有初步判断力，避免只做表面记录",
+      "有数据意识，能用Excel或SQL等工具做基础分析",
+      "能在原型工具中快速表达想法，接受反复修改",
+      "时间管理能力，可兼顾学业与实习任务",
+      "学习能力强，愿意接触AI工具与提示词等新方法"
+    ],
+    "keywords": [
+      "用户访谈",
+      "需求整理",
+      "原型设计",
+      "数据分析",
+      "教师工具",
+      "教育科技",
+      "逻辑清晰",
+      "个人贡献",
+      "团队协作",
+      "课程项目",
+      "校园项目",
+      "AI工具",
+      "Figma",
+      "Excel",
+      "SQL",
+      "提示词调试"
+    ],
+    "idealCandidate": "在校本科生，最好有信息管理、交互或统计相关课程背景；通过课程项目、竞赛或校园活动积累了用户访谈、需求整理、原型设计与基础数据分析经验，能清晰说明自己在每段经历中的个人贡献；熟练或初步掌握Figma、Excel、SQL基础，了解AI工具与提示词调试；对教育科技和教师工具有兴趣，逻辑清晰、善于协作，能在指导下承担访谈记录、需求梳理、原型调整和数据整理等支持性工作。",
+    "coreCompetencies": [
+      {
+        "name": "需求分析",
+        "importance": "high",
+        "description": "能通过用户访谈和试用反馈收集信息，梳理并归纳出清晰、可执行的需求，区分表面诉求与真实问题。"
+      },
+      {
+        "name": "数据意识",
+        "importance": "high",
+        "description": "能用Excel或SQL基础对问卷、试用等数据做整理和分析，并从数据中得出对产品有帮助的结论。"
+      },
+      {
+        "name": "协作沟通",
+        "importance": "high",
+        "description": "有团队项目或校园活动协作经验，能配合他人推进任务，并清楚说明个人贡献与团队分工。"
+      },
+      {
+        "name": "原型设计",
+        "importance": "medium",
+        "description": "能使用Figma等工具制作界面或流程原型，把需求转化为可讨论、可修改的方案。"
+      },
+      {
+        "name": "逻辑表达",
+        "importance": "high",
+        "description": "能结构化地陈述问题、分析过程和结论，让访谈记录与需求文档条理清晰。"
+      },
+      {
+        "name": "AI工具应用",
+        "importance": "medium",
+        "description": "了解AI工具与提示词调试，能将其用于问答原型或提升日常工作效率，属于加分能力。"
+      },
+      {
+        "name": "教育场景理解",
+        "importance": "medium",
+        "description": "对教师工作场景与教育科技产品有基本认知，能站在教师视角理解需求与使用障碍。"
+      }
+    ]
+  },
+  "diagnosis": {
+    "overallScore": 72,
+    "dimensionScores": [
+      {
+        "dimension": "JD硬性条件匹配",
+        "score": 88,
+        "comment": "本科在读，信息管理专业与产品、数据方向有一定相关性，符合校招实习生身份；JD不要求商业项目经验，硬性门槛基本满足。"
+      },
+      {
+        "dimension": "核心职责与项目证据",
+        "score": 68,
+        "comment": "有原型设计、需求整理、问卷与数据整理、团队协作等课程或校园证据，但缺少教师工具场景和直接用户访谈证据。"
+      },
+      {
+        "dimension": "成果与证据强度",
+        "score": 55,
+        "comment": "项目多为课程原型或个人练习，未上线，个人贡献有简述但缺少交付结果、量化影响和用户验证反馈。"
+      },
+      {
+        "dimension": "JD关键词与专业能力覆盖",
+        "score": 70,
+        "comment": "覆盖Figma、需求、Excel、SQL、协作、提示词调试等关键词，但用户访谈、数据分析闭环和产品指标证据不足。"
+      },
+      {
+        "dimension": "表达质量与信息结构",
+        "score": 72,
+        "comment": "时间倒序清晰，角色与负责事项可读，但描述偏简略，缺少个人贡献边界、结果数据和与目标岗位的对应说明。"
+      }
+    ],
+    "mainIssues": [
+      "缺少面向教师工具的用户访谈和需求分析直接证据。",
+      "项目成果多为课程原型或个人练习，未上线且缺少量化结果与验证反馈。",
+      "数据分析经历偏基础，缺少从数据发现到产品建议的闭环说明。",
+      "个人贡献描述有角色标签，但具体行动、产出边界和协作分工不够具体。",
+      "教育科技行业理解和AI工具应用深度缺少展开，关键词与JD匹配度可进一步提升。"
+    ],
+    "prioritySuggestions": [
+      "在校园问答Demo中补充试用或访谈对象、问题提纲、关键发现及据此调整需求的过程，若未做正式访谈不要写成用户访谈。",
+      "用“目标-我的行动-交付物-结果/反馈”结构改写每段项目，明确个人贡献和团队协作边界。",
+      "将食堂满意度调研和学习数据看板改写成“数据发现问题-提出建议-结果”的分析闭环。",
+      "补充Figma原型的页面数、核心流程、评审反馈和迭代点，强调原型设计能力，不写成上线产品。",
+      "补充AI工具名称、提示词调试目标及效果，说明如何辅助需求整理或原型设计。",
+      "按JD顺序重组技能和项目关键词：用户访谈、需求整理、原型设计、数据分析、团队协作、AI工具。"
+    ]
+  },
+  "matchItems": [
+    {
+      "jdRequirement": "面向在校本科生，可校招实习",
+      "resumeEvidence": "金陵信息大学信息管理本科在读，2023.09—2027.06。",
+      "evidenceStrength": "strong",
+      "needsSupplement": false,
+      "optimizationSuggestion": "保留学历信息，补充可实习时间、每周到岗天数和可实习时长，便于招聘方判断。"
+    },
+    {
+      "jdRequirement": "协助教师工具的用户访谈",
+      "resumeEvidence": "校园问答Demo中用公开校园资料制作问答原型，并邀请同学试用；未说明是否开展正式访谈、访谈对象和访谈记录。",
+      "evidenceStrength": "weak",
+      "needsSupplement": true,
+      "optimizationSuggestion": "如实际做过访谈或试用，补充访谈人数、问题提纲、关键发现和据此调整的需求；若未访谈，不要写成用户访谈，可改为试用反馈收集。"
+    },
+    {
+      "jdRequirement": "需求整理",
+      "resumeEvidence": "校园问答Demo负责需求与提示词调试；图书预约原型整理预约流程；二手书小程序设计负责发布信息页面与交易状态流程原型设计。",
+      "evidenceStrength": "none",
+      "needsSupplement": true,
+      "optimizationSuggestion": "用“收集-分类-优先级-原型验证”说明需求整理过程，并补充需求文档、用户故事或流程图等交付物。"
+    },
+    {
+      "jdRequirement": "原型设计",
+      "resumeEvidence": "图书预约原型用Figma制作并完成课程展示；二手书小程序设计负责页面与交易状态流程原型，未开发上线。",
+      "evidenceStrength": "none",
+      "needsSupplement": true,
+      "optimizationSuggestion": "补充原型工具、页面数量、核心流程、评审反馈和迭代点，突出Figma交互原型能力，避免写成商业上线项目。"
+    },
+    {
+      "jdRequirement": "数据分析",
+      "resumeEvidence": "食堂满意度调研参与问卷设计，用Excel整理数据并提交报告；学习数据看板用公开模拟数据练习SQL查询，不代表真实用户行为。",
+      "evidenceStrength": "none",
+      "needsSupplement": true,
+      "optimizationSuggestion": "补充样本量、分析维度、关键结论、建议及对活动或产品的启发；学习看板注明模拟数据边界，突出SQL与指标设计能力。"
+    },
+    {
+      "jdRequirement": "有团队协作经验",
+      "resumeEvidence": "多个课程项目中担任负责人或成员；校读书协会活动干事，组织读书分享会，协调场地和报名。",
+      "evidenceStrength": "strong",
+      "needsSupplement": false,
+      "optimizationSuggestion": "补充协作规模、分工接口、协调难点和推进结果，突出与同学、设计或其他角色的配合。"
+    },
+    {
+      "jdRequirement": "逻辑清晰，能说明个人贡献",
+      "resumeEvidence": "每段经历标注角色和负责事项，但描述较简略，缺少个人贡献边界、决策依据和结果。",
+      "evidenceStrength": "weak",
+      "needsSupplement": true,
+      "optimizationSuggestion": "统一用“目标-我的行动-产出-结果/反馈”结构改写，明确哪些是个人完成、哪些是团队协作。"
+    },
+    {
+      "jdRequirement": "了解AI工具加分",
+      "resumeEvidence": "校园问答Demo负责提示词调试；技能栏写有“提示词调试”，但未说明AI工具名称、使用场景和效果。",
+      "evidenceStrength": "none",
+      "needsSupplement": true,
+      "optimizationSuggestion": "补充使用的AI工具、提示词调试目标、对比效果，以及如何用AI辅助需求整理或原型设计，不要夸大AI能力。"
+    }
+  ],
+  "experienceAssessments": [
+    {
+      "experienceId": "exp-1",
+      "experienceType": "project",
+      "experienceTitle": "校园问答Demo",
+      "organization": "金陵信息大学（课程项目）",
+      "role": "课程项目负责人",
+      "period": "2026.04—2026.06",
+      "originalBullets": [
+        "用公开校园资料制作问答原型。",
+        "负责需求与提示词调试。",
+        "邀请同学试用。"
+      ],
+      "directRelevance": "low",
+      "transferableValue": "medium",
+      "evidenceCompleteness": "partial",
+      "missingDimensions": [],
+      "suggestedAction": "retain",
+      "removalReason": "",
+      "userDecision": "retain"
+    },
+    {
+      "experienceId": "exp-2",
+      "experienceType": "project",
+      "experienceTitle": "图书预约原型",
+      "organization": "金陵信息大学（课程项目）",
+      "role": "交互课程成员",
+      "period": "2025.10—2025.12",
+      "originalBullets": [
+        "整理预约流程。",
+        "使用Figma制作预约流程原型。",
+        "完成课程展示。"
+      ],
+      "directRelevance": "low",
+      "transferableValue": "medium",
+      "evidenceCompleteness": "partial",
+      "missingDimensions": [],
+      "suggestedAction": "retain",
+      "removalReason": "",
+      "userDecision": "retain"
+    },
+    {
+      "experienceId": "exp-3",
+      "experienceType": "project",
+      "experienceTitle": "食堂满意度调研",
+      "organization": "金陵信息大学（课程项目）",
+      "role": "统计课程成员",
+      "period": "2025.05—2025.06",
+      "originalBullets": [
+        "参与问卷设计。",
+        "用Excel整理调研数据。",
+        "提交调研报告。"
+      ],
+      "directRelevance": "low",
+      "transferableValue": "medium",
+      "evidenceCompleteness": "partial",
+      "missingDimensions": [],
+      "suggestedAction": "retain",
+      "removalReason": "",
+      "userDecision": "retain"
+    },
+    {
+      "experienceId": "exp-4",
+      "experienceType": "project",
+      "experienceTitle": "二手书小程序设计",
+      "organization": "金陵信息大学（课程项目）",
+      "role": "课程项目成员",
+      "period": "2024.11—2024.12",
+      "originalBullets": [
+        "负责发布信息页面的原型设计。",
+        "负责交易状态流程的原型设计。",
+        "项目未开发上线。"
+      ],
+      "directRelevance": "low",
+      "transferableValue": "medium",
+      "evidenceCompleteness": "partial",
+      "missingDimensions": [],
+      "suggestedAction": "retain",
+      "removalReason": "",
+      "userDecision": "retain"
+    },
+    {
+      "experienceId": "exp-5",
+      "experienceType": "project",
+      "experienceTitle": "学习数据看板",
+      "organization": "个人自学",
+      "role": "个人练习",
+      "period": "2024.07—2024.08",
+      "originalBullets": [
+        "使用公开模拟数据制作学习时长看板。",
+        "练习SQL查询。",
+        "数据为模拟数据，不代表真实用户行为。"
+      ],
+      "directRelevance": "low",
+      "transferableValue": "medium",
+      "evidenceCompleteness": "partial",
+      "missingDimensions": [],
+      "suggestedAction": "retain",
+      "removalReason": "",
+      "userDecision": "retain"
+    },
+    {
+      "experienceId": "exp-6",
+      "experienceType": "campus",
+      "experienceTitle": "校读书协会",
+      "organization": "金陵信息大学校读书协会",
+      "role": "活动干事",
+      "period": "2024.09—2025.06",
+      "originalBullets": [
+        "组织读书分享会。",
+        "协调场地和报名。"
+      ],
+      "directRelevance": "low",
+      "transferableValue": "medium",
+      "evidenceCompleteness": "partial",
+      "missingDimensions": [],
+      "suggestedAction": "retain",
+      "removalReason": "",
+      "userDecision": "retain"
+    }
+  ],
+  "followUpQuestions": [
+    {
+      "id": "fu-1",
+      "experienceId": "exp-1",
+      "experienceType": "project",
+      "experienceTitle": "校园问答Demo",
+      "evidenceDimension": "action",
+      "question": "在校园问答Demo中，你负责的需求整理和提示词调试具体包括哪些步骤？使用了哪些AI工具或提示词方法，你个人完成了哪部分？",
+      "purpose": "补充个人行动与工具使用细节，明确需求整理和AI工具应用的具体证据。",
+      "userAnswer": "校园问答Demo使用公开校园资料，由我编写提示词和整理20条人工测试问题，邀请8名同学体验。没有正式准确率统计，没有商业用户、真实营收或生产上线。",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-2",
+      "experienceId": "exp-1",
+      "experienceType": "project",
+      "experienceTitle": "校园问答Demo",
+      "evidenceDimension": "collaboration",
+      "question": "校园问答Demo作为课程项目，你和团队成员如何分工？你在推动需求确认或试用安排时与谁协作、如何解决分歧？",
+      "purpose": "补充团队协作与推动过程的证据，突出协作能力。",
+      "userAnswer": "校园问答Demo使用公开校园资料，由我编写提示词和整理20条人工测试问题，邀请8名同学体验。没有正式准确率统计，没有商业用户、真实营收或生产上线。",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-3",
+      "experienceId": "exp-1",
+      "experienceType": "project",
+      "experienceTitle": "校园问答Demo",
+      "evidenceDimension": "result",
+      "question": "校园问答Demo邀请同学试用后，收集到哪些具体反馈？你据此对原型或提示词做了哪些调整，最终交付了什么？",
+      "purpose": "补充真实试用反馈和迭代结果，避免写成正式用户访谈。",
+      "userAnswer": "校园问答Demo使用公开校园资料，由我编写提示词和整理20条人工测试问题，邀请8名同学体验。没有正式准确率统计，没有商业用户、真实营收或生产上线。",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-4",
+      "experienceId": "exp-2",
+      "experienceType": "project",
+      "experienceTitle": "图书预约原型",
+      "evidenceDimension": "action",
+      "question": "在图书预约原型中，你具体如何整理预约流程？用Figma制作了哪些页面和核心流程，你个人负责哪部分设计？",
+      "purpose": "补充原型设计的具体行动、页面与流程边界，突出Figma能力。",
+      "userAnswer": "图书预约原型是3人课程作业，我访谈4名同学并制作预约与取消预约页面，交付Figma原型和课程报告，未上线。",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-5",
+      "experienceId": "exp-2",
+      "experienceType": "project",
+      "experienceTitle": "图书预约原型",
+      "evidenceDimension": "result",
+      "question": "图书预约原型完成课程展示后，老师或同学给出了哪些反馈？你是否根据反馈迭代了原型，最终交付物是什么？",
+      "purpose": "补充课程展示反馈与迭代结果，证明原型交付质量。",
+      "userAnswer": "图书预约原型是3人课程作业，我访谈4名同学并制作预约与取消预约页面，交付Figma原型和课程报告，未上线。",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-6",
+      "experienceId": "exp-3",
+      "experienceType": "project",
+      "experienceTitle": "食堂满意度调研",
+      "evidenceDimension": "action",
+      "question": "在食堂满意度调研中，你参与问卷设计和Excel数据整理的具体步骤是什么？你个人负责哪些题目设计或数据处理？",
+      "purpose": "补充问卷设计与数据处理的具体行动和个人贡献。",
+      "userAnswer": "食堂满意度调研收集到64份有效问卷，我负责去重、缺失值检查和Excel图表，报告获任课教师书面反馈，没有落地运营变化。",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-7",
+      "experienceId": "exp-3",
+      "experienceType": "project",
+      "experienceTitle": "食堂满意度调研",
+      "evidenceDimension": "scale",
+      "question": "食堂满意度调研共回收多少份问卷？覆盖哪些人群或维度？你用了哪些Excel分析方法？",
+      "purpose": "补充样本量与分析维度，支撑数据分析的规模证据。",
+      "userAnswer": "食堂满意度调研收集到64份有效问卷，我负责去重、缺失值检查和Excel图表，报告获任课教师书面反馈，没有落地运营变化。",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-8",
+      "experienceId": "exp-3",
+      "experienceType": "project",
+      "experienceTitle": "食堂满意度调研",
+      "evidenceDimension": "result",
+      "question": "食堂满意度调研最终报告发现了哪些关键结论或建议？报告提交后是否有被采用、展示或收到反馈？",
+      "purpose": "补充从数据到结论的闭环结果与反馈。",
+      "userAnswer": "食堂满意度调研收集到64份有效问卷，我负责去重、缺失值检查和Excel图表，报告获任课教师书面反馈，没有落地运营变化。",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-9",
+      "experienceId": "exp-4",
+      "experienceType": "project",
+      "experienceTitle": "二手书小程序设计",
+      "evidenceDimension": "action",
+      "question": "在二手书小程序设计中，你负责的发布信息页面和交易状态流程原型具体包含哪些页面和状态？你如何用Figma呈现这些流程？",
+      "purpose": "补充原型设计的具体页面、流程与工具细节。",
+      "userAnswer": "二手书小程序设计中，我负责发布页面、交易状态和异常取消流程原型，交付课程报告，没有开发上线。",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-10",
+      "experienceId": "exp-4",
+      "experienceType": "project",
+      "experienceTitle": "二手书小程序设计",
+      "evidenceDimension": "result",
+      "question": "二手书小程序设计项目结束后，课程评审或团队反馈如何？你负责的原型部分最终交付了什么？",
+      "purpose": "补充课程项目交付物与反馈，明确未上线边界。",
+      "userAnswer": "二手书小程序设计中，我负责发布页面、交易状态和异常取消流程原型，交付课程报告，没有开发上线。",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-11",
+      "experienceId": "exp-5",
+      "experienceType": "project",
+      "experienceTitle": "学习数据看板",
+      "evidenceDimension": "action",
+      "question": "在学习数据看板练习中，你具体设计了哪些指标和看板视图？用SQL做了哪些查询或计算？",
+      "purpose": "补充数据指标设计与SQL查询的具体行动。",
+      "userAnswer": "学习数据看板使用公开模拟数据，我写SQL按日期汇总学习时长，交付本地看板截图；不能用模拟数据声称真实学习效果改善。",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-12",
+      "experienceId": "exp-5",
+      "experienceType": "project",
+      "experienceTitle": "学习数据看板",
+      "evidenceDimension": "result",
+      "question": "学习数据看板练习完成后，你从中发现了什么？这份练习产出了哪些可展示的结果或帮助你掌握了什么技能？",
+      "purpose": "补充个人练习的产出与学习结果，同时注明模拟数据边界。",
+      "userAnswer": "学习数据看板使用公开模拟数据，我写SQL按日期汇总学习时长，交付本地看板截图；不能用模拟数据声称真实学习效果改善。",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-13",
+      "experienceId": "exp-6",
+      "experienceType": "campus",
+      "experienceTitle": "校读书协会",
+      "evidenceDimension": "action",
+      "question": "在校读书协会担任活动干事期间，你具体负责组织读书分享会的哪些环节？协调场地和报名的过程是怎样的？",
+      "purpose": "补充校园活动中的具体行动与组织协调过程。",
+      "userAnswer": "我为读书协会协调场地、制作报名表，组织了3场分享会，共有86人次参与，这一数字按每场签到求和，会重复计算跨场参与者，没有满意度数据。",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-14",
+      "experienceId": "exp-6",
+      "experienceType": "campus",
+      "experienceTitle": "校读书协会",
+      "evidenceDimension": "scale",
+      "question": "你组织的读书分享会一共举办了多少场？每场参与人数或覆盖范围大致如何？",
+      "purpose": "补充活动规模与覆盖人数，量化校园经历。",
+      "userAnswer": "我为读书协会协调场地、制作报名表，组织了3场分享会，共有86人次参与，这一数字按每场签到求和，会重复计算跨场参与者，没有满意度数据。",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-15",
+      "experienceId": "exp-6",
+      "experienceType": "campus",
+      "experienceTitle": "校读书协会",
+      "evidenceDimension": "result",
+      "question": "读书分享会结束后，参与者或协会给出了哪些反馈？活动效果如何，是否有可验证的结果？",
+      "purpose": "补充校园活动的真实结果与反馈。",
+      "userAnswer": "我为读书协会协调场地、制作报名表，组织了3场分享会，共有86人次参与，这一数字按每场签到求和，会重复计算跨场参与者，没有满意度数据。",
+      "generatedBullet": ""
+    }
+  ]
+}

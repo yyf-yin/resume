@@ -16,6 +16,7 @@ export async function POST(request: Request) {
       diagnosis,
       exampleMode = false,
       checkpoint,
+      targetingContext,
     } = body;
 
     if (!input?.originalResume?.trim() || !style) {
@@ -34,7 +35,8 @@ export async function POST(request: Request) {
         followUpQuestions,
         experienceAssessments,
         exampleMode,
-        checkpoint
+        checkpoint,
+        targetingContext
       );
     return NextResponse.json({
       optimizedItems,

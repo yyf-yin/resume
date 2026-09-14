@@ -44,6 +44,7 @@ export interface AnalyzeStageResponseBody {
 }
 
 export interface OptimizeRequestBody {
+  targetingContext?: import("@/types/resume").ResumeTargetingContext;
   input: import("@/types/resume").UserInput;
   style: import("@/types/resume").OptimizeStyle;
   followUpQuestions?: import("@/types/resume").FollowUpQuestion[];
@@ -64,6 +65,7 @@ export type OptimizationStage =
   | "interview";
 
 export interface OptimizeStageRequestBody {
+  targetingContext?: import("@/types/resume").ResumeTargetingContext;
   input: import("@/types/resume").UserInput;
   style: import("@/types/resume").OptimizeStyle;
   stage: OptimizationStage;

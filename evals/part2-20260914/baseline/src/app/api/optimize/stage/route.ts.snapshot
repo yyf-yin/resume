@@ -1,0 +1,79 @@
+import { NextResponse } from "next/server";
+import { LLMError } from "@/lib/ai/client";
+import { OptimizationCheckpointError } from "@/lib/ai/errors";
+import type { OptimizeStageRequestBody } from "@/lib/ai/types";
+import { APIRequestError, parseProtectedJSON } from "@/lib/api/request-guard";
+import { optimizeResumeStageServer } from "@/services/ai/resumeAgent.server";
+
+const OPTIMIZATION_STAGES = [
+  "optimized-items",
+  "final-resume",
+  "final-score",
+  "interview",
+] as const;
+
+export async function POST(request: Request) {
+  try {
+    const body = await parseProtectedJSON<OptimizeStageRequestBody>(request);
+    const {
+      input,
+      style,
+      stage,
+      diagnosis,
+      followUpQuestions = [],
+      experienceAssessments = [],
+      exampleMode = false,
+      checkpoint,
+    } = body;
+
+    if (
+      !input?.originalResume?.trim() ||
+      !style ||
+      !stage ||
+      !OPTIMIZATION_STAGES.includes(stage) ||
+      !diagnosis
+    ) {
+      return NextResponse.json({ error: "缺少必要参数" }, { status: 400 });
+    }
+
+    const result = await optimizeResumeStageServer(
+      input,
+      style,
+      diagnosis,
+      followUpQuestions,
+      experienceAssessments,
+      stage,
+      exampleMode,
+      checkpoint
+    );
+    return NextResponse.json({ stage, ...result });
+  } catch (error) {
+    if (error instanceof APIRequestError) {
+      return NextResponse.json(
+        { error: error.message },
+        {
+          status: error.status,
+          headers: error.retryAfterSeconds
+            ? { "Retry-After": String(error.retryAfterSeconds) }
+            : undefined,
+        }
+      );
+    }
+    const message =
+      error instanceof LLMError
+        ? error.message
+        : error instanceof Error
+          ? error.message
+          : "优化生成失败，请稍后重试";
+    console.error("[optimize:stage]", error);
+    return NextResponse.json(
+      {
+        error: message,
+        ...(error instanceof OptimizationCheckpointError
+          ? { checkpoint: error.checkpoint }
+          : {}),
+      },
+      { status: 500 }
+    );
+  }
+}

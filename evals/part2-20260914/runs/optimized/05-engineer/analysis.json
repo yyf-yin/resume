@@ -1,0 +1,337 @@
+{
+  "jdAnalysis": {
+    "responsibilities": [
+      "将开发者需求转化为 API、工作台与权限配置方案",
+      "理解并关注 LLM 调用成本、响应时延与质量评测，支撑 AI 平台能力设计",
+      "参与或负责 AI 平台产品规划，并开展开发者访谈以获取和验证需求",
+      "与研发团队协作，推动产品方案落地交付"
+    ],
+    "hardRequirements": [
+      "本科及以上学历",
+      "具备3年以上软件研发或技术产品经验（软件研发经验与技术产品经验满足其一即可）"
+    ],
+    "implicitRequirements": [
+      "推断：需要具备开发者工具或平台产品的领域理解，能将开发者需求抽象为可落地方案。JD依据：岗位要求将开发者需求转为 API、工作台与权限配置方案。待确认点：公司现有开发者平台的技术栈、目标开发者类型及现有权限模型。",
+      "推断：需要能够与研发建立协作信任并推动交付，而非仅提出需求。JD依据：要求能够与研发协作交付。待确认点：团队协作流程、研发规模与职责边界。",
+      "推断：需要对 LLM 应用的成本、时延与质量有可量化评估意识或实践。JD依据：明确要求理解 LLM 调用成本、响应时延与质量评测。待确认点：现有评测指标、监控工具与成本控制目标。",
+      "推断：产品规划与开发者访谈能力可能影响需求来源与路线图质量，但属于优先项而非硬门槛。JD依据：产品规划和开发者访谈经验优先。待确认点：是否要求独立完成规划，或仅参与部分环节。",
+      "推断：商业 AI 项目经验是加分项，可能用于判断候选人能否将 AI 能力落到商业场景。JD依据：商业 AI 项目经验加分。待确认点：公司当前是否有商业化 AI 项目或相关规划。"
+    ],
+    "keywords": [
+      "AI平台产品经理",
+      "开发者平台",
+      "开发者需求",
+      "API",
+      "工作台",
+      "权限配置",
+      "LLM调用成本",
+      "响应时延",
+      "质量评测",
+      "产品规划",
+      "开发者访谈",
+      "研发协作交付",
+      "商业AI项目",
+      "软件研发",
+      "技术产品经验",
+      "本科及以上"
+    ],
+    "idealCandidate": "具备3年以上软件研发或技术产品经验，能提供参与平台型产品或技术方案落地的可观察证据；有将开发者需求转化为 API、工作台或权限配置方案的交付物或案例；理解 LLM 调用成本、响应时延与质量评测，能说明具体指标或评估方法；有产品规划或开发者访谈的实操记录，如路线图、访谈纪要或需求文档；能与研发协作交付，具备跨职能推进项目的合作可信度。岗位不要求已有产品经理职称，商业 AI 项目经验为加分项。",
+    "coreCompetencies": [
+      {
+        "name": "开发者需求产品化能力",
+        "importance": "high",
+        "description": "能将开发者需求转为 API、工作台与权限配置方案，交付可评审的产品方案、需求文档或配置设计。"
+      },
+      {
+        "name": "LLM 工程经济性与质量意识",
+        "importance": "high",
+        "description": "理解 LLM 调用成本、响应时延与质量评测，能给出指标定义、监控思路或优化方案，证明对 AI 平台运行约束的掌握。"
+      },
+      {
+        "name": "研发协作交付能力",
+        "importance": "high",
+        "description": "能与研发协作交付，通过跨职能项目推进记录、协作文档或上线结果证明合作可信度。"
+      },
+      {
+        "name": "产品规划与开发者访谈",
+        "importance": "medium",
+        "description": "能开展产品规划与开发者访谈，产出路线图、访谈纪要或需求优先级判断，证明需求获取与规划能力。"
+      },
+      {
+        "name": "商业 AI 项目经验",
+        "importance": "low",
+        "description": "有商业 AI 项目经验，能说明 AI 能力在商业场景中的落地或验证过程，作为加分项证明业务转化意识。"
+      }
+    ]
+  },
+  "diagnosis": {
+    "overallScore": 69,
+    "dimensionScores": [
+      {
+        "dimension": "JD硬性条件匹配",
+        "score": 88,
+        "comment": "学历为软件工程本科，满足“本科及以上”；2021.07—2026.08在墨舟技术（企业开发工具供应商）任后端工程师，约5年软件研发经验，满足“3年以上软件研发或技术产品经验”，且公司性质与开发者工具行业方向一致。JD明确不要求已有产品经理职称，无正式PM任职经历不构成硬性不符。扣分点在于行业虽相关但非AI平台/大模型平台直接背景。"
+      },
+      {
+        "dimension": "核心职责与项目证据",
+        "score": 65,
+        "comment": "API网关与权限模块、开发者工作台的API密钥管理与用量查询，与“API、工作台、权限配置”职责方向直接对应，属较强已有证据；模型调用对比台记录了Token用量与响应时延，触及LLM成本与时延。但简历显示工作台项目中本人仅负责后端实现，未体现将开发者需求转化为方案的主导过程，产品规划、开发者访谈、质量评测方法层面均无直接证据，核心职责覆盖不完整。"
+      },
+      {
+        "dimension": "成果与证据强度",
+        "score": 48,
+        "comment": "经历描述基本停留在职责与动作层面：接口性能优化、限流、调用链监控、解决客户接入问题均无量化指标与结果数据；工作台项目明确“没有负责完整产品路线图”；模型调用对比台为个人开源Demo、尚未商业化。个人贡献边界清晰但可验证的交付结果与影响证据薄弱。"
+      },
+      {
+        "dimension": "JD关键词与专业能力覆盖",
+        "score": 65,
+        "comment": "真实覆盖API设计、权限控制、开发者工作台、大模型API调用、Token用量、响应时延等关键词；产品规划、开发者访谈、质量评测、商业AI项目等关键词无有效事实支撑。“评测”仅体现为离线公开文本比较，方法深度不足，关键词覆盖集中于技术实现侧而非产品侧。"
+      },
+      {
+        "dimension": "表达质量与信息结构",
+        "score": 70,
+        "comment": "简历条目简洁、时间线清晰，技能与教育信息完整，可快速读取。但缺少面向目标岗位的能力概览，经历按时间平铺、未突出平台产品相关重点，且几乎无量化结果，专业说服力受限。"
+      }
+    ],
+    "mainIssues": [
+      "无正式产品经理任职经历，产品规划与开发者访谈两项优先条件在简历中无任何事实支撑，目前只能显示为“材料未说明”而非能力缺失",
+      "核心职责中的产品化环节证据不足：工作台项目本人仅负责后端实现，未体现将开发者需求抽象为API、工作台或权限配置方案的主导过程与取舍依据",
+      "LLM成本、时延与质量评测仅停留在个人开源Demo层面，且只记录Token用量与响应时延，缺少质量评测方法与成本口径，也未在平台级或商业场景中验证",
+      "成果量化普遍缺失：接口性能优化、限流、调用链监控、客户接入支持均无前后对比数据、规模数据或上线结果",
+      "简历结构偏执行视角，缺少平台产品能力概览与关键词前置，招聘方难以在短时间定位到API、权限、工作台、评测等与JD对齐的强证据"
+    ],
+    "prioritySuggestions": [
+      "在保持“后端工程师”原职称不变的前提下，补充每段经历中的产品侧动作，如需求来源、方案取舍、评审参与、跨团队推动与上线节点，避免改写职称",
+      "为API网关、权限模块、开发者工作台补充可验证结果：接入开发者或客户规模、接口耗时与错误率变化、权限配置覆盖范围、上线时间与迭代次数",
+      "扩展模型调用对比台项目：写明评测指标与评分方法、成本统计口径、时延分位口径与对比结论，并明确标注为个人项目、尚未商业化，不夸大性质",
+      "增补与开发者访谈相关的间接证据，如客户接入支持中归纳的需求类型、反馈分类、优先级判断，避免直接声称具备访谈经验",
+      "重排简历顺序，将开发者工作台与模型调用对比台前置，并在开头增加3—4行能力概览，集中呈现API设计、权限控制、LLM调用成本与时延观测等关键词",
+      "针对“质量评测”补充可落地的评测思路或已尝试方法（如评测集来源、指标选取、人工与离线对比差异），材料不足处诚实留白并标注待补充"
+    ]
+  },
+  "matchItems": [
+    {
+      "jdRequirement": "本科及以上学历",
+      "resumeEvidence": "北方科技大学｜软件工程本科｜2017.09—2021.06，学历层次与专业方向明确，可直接核对",
+      "evidenceStrength": "strong",
+      "needsSupplement": false,
+      "optimizationSuggestion": "保持现有学历写法即可，可将毕业时间精简为年份，把版面留给平台产品相关经历"
+    },
+    {
+      "jdRequirement": "具备3年以上软件研发或技术产品经验（二者满足其一）",
+      "resumeEvidence": "墨舟技术（企业开发工具供应商）｜后端工程师｜2021.07—2026.08，约5年软件研发经验；公司为开发者工具供应商，与目标行业方向一致",
+      "evidenceStrength": "strong",
+      "needsSupplement": false,
+      "optimizationSuggestion": "在原职称不变的前提下，于该段开头用一句话点明服务对象为使用API与权限体系的开发者，强化行业相关性"
+    },
+    {
+      "jdRequirement": "能将开发者需求转为API、工作台与权限配置方案",
+      "resumeEvidence": "开发API网关与权限模块，参与接口设计评审并解决客户接入问题；内部开发者工作台项目中与产品经理协作实现API密钥管理和用量查询，本人负责后端实现，明确未负责完整产品路线图",
+      "evidenceStrength": "medium",
+      "needsSupplement": true,
+      "optimizationSuggestion": "补充需求来源与方案取舍过程，例如客户接入问题如何转化为接口或权限配置改动、密钥与用量查询方案的设计约束与评审结论，并明确个人在方案环节的参与边界"
+    },
+    {
+      "jdRequirement": "理解LLM调用成本、响应时延与质量评测",
+      "resumeEvidence": "模型调用对比台（个人开源Demo，2026.01—2026.04）：独立制作模型调用对比界面，记录Token用量与响应时延，使用公开文本做离线比较，尚未商业化；技能中列有大模型API调用",
+      "evidenceStrength": "medium",
+      "needsSupplement": true,
+      "optimizationSuggestion": "写明成本统计口径（单次调用/千Token）、时延分位指标、质量评测的具体方法与评测集来源，并说明对比结论对平台选型或成本控制的启示；同时标注为个人项目"
+    },
+    {
+      "jdRequirement": "产品规划和开发者访谈经验优先",
+      "resumeEvidence": "材料未说明：简历中无产品规划、路线图、需求文档或开发者访谈记录；工作台项目为与产品经理协作并负责后端实现，本人未负责完整产品路线图；补充信息明确无正式产品经理任职经历",
+      "evidenceStrength": "none",
+      "needsSupplement": true,
+      "optimizationSuggestion": "属优先项而非硬性条件，不要虚构规划或访谈经历；可补充协作中的规划参与证据，如参与排期与优先级讨论、整理接入反馈清单等，无则如实留白并说明转岗动机"
+    },
+    {
+      "jdRequirement": "能够与研发协作交付",
+      "resumeEvidence": "参与接口设计评审并解决客户接入问题；内部开发者工作台项目中与产品经理协作实现API密钥管理和用量查询；负责调用链监控与限流功能",
+      "evidenceStrength": "medium",
+      "needsSupplement": true,
+      "optimizationSuggestion": "补充协作交付的可验证结果，如评审机制、跨团队推动节点、功能上线时间与服务对象，用交付事实替代职责罗列"
+    },
+    {
+      "jdRequirement": "商业AI项目经验加分",
+      "resumeEvidence": "模型调用对比台为个人开源Demo，尚未商业化；其余经历均为企业开发工具与后端平台方向，无商业AI项目记录",
+      "evidenceStrength": "none",
+      "needsSupplement": true,
+      "optimizationSuggestion": "该项为加分项，缺失不构成硬性不符；可在Demo中说明是否有外部使用者或内部分享反馈，若无商业落地则明确标注为个人项目，不进行性质夸大"
+    },
+    {
+      "jdRequirement": "产品经理职称不要求，但需具备技术产品交付的岗位适配证据",
+      "resumeEvidence": "补充信息确认无正式产品经理任职经历，且不能改写原职称；现有经历集中在API设计、权限控制、平台后端与开发者工作台，属技术侧交付证据",
+      "evidenceStrength": "medium",
+      "needsSupplement": true,
+      "optimizationSuggestion": "用“技术方案推动者”的表述呈现适配性，例如由后端视角提出接口与权限改进并被采纳的过程，从现有事实中提炼产品化视角，不改变职称也不虚构职责"
+    }
+  ],
+  "experienceAssessments": [
+    {
+      "experienceId": "exp-1",
+      "experienceType": "work",
+      "experienceTitle": "后端工程师（API网关、权限模块、调用链监控与限流）",
+      "organization": "墨舟技术（企业开发工具供应商）",
+      "role": "后端工程师",
+      "period": "2021.07—2026.08",
+      "originalBullets": [
+        "开发API网关与权限模块，参与接口设计评审并解决客户接入问题，编写接口文档。",
+        "负责调用链监控与限流功能，优化接口性能。"
+      ],
+      "directRelevance": "low",
+      "transferableValue": "medium",
+      "evidenceCompleteness": "partial",
+      "missingDimensions": [
+        "scale",
+        "result"
+      ],
+      "suggestedAction": "retain",
+      "removalReason": "",
+      "userDecision": "retain"
+    },
+    {
+      "experienceId": "exp-2",
+      "experienceType": "project",
+      "experienceTitle": "内部开发者工作台（API密钥管理与用量查询）",
+      "organization": "",
+      "role": "后端工程师",
+      "period": "2024.06—2025.02",
+      "originalBullets": [
+        "与产品经理协作实现API密钥管理和用量查询；本人负责后端实现，没有负责完整产品路线图。"
+      ],
+      "directRelevance": "low",
+      "transferableValue": "medium",
+      "evidenceCompleteness": "partial",
+      "missingDimensions": [
+        "scale",
+        "result"
+      ],
+      "suggestedAction": "retain",
+      "removalReason": "",
+      "userDecision": "retain"
+    },
+    {
+      "experienceId": "exp-3",
+      "experienceType": "project",
+      "experienceTitle": "模型调用对比台（个人开源Demo）",
+      "organization": "个人（开源Demo）",
+      "role": "独立开发者",
+      "period": "2026.01—2026.04",
+      "originalBullets": [
+        "独立制作模型调用对比界面，记录Token用量、响应时延，使用公开文本做离线比较，尚未商业化。"
+      ],
+      "directRelevance": "low",
+      "transferableValue": "medium",
+      "evidenceCompleteness": "partial",
+      "missingDimensions": [
+        "scale",
+        "result"
+      ],
+      "suggestedAction": "retain",
+      "removalReason": "",
+      "userDecision": "retain"
+    }
+  ],
+  "followUpQuestions": [
+    {
+      "id": "fu-1",
+      "experienceId": "exp-1",
+      "experienceType": "work",
+      "experienceTitle": "后端工程师（API网关、权限模块、调用链监控与限流）",
+      "evidenceDimension": "action",
+      "question": "在墨舟技术开发API网关与权限模块期间，客户接入问题具体是如何被转化为接口设计或权限配置改动的？你本人做了哪些方案选择，放弃了哪些替代做法？",
+      "purpose": "对应JD核心要求“将开发者需求转为API、工作台与权限配置方案”，补足从开发者需求到具体方案的转化过程与个人设计取舍证据",
+      "userAnswer": "",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-2",
+      "experienceId": "exp-1",
+      "experienceType": "work",
+      "experienceTitle": "后端工程师（API网关、权限模块、调用链监控与限流）",
+      "evidenceDimension": "collaboration",
+      "question": "在接口设计评审和客户接入支持中，你与产品经理、其他研发或客户方出现分歧时是怎么推进的？有哪一次接口或权限改动是你提出并被采纳落地的？",
+      "purpose": "对应JD要求“能够与研发协作交付”，补足跨职能协作、推动过程与方案被采纳的可信证据",
+      "userAnswer": "",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-3",
+      "experienceId": "exp-1",
+      "experienceType": "work",
+      "experienceTitle": "后端工程师（API网关、权限模块、调用链监控与限流）",
+      "evidenceDimension": "result",
+      "question": "API网关、权限模块、调用链监控与限流上线后，服务了多少开发者或客户、覆盖多少接口？接口耗时、错误率或限流命中率有没有可核对的前后变化？",
+      "purpose": "补足该段经历的规模与结果证据，把职责罗列替换为可验证的交付事实，支撑JD对平台型技术产品交付的要求",
+      "userAnswer": "",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-4",
+      "experienceId": "exp-2",
+      "experienceType": "project",
+      "experienceTitle": "内部开发者工作台（API密钥管理与用量查询）",
+      "evidenceDimension": "role",
+      "question": "在内部开发者工作台项目中，除后端实现外，你在API密钥管理和用量查询的方案讨论、需求优先级判断上参与了多少？哪些设计决定是你提出的？",
+      "purpose": "对应JD“将开发者需求转为API、工作台与权限配置方案”，明确个人在方案环节的参与边界与产品化贡献，避免把协作项目整体归为个人成果",
+      "userAnswer": "",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-5",
+      "experienceId": "exp-2",
+      "experienceType": "project",
+      "experienceTitle": "内部开发者工作台（API密钥管理与用量查询）",
+      "evidenceDimension": "challenge",
+      "question": "API密钥管理与用量查询在权限模型、密钥轮换或用量统计口径上遇到过哪些限制或冲突？你当时是怎么处理这些约束的？",
+      "purpose": "对应JD对权限配置方案与平台设计能力的要求，补足关键限制与处理方式，体现技术约束下的方案判断",
+      "userAnswer": "",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-6",
+      "experienceId": "exp-2",
+      "experienceType": "project",
+      "experienceTitle": "内部开发者工作台（API密钥管理与用量查询）",
+      "evidenceDimension": "result",
+      "question": "这个开发者工作台最终上线了吗？服务了多少内部或外部开发者？是否有正式反馈、使用数据或后续迭代？",
+      "purpose": "补足交付结果与采用情况，验证该平台类项目从设计到落地的完整度",
+      "userAnswer": "",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-7",
+      "experienceId": "exp-3",
+      "experienceType": "project",
+      "experienceTitle": "模型调用对比台（个人开源Demo）",
+      "evidenceDimension": "action",
+      "question": "模型调用对比台里，Token用量和响应时延分别按什么口径统计（单次调用还是千Token、平均值还是分位值）？质量评测用了哪些指标和什么来源的评测集？",
+      "purpose": "对应JD“理解LLM调用成本、响应时延与质量评测”，补足成本口径、时延指标与评测方法的具体证据，避免只停留在“记录数据”层面",
+      "userAnswer": "",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-8",
+      "experienceId": "exp-3",
+      "experienceType": "project",
+      "experienceTitle": "模型调用对比台（个人开源Demo）",
+      "evidenceDimension": "challenge",
+      "question": "用公开文本做离线比较时，你遇到哪些局限（例如模型版本变化、评测集代表性不足、结果不稳定）？你是如何处理的？",
+      "purpose": "对应JD对质量评测的要求，补足对评测局限的认知与应对方法，体现评测设计的严谨性而非仅跑通界面",
+      "userAnswer": "",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-9",
+      "experienceId": "exp-3",
+      "experienceType": "project",
+      "experienceTitle": "模型调用对比台（个人开源Demo）",
+      "evidenceDimension": "result",
+      "question": "这个开源Demo有没有外部使用者、Star或内部分享？你得到的模型成本与时延对比结论是否被他人参考或采用？",
+      "purpose": "补足该个人项目的真实影响与可验证反馈，作为加分项证据，同时保持个人项目、尚未商业化的性质标注",
+      "userAnswer": "",
+      "generatedBullet": ""
+    }
+  ]
+}

@@ -1,0 +1,115 @@
+import type {
+  MatchItem,
+  PerfectionPlan,
+  ResumeDiagnosis,
+  UserInput,
+} from "@/types/resume";
+
+export const PERFECTION_SYSTEM_PROMPT = `你是资深职业发展顾问和项目制学习教练。
+你的任务是根据候选人与目标岗位之间仍然薄弱的匹配点，推荐个人可以独立完成、可展示、可验证的补强项目与自学知识点。
+要求：
+1. 所有内容使用中文，只输出合法 JSON
+2. 优先处理 evidenceStrength 为 weak/none 或 needsSupplement 为 true 的差距
+3. 项目必须能由一人完成，不依赖公司内部权限、真实客户或多人团队
+4. 项目应有明确交付物，可放入作品集，但不得把练习项目包装成商业经历
+5. 不编造用户已经具备的经历、成果或量化数据
+6. 推荐 3-5 个项目、4-8 个知识点，并给出可执行顺序
+7. resumeBulletTemplate 必须使用待填写占位符，如 [数量]、[结果]，不得虚构数据`;
+
+export function buildPerfectionPrompt(
+  input: UserInput,
+  diagnosis: ResumeDiagnosis,
+  matchItems: MatchItem[]
+): string {
+  const weakItems = matchItems.filter(
+    (item) => item.needsSupplement || item.evidenceStrength === "weak" || item.evidenceStrength === "none"
+  );
+
+  return `请为以下候选人生成“精益求精”补强计划。
+
+【目标岗位】${input.targetRole}
+【行业】${input.industry || "未填写"}
+【公司类型】${input.companyType}
+【求职阶段】${input.jobStage}
+【希望突出能力】${input.highlightSkills || "未填写"}
+
+【整体匹配度】${diagnosis.overallScore}/100
+【主要问题】
+${diagnosis.mainIssues.map((item) => `- ${item}`).join("\n") || "- 无"}
+
+【优先建议】
+${diagnosis.prioritySuggestions.map((item) => `- ${item}`).join("\n") || "- 无"}
+
+【仍需补足的匹配点】
+${weakItems
+  .map(
+    (item) =>
+      `- JD要求：${item.jdRequirement}\n  当前证据：${item.resumeEvidence || "无"}\n  证据强度：${item.evidenceStrength}\n  优化建议：${item.optimizationSuggestion}`
+  )
+  .join("\n") || "- 未识别到明确弱项，请根据诊断建议补强"}
+
+只输出以下结构的合法 JSON：
+{
+  "plan": {
+    "summary": string,
+    "priorityGaps": string[],
+    "projects": [{
+      "id": string,
+      "title": string,
+      "targetGap": string,
+      "whyItHelps": string,
+      "difficulty": "入门" | "进阶" | "挑战",
+      "estimatedDuration": string,
+      "techStack": string[],
+      "steps": string[],
+      "deliverables": string[],
+      "resumeBulletTemplate": string
+    }],
+    "learningPoints": [{
+      "id": string,
+      "topic": string,
+      "targetGap": string,
+      "whyItMatters": string,
+      "estimatedDuration": string,
+      "learningGoals": string[],
+      "practiceTask": string,
+      "searchKeywords": string[]
+    }],
+    "actionOrder": string[]
+  }
+}`;
+}
+
+export function normalizePerfectionPlan(raw: PerfectionPlan): PerfectionPlan {
+  const difficulties = ["入门", "进阶", "挑战"] as const;
+
+  return {
+    summary: raw?.summary ?? "",
+    priorityGaps: raw?.priorityGaps ?? [],
+    projects: (raw?.projects ?? []).map((item, index) => ({
+      id: item.id || `project-${index + 1}`,
+      title: item.title ?? "",
+      targetGap: item.targetGap ?? "",
+      whyItHelps: item.whyItHelps ?? "",
+      difficulty: difficulties.includes(item.difficulty) ? item.difficulty : "进阶",
+      estimatedDuration: item.estimatedDuration ?? "",
+      techStack: item.techStack ?? [],
+      steps: item.steps ?? [],
+      deliverables: item.deliverables ?? [],
+      resumeBulletTemplate: item.resumeBulletTemplate ?? "",
+    })),
+    learningPoints: (raw?.learningPoints ?? []).map((item, index) => ({
+      id: item.id || `learning-${index + 1}`,
+      topic: item.topic ?? "",
+      targetGap: item.targetGap ?? "",
+      whyItMatters: item.whyItMatters ?? "",
+      estimatedDuration: item.estimatedDuration ?? "",
+      learningGoals: item.learningGoals ?? [],
+      practiceTask: item.practiceTask ?? "",
+      searchKeywords: item.searchKeywords ?? [],
+    })),
+    actionOrder: raw?.actionOrder ?? [],
+  };
+}
+
+

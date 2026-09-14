@@ -1,0 +1,28 @@
+import type { Metadata } from "next";
+import "./globals.css";
+
+export const metadata: Metadata = {
+  title: "简历助手 - JD 定制简历优化 Agent",
+  description: "基于目标岗位 JD，诊断简历、匹配岗位要求、挖掘经历、重构表达，并生成面试准备材料",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="zh-CN" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var theme=localStorage.getItem('resume-expert-theme');var dark=theme==='dark';document.documentElement.classList.toggle('dark',dark);document.documentElement.style.colorScheme=dark?'dark':'light';}catch(e){}})();`,
+          }}
+        />
+      </head>
+      <body className="antialiased" suppressHydrationWarning>
+        {children}
+      </body>
+    </html>
+  );
+}

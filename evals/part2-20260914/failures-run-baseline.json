@@ -1,0 +1,22 @@
+[
+  {
+    "id": "02-overseas",
+    "error": "AnalysisCheckpointError: fetch failed"
+  },
+  {
+    "id": "01-mature",
+    "error": "AnalysisCheckpointError: fetch failed"
+  },
+  {
+    "id": "03-transfer",
+    "error": "AnalysisCheckpointError: fetch failed"
+  },
+  {
+    "id": "04-campus",
+    "error": "AnalysisCheckpointError: fetch failed"
+  },
+  {
+    "id": "05-engineer",
+    "error": "AnalysisCheckpointError: fetch failed"
+  }
+]

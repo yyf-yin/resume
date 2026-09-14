@@ -1,0 +1,301 @@
+{
+  "jdAnalysis": {
+    "responsibilities": [
+      "负责面向欧美个人用户的 AI 应用需求研究与产品规划",
+      "围绕订阅转化目标设计并推进产品迭代，优化注册到订阅的转化漏斗",
+      "以英语直接开展欧美用户访谈与用户研究，沉淀需求并形成需求池",
+      "结合数据分析评估版本效果，通过实验驱动订阅与留存指标提升",
+      "与研发、设计、客服等团队协作推动版本上线与帮助内容建设"
+    ],
+    "hardRequirements": [
+      "本科及以上学历",
+      "3年以上产品经验",
+      "有实际欧美市场产品经历",
+      "能够以英语完成用户访谈",
+      "熟悉订阅漏斗与数据分析"
+    ],
+    "implicitRequirements": [
+      "对 AI 产品有浓厚兴趣，愿意持续跟进 AIGC 应用趋势",
+      "能在创业公司环境中独立推进从研究到上线的完整闭环",
+      "具备跨时区、跨文化协作与远程沟通能力",
+      "有较强的数据敏感度，能围绕转化与留存指标做取舍",
+      "能够在缺少成熟流程的情况下自我驱动、快速试错"
+    ],
+    "keywords": [
+      "AI 产品经理",
+      "出海",
+      "欧美市场",
+      "个人用户",
+      "订阅转化",
+      "订阅漏斗",
+      "用户研究",
+      "英语用户访谈",
+      "数据分析",
+      "A/B测试",
+      "AIGC 应用",
+      "版本迭代",
+      "创业公司"
+    ],
+    "idealCandidate": "具备3年以上产品经验、有真实欧美市场面向个人用户的产品经历，能用英语独立完成用户访谈并驱动订阅漏斗优化的产品经理；熟悉订阅转化与数据分析，有增长实验落地经验，对生成式 AI 应用有强烈兴趣并愿意在创业公司快速迭代环境中独立推进项目。",
+    "coreCompetencies": [
+      {
+        "name": "欧美用户研究能力",
+        "importance": "high",
+        "description": "能够以英语直接面向欧美个人用户开展访谈与调研，识别真实需求并转化为可执行的产品需求池"
+      },
+      {
+        "name": "订阅转化与漏斗优化",
+        "importance": "high",
+        "description": "熟悉注册到订阅的转化漏斗，能够定位流失环节并设计改版方案以提升订阅转化"
+      },
+      {
+        "name": "数据分析与增长实验",
+        "importance": "high",
+        "description": "能够使用 SQL 等工具分析漏斗数据，设计并执行 A/B 测试，用数据验证迭代效果"
+      },
+      {
+        "name": "AI 产品理解与兴趣",
+        "importance": "medium",
+        "description": "对 AIGC 应用与 AI 产品形态有持续关注和理解，能将 AI 能力转化为面向用户的产品价值"
+      },
+      {
+        "name": "跨职能协作与落地推动",
+        "importance": "medium",
+        "description": "能与研发、设计、客服等角色协作，在创业公司资源有限的情况下推动版本按时上线"
+      },
+      {
+        "name": "出海本地化与英语沟通",
+        "importance": "medium",
+        "description": "具备英语工作能力与跨文化意识，能够完成面向欧美市场的产品文档与用户沟通"
+      }
+    ]
+  },
+  "diagnosis": {
+    "overallScore": 66,
+    "dimensionScores": [
+      {
+        "dimension": "JD硬性条件匹配",
+        "score": 82,
+        "comment": "学历（商务英语本科）、年限（2022.07—2026.08，约4年产品经验）、欧美市场经历（面向美国及英国用户的英文笔记应用）、英语访谈能力（28次英语远程访谈）、订阅漏斗与数据分析（注册到订阅漏斗梳理、SQL、漏斗分析）五项硬性/优先条件均有可验证证据，硬性门槛基本达标；唯一缺口是AIGC应用经验，但JD将其列为优先项而非硬性要求，故对本维度扣分有限。"
+      },
+      {
+        "dimension": "核心职责与项目证据",
+        "score": 62,
+        "comment": "海外用户研究（28次英语访谈、需求池）与订阅转化迭代（新手引导改版、A/B测试上线）属于岗位核心职责且证据较具体，定价页改版项目也覆盖订阅方案与埋点。但职责证据集中在传统效率工具产品，缺少AI产品定义、prompt/模型能力边界讨论、AI功能迭代等岗位核心工作内容的直接证据，与'AI产品经理'定位存在明显错位。"
+      },
+      {
+        "dimension": "成果与证据强度",
+        "score": 45,
+        "comment": "仅'订阅转化率有所提升'一句结论，且明确标注数据待确认，缺少实验周期、样本量、对照口径、提升幅度与个人贡献边界，无法验证因果与量级；访谈成果仅描述为'整理为需求池'，未见洞察落地后的结果。整体属于有动作、无结果的弱证据状态。"
+      },
+      {
+        "dimension": "JD关键词与专业能力覆盖",
+        "score": 65,
+        "comment": "英语访谈、订阅漏斗、A/B测试、SQL、埋点、竞品分析等关键词真实可查，覆盖出海与增长方向的主要能力项。但AI产品、AIGC、个人用户订阅增长（留存/付费率）等关键词覆盖偏弱，技能栏也缺少AI工具链相关表述。"
+      },
+      {
+        "dimension": "表达质量与信息结构",
+        "score": 72,
+        "comment": "整体按'经历—动作—结果'组织，条理清晰、命名规范、时间线完整，可读性良好。但亮点前置不足（英语访谈与订阅转化未进入摘要），成果句普遍以弱化表述收尾，AI相关经历完全未成段呈现，HR快速扫描时难以抓住匹配点。"
+      }
+    ],
+    "mainIssues": [
+      "订阅转化成果缺少可验证数据，'转化率有所提升，具体数据待确认'无法支撑增长实验能力，反而暴露证据链断裂。",
+      "完全没有AI/AIGC应用的产品负责或上线经历，与'AI产品经理'岗位定位存在直接证据缺口，简历中AI元素仅停留在'平时体验生成式AI写作工具'。",
+      "28次英语访谈只写到'整理为需求池'，缺少访谈主题、样本结构、关键洞察以及洞察如何转化为产品决策与结果的闭环描述。",
+      "未体现面向欧美个人用户订阅业务的关键指标（付费率、留存、LTV、退款率等），难以证明对订阅商业模型的理解深度。",
+      "摘要与首屏信息未前置最匹配的亮点（英语用户研究 + 订阅漏斗 + A/B测试），猎头/HR扫描效率偏低。"
+    ],
+    "prioritySuggestions": [
+      "在绝对数值无法披露时，改用可验证的实验描述替代：说明实验假设、变量、对照方式、样本与周期，并给出方向性结论（如'新手引导改版后注册到订阅转化率相对提升'），避免'待确认'这类削弱可信度的表述。",
+      "新增'AI相关实践'独立小节，诚实呈现对生成式AI写作工具的产品化观察、竞品拆解与个人思考，并明确区分'个人使用体验'与'团队AI产品上线经验'，不夸大也不空白。",
+      "把28次英语访谈重构为一条证据链：研究目标→样本分布（美/英用户占比、用户类型）→3条关键洞察→对应的需求决策→上线后的验证方式。",
+      "将岗位关键词（出海、订阅漏斗、A/B测试、英语用户访谈）前置到个人摘要与工作经历首条要点，缩短HR的匹配判断路径。",
+      "补充订阅业务的指标意识表述，即使无完整数据，也可写明关注并分析的漏斗环节与指标口径，体现数据驱动的思维框架。"
+    ]
+  },
+  "matchItems": [
+    {
+      "jdRequirement": "本科及以上学历",
+      "resumeEvidence": "南方商务大学｜商务英语本科｜2018.09—2022.06，学历层次与时间完整清晰。",
+      "evidenceStrength": "strong",
+      "needsSupplement": false,
+      "optimizationSuggestion": "保持现状即可；可在教育栏后补一行与出海/AI产品相关的课程、证书或自学项目，提升岗位相关性，切忌添加无法核实的头衔。"
+    },
+    {
+      "jdRequirement": "3年以上产品经验",
+      "resumeEvidence": "航迹科技（海外效率工具开发商）｜产品经理｜2022.07—2026.08，连续担任产品经理约4年，职务与公司业务方向明确。",
+      "evidenceStrength": "strong",
+      "needsSupplement": false,
+      "optimizationSuggestion": "在职时间已满足要求，建议在首条经历要点前加一句职责范围概述（负责的产品线、服务用户规模、版本节奏），让'4年产品经验'的含金量更直观。"
+    },
+    {
+      "jdRequirement": "实际欧美市场产品经历",
+      "resumeEvidence": "负责英文笔记应用的需求整理和版本迭代，明确面向美国及英国用户，产品形态与出海场景一致。",
+      "evidenceStrength": "strong",
+      "needsSupplement": false,
+      "optimizationSuggestion": "补充该应用面向欧美市场的规模描述（如用户量级、市场覆盖、本地化适配范围），把'面向欧美'从一句定语升级为可验证的业务背景。"
+    },
+    {
+      "jdRequirement": "能够以英语完成用户访谈",
+      "resumeEvidence": "面向美国及英国用户以英语开展28次远程访谈，访谈语言、次数、用户地域均有明确记录。",
+      "evidenceStrength": "strong",
+      "needsSupplement": false,
+      "optimizationSuggestion": "补充访谈的样本结构（新用户/付费用户/流失用户占比）与2—3条关键洞察，将'访谈次数'升级为'研究能力证据'。"
+    },
+    {
+      "jdRequirement": "熟悉订阅漏斗与数据分析",
+      "resumeEvidence": "梳理注册到订阅的转化漏斗，技能栏列有SQL、漏斗分析、A/B测试，具备工具与方法的双重支撑。",
+      "evidenceStrength": "medium",
+      "needsSupplement": true,
+      "optimizationSuggestion": "注明漏斗分析的具体环节（如注册→激活→试用→付费→续订）与使用的数据口径、SQL取数范围，把'梳理漏斗'细化为可复现的分析动作，弥补无量化结果的短板。"
+    },
+    {
+      "jdRequirement": "负责订阅转化与产品迭代（增长实验能力）",
+      "resumeEvidence": "设计新手引导改版并与研发、设计协作上线，完成A/B测试，订阅转化率有所提升但具体数据待确认；另有定价页改版项目，覆盖竞品方案、原型、埋点需求与上线反馈。",
+      "evidenceStrength": "weak",
+      "needsSupplement": true,
+      "optimizationSuggestion": "补充实验设计细节（假设、实验变量、对照分组、样本量与周期），并给出方向性结论；即便绝对值不可披露，也应避免'数据待确认'这类自我否定的表述，同时写明个人在实验中的具体决策贡献。"
+    },
+    {
+      "jdRequirement": "有AIGC应用经验（优先项）",
+      "resumeEvidence": "仅提及平时体验生成式AI写作工具；补充信息明确未负责过AI应用上线，也无RAG、模型训练与算法开发经验。",
+      "evidenceStrength": "weak",
+      "needsSupplement": true,
+      "optimizationSuggestion": "先明确这是优先项而非硬性门槛，再新增'AI产品实践'小节：写明体验过哪些AIGC产品、对比分析了哪些功能与订阅设计、形成了怎样的产品判断，用思考深度替代上线经历，但必须清楚标注为个人体验而非项目经历。"
+    },
+    {
+      "jdRequirement": "对AI产品有浓厚兴趣（不要求模型训练或RAG工程经验）",
+      "resumeEvidence": "简历中AI相关表述仅一句'平时体验生成式AI写作工具'，无持续关注、系统研究或输出成果的痕迹。",
+      "evidenceStrength": "weak",
+      "needsSupplement": true,
+      "optimizationSuggestion": "把兴趣转化为可验证的行为：如持续跟踪的AI产品清单、完成的拆解笔记、对AI功能商业化路径的分析，用具体动作证明'浓厚兴趣'，同时避免编造AI项目经历。"
+    }
+  ],
+  "experienceAssessments": [
+    {
+      "experienceId": "exp-1",
+      "experienceType": "work",
+      "experienceTitle": "英文笔记应用产品经理（面向美英市场）",
+      "organization": "航迹科技（海外效率工具开发商）",
+      "role": "产品经理",
+      "period": "2022.07—2026.08",
+      "originalBullets": [
+        "负责英文笔记应用的需求整理和版本迭代，面向美国及英国用户以英语开展28次远程访谈，将发现的问题整理为需求池。",
+        "梳理注册到订阅的转化漏斗，设计新手引导改版并与研发和设计协作上线，完成A/B测试，订阅转化率有所提升，具体数据待确认。",
+        "参与英文帮助中心建设，协调客服与研发整理常见问题并更新文档。"
+      ],
+      "directRelevance": "low",
+      "transferableValue": "medium",
+      "evidenceCompleteness": "partial",
+      "missingDimensions": [],
+      "suggestedAction": "retain",
+      "removalReason": "",
+      "userDecision": "retain"
+    },
+    {
+      "experienceId": "exp-2",
+      "experienceType": "project",
+      "experienceTitle": "定价页改版",
+      "organization": "航迹科技（海外效率工具开发商）",
+      "role": "产品经理",
+      "period": "2025.03—2025.06",
+      "originalBullets": [
+        "整理竞品订阅方案、制定原型与埋点需求，推进上线并观察用户反馈。"
+      ],
+      "directRelevance": "low",
+      "transferableValue": "medium",
+      "evidenceCompleteness": "partial",
+      "missingDimensions": [],
+      "suggestedAction": "retain",
+      "removalReason": "",
+      "userDecision": "retain"
+    },
+    {
+      "experienceId": "exp-3",
+      "experienceType": "campus",
+      "experienceTitle": "商务英语本科",
+      "organization": "南方商务大学",
+      "role": "学生",
+      "period": "2018.09—2022.06",
+      "originalBullets": [
+        "商务英语本科（2018.09—2022.06）。"
+      ],
+      "directRelevance": "low",
+      "transferableValue": "medium",
+      "evidenceCompleteness": "weak",
+      "missingDimensions": [],
+      "suggestedAction": "retain",
+      "removalReason": "",
+      "userDecision": "retain"
+    }
+  ],
+  "followUpQuestions": [
+    {
+      "id": "fu-1",
+      "experienceId": "exp-1",
+      "experienceType": "work",
+      "experienceTitle": "英文笔记应用产品经理（面向美英市场）",
+      "evidenceDimension": "scale",
+      "question": "针对面向美国及英国用户的28次英文远程访谈，受访者的样本结构是怎样的（美英用户各占多少、新用户/付费用户/流失用户比例、访谈时长与开展周期），访谈由你独立完成还是与他人协作？",
+      "purpose": "把“28次访谈”从次数升级为可验证的研究规模与样本结构，证明海外用户研究的执行深度。",
+      "userAnswer": "",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-2",
+      "experienceId": "exp-1",
+      "experienceType": "work",
+      "experienceTitle": "英文笔记应用产品经理（面向美英市场）",
+      "evidenceDimension": "action",
+      "question": "这28次英文访谈中你挖掘到的关键洞察有哪些，你如何把其中哪些洞察转化为具体的需求决策并推动进入版本迭代？",
+      "purpose": "补充“研究洞察→需求决策”的闭环证据，避免访谈成果停留在“整理为需求池”。",
+      "userAnswer": "",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-3",
+      "experienceId": "exp-1",
+      "experienceType": "work",
+      "experienceTitle": "英文笔记应用产品经理（面向美英市场）",
+      "evidenceDimension": "result",
+      "question": "新手引导改版A/B测试的具体口径是什么——实验假设、实验变量、对照组设置、样本量与实验周期分别是多少，上线后订阅转化率相对对照组的变化方向如何，你在其中做了哪些关键决策？",
+      "purpose": "用可复现的实验口径替代“数据待确认”，支撑增长实验能力这一核心要求。",
+      "userAnswer": "",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-4",
+      "experienceId": "exp-2",
+      "experienceType": "project",
+      "experienceTitle": "定价页改版",
+      "evidenceDimension": "action",
+      "question": "定价页改版项目中，你整理的竞品订阅方案覆盖了哪些欧美同类产品，你据此提出的原型方案与埋点需求具体包含哪些改动点（如套餐结构、价格锚点、试用入口）？",
+      "purpose": "补充定价页改版的具体动作与专业判断，强化订阅商业化理解。",
+      "userAnswer": "",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-5",
+      "experienceId": "exp-2",
+      "experienceType": "project",
+      "experienceTitle": "定价页改版",
+      "evidenceDimension": "result",
+      "question": "定价页改版上线后观察到了哪些用户反馈或指标变化（如定价页到付费页的转化、套餐选择分布、用户评价或客服反馈），这些结果是否形成了后续迭代决策？",
+      "purpose": "补充项目的落地结果与验证方式，弥补只有“上线并观察反馈”而无产出的缺口。",
+      "userAnswer": "",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-6",
+      "experienceId": "exp-3",
+      "experienceType": "campus",
+      "experienceTitle": "商务英语本科",
+      "evidenceDimension": "other",
+      "question": "商务英语本科期间，除语言课程外是否有与产品、市场或数据分析相关的课程作业、课题报告或实践项目（如英文商业分析、市场调研、翻译项目），能否说明具体内容与完成情况？",
+      "purpose": "在职业经历AI证据不足时，补充可迁移的英语沟通与商业分析基础，但严格限定为校园学习成果。",
+      "userAnswer": "",
+      "generatedBullet": ""
+    }
+  ]
+}

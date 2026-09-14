@@ -1,0 +1,270 @@
+{
+  "comparedVersions": {
+    "baseline": "baseline",
+    "optimized": "optimized-final"
+  },
+  "averages": {
+    "baseline": 86.2,
+    "optimized": 88.9
+  },
+  "rows": [
+    {
+      "id": "01-mature",
+      "name": "成熟 AI 产品经理／材料完整、无追问补充",
+      "scores": {
+        "baseline": 85.1,
+        "optimized": 88.1
+      },
+      "delta": 3,
+      "rounds": [
+        {
+          "baseline": 87.6,
+          "optimized": 86.3
+        },
+        {
+          "optimized": 89.8,
+          "baseline": 82.6
+        }
+      ],
+      "productScores": {
+        "baseline": {
+          "original": 85,
+          "raw": 85,
+          "displayed": 85
+        },
+        "optimized": {
+          "original": 83,
+          "raw": 84,
+          "displayed": 84
+        }
+      },
+      "counts": {
+        "baseline": {
+          "followUps": 0,
+          "interviews": 10,
+          "projects": 1
+        },
+        "optimized": {
+          "followUps": 0,
+          "interviews": 10,
+          "projects": 1
+        }
+      },
+      "validation": {
+        "baseline": [],
+        "optimized": []
+      }
+    },
+    {
+      "id": "02-overseas",
+      "name": "出海产品经理／AI 仅为兴趣要求、完全跳过追问",
+      "scores": {
+        "baseline": 84.6,
+        "optimized": 89.1
+      },
+      "delta": 4.5,
+      "rounds": [
+        {
+          "optimized": 88.8,
+          "baseline": 79.9
+        },
+        {
+          "baseline": 89.3,
+          "optimized": 89.3
+        }
+      ],
+      "productScores": {
+        "baseline": {
+          "original": 66,
+          "raw": 68,
+          "displayed": 68
+        },
+        "optimized": {
+          "original": 71,
+          "raw": 71,
+          "displayed": 74
+        }
+      },
+      "counts": {
+        "baseline": {
+          "followUps": 6,
+          "interviews": 10,
+          "projects": 1
+        },
+        "optimized": {
+          "followUps": 5,
+          "interviews": 10,
+          "projects": 1
+        }
+      },
+      "validation": {
+        "baseline": [],
+        "optimized": []
+      }
+    },
+    {
+      "id": "03-transfer",
+      "name": "传统 ToB 产品转 AI／知识与规划不可升级为落地",
+      "scores": {
+        "baseline": 89.1,
+        "optimized": 89.2
+      },
+      "delta": 0.1,
+      "rounds": [
+        {
+          "optimized": 91.4,
+          "baseline": 89.2
+        },
+        {
+          "baseline": 89,
+          "optimized": 87
+        }
+      ],
+      "productScores": {
+        "baseline": {
+          "original": 60,
+          "raw": 61,
+          "displayed": 61
+        },
+        "optimized": {
+          "original": 63,
+          "raw": 68,
+          "displayed": 68
+        }
+      },
+      "counts": {
+        "baseline": {
+          "followUps": 8,
+          "interviews": 10,
+          "projects": 2
+        },
+        "optimized": {
+          "followUps": 8,
+          "interviews": 10,
+          "projects": 2
+        }
+      },
+      "validation": {
+        "baseline": [],
+        "optimized": []
+      }
+    },
+    {
+      "id": "04-campus",
+      "name": "校招／五个项目与校园经历完整保留",
+      "scores": {
+        "baseline": 85.7,
+        "optimized": 90.6
+      },
+      "delta": 4.9,
+      "rounds": [
+        {
+          "optimized": 91.7,
+          "baseline": 83.7
+        },
+        {
+          "baseline": 87.7,
+          "optimized": 89.5
+        }
+      ],
+      "productScores": {
+        "baseline": {
+          "original": 72,
+          "raw": 78,
+          "displayed": 78
+        },
+        "optimized": {
+          "original": 70,
+          "raw": 72,
+          "displayed": 72
+        }
+      },
+      "counts": {
+        "baseline": {
+          "followUps": 15,
+          "interviews": 10,
+          "projects": 5
+        },
+        "optimized": {
+          "followUps": 12,
+          "interviews": 10,
+          "projects": 5
+        }
+      },
+      "validation": {
+        "baseline": [],
+        "optimized": []
+      }
+    },
+    {
+      "id": "05-engineer",
+      "name": "工程师转技术产品／个人 Demo 与商业职责边界",
+      "scores": {
+        "baseline": 86.7,
+        "optimized": 87.7
+      },
+      "delta": 1,
+      "rounds": [
+        {
+          "optimized": 89.7,
+          "baseline": 85.6
+        },
+        {
+          "baseline": 87.7,
+          "optimized": 85.7
+        }
+      ],
+      "productScores": {
+        "baseline": {
+          "original": 64,
+          "raw": 72,
+          "displayed": 72
+        },
+        "optimized": {
+          "original": 64,
+          "raw": 71,
+          "displayed": 71
+        }
+      },
+      "counts": {
+        "baseline": {
+          "followUps": 7,
+          "interviews": 11,
+          "projects": 2
+        },
+        "optimized": {
+          "followUps": 8,
+          "interviews": 10,
+          "projects": 2
+        }
+      },
+      "validation": {
+        "baseline": [
+          "面试问题数量为11，要求10"
+        ],
+        "optimized": []
+      }
+    }
+  ],
+  "stats": {
+    "baseline": {
+      "requests": 55,
+      "httpSuccess": 40,
+      "networkErrors": 15,
+      "jsonRepairCalls": 0,
+      "promptTokens": 130462,
+      "completionTokens": 136851,
+      "elapsedMs": 664318
+    },
+    "optimized": {
+      "requests": 40,
+      "httpSuccess": 40,
+      "networkErrors": 0,
+      "jsonRepairCalls": 0,
+      "promptTokens": 205520,
+      "completionTokens": 107853,
+      "elapsedMs": 548928
+    }
+  },
+  "scoringFloorUnchanged": true
+}

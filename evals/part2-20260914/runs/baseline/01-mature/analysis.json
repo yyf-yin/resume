@@ -1,0 +1,226 @@
+{
+  "jdAnalysis": {
+    "responsibilities": [
+      "负责企业知识库问答产品的规划与迭代",
+      "负责知识库问答产品的效果评估",
+      "定义评测集并分析错误案例",
+      "协调算法和工程团队完成产品交付",
+      "推动客户试点并根据上线后反馈形成闭环迭代",
+      "关注有效回答率、客户采纳等核心指标",
+      "对接ToB客户需求并推动产品优化"
+    ],
+    "hardRequirements": [
+      "本科及以上学历",
+      "3年以上产品经验",
+      "至少一个已上线的LLM应用项目",
+      "能定义评测集",
+      "能分析错误案例",
+      "能协调算法和工程交付"
+    ],
+    "implicitRequirements": [
+      "具备企业软件或ToB产品经验",
+      "理解RAG技术方案及其产品化边界",
+      "理解企业权限管理对知识库问答的影响",
+      "具备跨团队协作和推动交付能力",
+      "具备数据指标意识和反馈闭环意识",
+      "能在业务、算法与工程之间进行需求翻译和优先级协调",
+      "能独立负责客户试点及后续迭代复盘"
+    ],
+    "keywords": [
+      "AI产品经理",
+      "企业知识库问答",
+      "LLM应用",
+      "RAG",
+      "效果评估",
+      "评测集",
+      "错误案例分析",
+      "跨团队交付",
+      "客户试点",
+      "ToB客户需求分析",
+      "企业权限管理",
+      "有效回答率",
+      "客户采纳",
+      "反馈闭环",
+      "算法协作",
+      "工程交付"
+    ],
+    "idealCandidate": "本科及以上学历，具备3年以上企业软件产品经验，至少参与过一个已上线的LLM应用项目；做过知识库问答或RAG相关产品，能够定义评测集、分析错误案例并推动迭代；理解企业权限管理和ToB客户需求，能协调算法与工程团队完成交付，并以有效回答率、客户采纳和上线后反馈闭环作为产品优化依据。",
+    "coreCompetencies": [
+      {
+        "name": "企业知识库问答产品规划",
+        "importance": "high",
+        "description": "能够围绕企业知识库问答场景完成需求研究、产品规划、方案设计和版本迭代，平衡业务价值、技术可行性与权限边界。"
+      },
+      {
+        "name": "效果评估与评测集设计",
+        "importance": "high",
+        "description": "能够定义离线或在线评测集，制定统一评审标准，跟踪有效回答率等指标，并基于评测结果判断产品效果。"
+      },
+      {
+        "name": "错误案例分析与数据驱动迭代",
+        "importance": "high",
+        "description": "能够对检索漏召回、无依据回答等错误案例进行分类归因，推动算法和产品方案进行针对性优化。"
+      },
+      {
+        "name": "跨团队交付与协调",
+        "importance": "high",
+        "description": "能够协调算法、工程和业务团队，明确需求、验收标准和交付节奏，推动LLM应用从研发到上线落地。"
+      },
+      {
+        "name": "ToB客户试点与反馈闭环",
+        "importance": "high",
+        "description": "能够组织企业客户试点，跟踪活跃使用、人工转接和权限问题，形成上线后反馈收集、问题修复与复盘迭代的闭环。"
+      },
+      {
+        "name": "RAG与企业权限管理理解",
+        "importance": "medium",
+        "description": "理解RAG检索增强生成的基本链路，以及企业权限管理对文档检索、引用溯源和回答可用性的影响。"
+      }
+    ]
+  },
+  "diagnosis": {
+    "overallScore": 85,
+    "dimensionScores": [
+      {
+        "dimension": "JD 硬性条件匹配",
+        "score": 85,
+        "comment": "本科、4年产品经验、企业软件背景和知识库问答项目均符合；但LLM/RAG应用的上线范围和资质证明不够明确。"
+      },
+      {
+        "dimension": "核心职责与项目证据",
+        "score": 88,
+        "comment": "覆盖知识库问答规划、评测集定义、错误案例分析、客户试点和跨团队交付，直接证据较多；缺少线上效果和客户采纳的深度闭环证据。"
+      },
+      {
+        "dimension": "成果与证据强度",
+        "score": 80,
+        "comment": "有300条评测集、有效回答率72%至84%、8家企业6周试点、7个权限问题修复等量化事实；但缺少客户采纳、收入或线上业务结果，部分成果仅限测试集。"
+      },
+      {
+        "dimension": "JD 关键词与专业能力覆盖",
+        "score": 86,
+        "comment": "企业知识库问答、RAG应用评测、权限设计、ToB访谈、试点迭代等关键词覆盖较好；客户采纳和上线后反馈闭环仍需补充。"
+      },
+      {
+        "dimension": "表达质量与信息结构",
+        "score": 82,
+        "comment": "简历结构清晰、量化信息突出、个人边界有说明；但句子偏长，项目成果和产品决策可进一步分点呈现。"
+      }
+    ],
+    "mainIssues": [
+      "已上线LLM/RAG项目的定义不够明确，缺少上线范围、用户量、线上指标等证据。",
+      "有效回答率提升仅来自300条离线评测集，缺少线上有效回答率、人工转接变化和客户采纳数据。",
+      "客户试点虽已开展，但未提供客户采纳率、满意度、续费或扩容等结果，反馈闭环机制未量化。",
+      "RAG经验偏评测，缺少检索、生成链路设计等RAG产品决策细节；权限管理经验强但需与AI产品岗位更紧密关联。",
+      "缺少收入增长数据，不能推断商业贡献，需用采纳、留存、使用频次等替代指标证明价值。",
+      "跨团队交付有事实基础，但个人在算法协作、优先级取舍和风险处理中的决策点可更突出。"
+    ],
+    "prioritySuggestions": [
+      "把知识库问答项目明确包装为已上线的LLM/RAG应用，补充上线时间、覆盖客户或用户、版本节奏和线上效果。",
+      "补充客户采纳与反馈闭环证据：试点采纳率、活跃使用、人工转接变化、满意度、续费或扩容意向及闭环迭代周期。",
+      "保留并强化评测集方法论：300条问题分布、专家评审一致性、错误分类标准、两轮迭代关键改动与效果归因。",
+      "将RAG能力从“评测”扩展到产品设计：检索、切分、召回、重排、生成、引用溯源及权限控制的产品决策。",
+      "量化权限管理成果：20类角色覆盖、7个权限问题影响面、发布前回归检查频率及漏检下降。",
+      "突出跨团队交付与个人贡献边界：协同算法和工程、组织业务专家、负责需求验收与试点复盘，避免让阅读者误以为只做支持性工作。"
+    ]
+  },
+  "matchItems": [
+    {
+      "jdRequirement": "本科及以上学历",
+      "resumeEvidence": "华东信息大学信息管理本科，2018.09—2022.06，学历信息明确。",
+      "evidenceStrength": "strong",
+      "needsSupplement": false,
+      "optimizationSuggestion": "保留学历信息即可，无需补充；若目标岗位强调AI或计算机背景，可补充与AI产品相关的课程、认证或培训。"
+    },
+    {
+      "jdRequirement": "3年以上产品经验",
+      "resumeEvidence": "澄明软件产品经理岗位为2022.07—2026.08，约4年企业软件产品经验，符合年限要求。",
+      "evidenceStrength": "strong",
+      "needsSupplement": false,
+      "optimizationSuggestion": "在职业摘要中直接写明“4年企业软件/AI产品经验”，并突出最近一段知识库问答产品的职责范围。"
+    },
+    {
+      "jdRequirement": "至少一个已上线的 LLM 应用项目",
+      "resumeEvidence": "协同4名工程师和1名算法工程师上线知识库问答；技能包含RAG应用评测，经历涉及检索漏召回和无依据回答，但未明确说明该产品为LLM/RAG应用、上线范围、版本及用户量。",
+      "evidenceStrength": "medium",
+      "needsSupplement": true,
+      "optimizationSuggestion": "将该项目明确标注为“LLM/RAG企业知识库问答”，补充上线时间、版本节奏、覆盖客户或用户数、线上问答量，以证明是已上线的LLM应用。"
+    },
+    {
+      "jdRequirement": "负责企业知识库问答产品规划",
+      "resumeEvidence": "访谈12家企业知识管理人员，梳理文档检索和权限问题，制定分角色检索及引用溯源需求，并推动知识库问答上线。",
+      "evidenceStrength": "strong",
+      "needsSupplement": false,
+      "optimizationSuggestion": "补充产品规划方法：需求优先级、版本路线图、关键取舍，以及分角色检索和引用溯源的产品决策依据。"
+    },
+    {
+      "jdRequirement": "能定义评测集、分析错误案例",
+      "resumeEvidence": "建立300条真实脱敏问题的离线评测集，组织两名业务专家按统一标准评审，基于检索漏召回和无依据回答分类推动两轮迭代；同一评测集有效回答率从72%提升至84%。",
+      "evidenceStrength": "strong",
+      "needsSupplement": false,
+      "optimizationSuggestion": "补充评测集的问题分布、专家评审一致性、错误分类标准和迭代归因；同时说明结果仅代表该测试集，避免过度推断。"
+    },
+    {
+      "jdRequirement": "协调算法和工程交付",
+      "resumeEvidence": "协同4名工程师和1名算法工程师上线知识库问答；联动工程团队建立文档权限发布前回归检查，7个权限问题修复后再上线。",
+      "evidenceStrength": "strong",
+      "needsSupplement": false,
+      "optimizationSuggestion": "补充跨团队协作机制、排期与风险管理、个人决策点，以及算法和工程在迭代中的分工。"
+    },
+    {
+      "jdRequirement": "RAG、企业权限管理经验优先",
+      "resumeEvidence": "技能列有RAG应用评测、权限设计；经历中制定分角色检索及引用溯源需求，定义20类角色与文档访问测试场景，建立发布前权限回归检查，修复7个权限问题。RAG更偏评测，未展开检索或生成链路设计。",
+      "evidenceStrength": "medium",
+      "needsSupplement": true,
+      "optimizationSuggestion": "拆分RAG与权限两条证据：RAG补充检索、切分、召回、重排、生成和引用溯源的产品设计；权限补充角色矩阵、覆盖范围和漏检下降数据。"
+    },
+    {
+      "jdRequirement": "ToB 客户需求分析、客户试点迭代与反馈闭环",
+      "resumeEvidence": "访谈12家企业知识管理人员；组织8家企业进行6周试点，跟踪活跃使用及人工转接，推动权限问题修复；本人负责需求、验收与试点复盘。未提供客户采纳率、续费或满意度及上线后反馈闭环数据。",
+      "evidenceStrength": "medium",
+      "needsSupplement": true,
+      "optimizationSuggestion": "补充客户分层、试点采纳率、活跃或转接具体数据、满意度或续费意向，以及“问题收集—优先级—迭代—复盘”的反馈闭环周期。"
+    }
+  ],
+  "experienceAssessments": [
+    {
+      "experienceId": "exp-1",
+      "experienceType": "work",
+      "experienceTitle": "产品经理",
+      "organization": "澄明软件（企业协作软件服务商）",
+      "role": "产品经理",
+      "period": "2022.07—2026.08",
+      "originalBullets": [
+        "访谈12家企业的知识管理人员，梳理文档检索和权限问题，制定分角色检索及引用溯源需求，协同4名工程师和1名算法工程师上线知识库问答。",
+        "建立包含300条真实脱敏问题的离线评测集，组织两名业务专家按统一标准评审，基于检索漏召回和无依据回答分类推动两轮迭代；同一评测集的有效回答率从72%提升至84%，结果仅代表该测试集。",
+        "组织8家企业进行6周试点，跟踪活跃使用及人工转接情况，推动权限问题修复；本人负责需求、验收与试点复盘，不负责模型训练。"
+      ],
+      "directRelevance": "low",
+      "transferableValue": "medium",
+      "evidenceCompleteness": "complete",
+      "missingDimensions": [],
+      "suggestedAction": "retain",
+      "removalReason": "",
+      "userDecision": "retain"
+    },
+    {
+      "experienceId": "exp-2",
+      "experienceType": "project",
+      "experienceTitle": "文档权限回归测试",
+      "organization": "",
+      "role": "产品负责人",
+      "period": "2025.09—2025.12",
+      "originalBullets": [
+        "定义20类角色与文档访问测试场景，联动工程团队建立发布前权限回归检查，测试中发现的7个权限问题均修复后再上线。"
+      ],
+      "directRelevance": "low",
+      "transferableValue": "medium",
+      "evidenceCompleteness": "complete",
+      "missingDimensions": [],
+      "suggestedAction": "retain",
+      "removalReason": "",
+      "userDecision": "retain"
+    }
+  ],
+  "followUpQuestions": []
+}

@@ -46,7 +46,11 @@ export function OptimizeStep() {
         diagnosis,
         analysisCheckpoint.followUpQuestions,
         analysisCheckpoint.experienceAssessments,
-        exampleMode
+        exampleMode,
+        {
+          jdAnalysis: analysisCheckpoint.jdAnalysis,
+          matchItems: analysisCheckpoint.matchItems,
+        }
       );
       applyOptimizationVariant(optimizeStyle, variant);
     } catch (error) {

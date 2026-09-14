@@ -1,0 +1,477 @@
+import { create } from "zustand";
+import type {
+  AnalysisResult,
+  OptimizationVariant,
+  OptimizeStyle,
+  PerfectionPlan,
+  StepId,
+  StepStatus,
+  UserInput,
+} from "@/types/resume";
+import type { AIMode } from "@/lib/ai/types";
+import type {
+  AnalysisCheckpoint,
+  AnalysisStage,
+  OptimizationCheckpoint,
+  OptimizationStage,
+} from "@/lib/ai/types";
+
+interface ResumeStore {
+  userInput: UserInput;
+  currentStep: StepId;
+  isAnalyzing: boolean;
+  hasPendingAnalysis: boolean;
+  isOptimizing: boolean;
+  analysisResult: AnalysisResult | null;
+  analysisCheckpoint: AnalysisCheckpoint;
+  optimizationCheckpoint: OptimizationCheckpoint;
+  runningStage: AnalysisStage | OptimizationStage | null;
+  stageErrors: Partial<Record<AnalysisStage | OptimizationStage, string>>;
+  optimizationCache: Partial<Record<OptimizeStyle, OptimizationVariant>>;
+  analysisError: string | null;
+  perfectionPlan: PerfectionPlan | null;
+  isGeneratingPerfection: boolean;
+  perfectionError: string | null;
+  aiMode: AIMode | null;
+  exampleMode: boolean;
+  optimizeStyle: OptimizeStyle;
+  copied: boolean;
+
+  setUserInput: (input: Partial<UserInput>) => void;
+  loadExampleData: () => void;
+  setCurrentStep: (step: StepId) => void;
+  setAnalyzing: (analyzing: boolean, reset?: boolean) => void;
+  setHasPendingAnalysis: (pending: boolean) => void;
+  setOptimizing: (optimizing: boolean) => void;
+  setRunningStage: (stage: AnalysisStage | OptimizationStage | null) => void;
+  setStageError: (stage: AnalysisStage | OptimizationStage, error: string | null) => void;
+  setAnalysisCheckpoint: (checkpoint: AnalysisCheckpoint) => void;
+  setOptimizationCheckpoint: (
+    checkpoint: OptimizationCheckpoint,
+    style?: OptimizeStyle
+  ) => void;
+  setAnalysisResult: (result: AnalysisResult, style?: OptimizeStyle) => void;
+  resetAnalysisProgress: () => void;
+  applyOptimizationVariant: (style: OptimizeStyle, variant: OptimizationVariant) => void;
+  setAnalysisError: (error: string | null) => void;
+  setPerfectionPlan: (plan: PerfectionPlan) => void;
+  setGeneratingPerfection: (generating: boolean) => void;
+  setPerfectionError: (error: string | null) => void;
+  setAiMode: (mode: AIMode | null) => void;
+  setExampleMode: (enabled: boolean) => void;
+  setOptimizeStyle: (style: OptimizeStyle) => void;
+  updateFollowUpAnswer: (id: string, answer: string) => void;
+  setFollowUpBullet: (id: string, bullet: string) => void;
+  setExperienceDecision: (experienceId: string, decision: "retain" | "remove") => void;
+  getStepStatus: (step: StepId) => StepStatus;
+  setCopied: (copied: boolean) => void;
+}
+
+const defaultUserInput: UserInput = {
+  targetRole: "",
+  industry: "",
+  companyType: "中型公司",
+  jobStage: "社招-中级",
+  highlightSkills: "",
+  jobDescription: "",
+  originalResume: "",
+  additionalInfo: "",
+};
+
+function buildCompleteResult(
+  analysis: AnalysisCheckpoint,
+  optimization: OptimizationCheckpoint
+): AnalysisResult | null {
+  if (
+    !analysis.jdAnalysis ||
+    !analysis.diagnosis ||
+    !analysis.matchItems ||
+    !analysis.experienceAssessments ||
+    !analysis.followUpQuestions ||
+    !optimization.optimizedItems ||
+    !optimization.finalResume ||
+    typeof optimization.finalResumeScore !== "number" ||
+    !optimization.interviewPrep
+  ) {
+    return null;
+  }
+
+  return {
+    jdAnalysis: analysis.jdAnalysis,
+    diagnosis: analysis.diagnosis,
+    matchItems: analysis.matchItems,
+    experienceAssessments: analysis.experienceAssessments,
+    followUpQuestions: analysis.followUpQuestions,
+    optimizedItems: optimization.optimizedItems,
+    finalResume: optimization.finalResume,
+    finalResumeScore: optimization.finalResumeScore,
+    interviewPrep: optimization.interviewPrep,
+  };
+}
+
+function splitResult(result: AnalysisResult) {
+  const analysisCheckpoint: AnalysisCheckpoint = {
+    jdAnalysis: result.jdAnalysis,
+    diagnosis: result.diagnosis,
+    matchItems: result.matchItems,
+    experienceAssessments: result.experienceAssessments,
+    followUpQuestions: result.followUpQuestions,
+  };
+  const optimizationCheckpoint: OptimizationCheckpoint = {
+    optimizedItems: result.optimizedItems,
+    finalResume: result.finalResume,
+    finalResumeScore: result.finalResumeScore,
+    interviewPrep: result.interviewPrep,
+  };
+  return { analysisCheckpoint, optimizationCheckpoint };
+}
+
+export const useResumeStore = create<ResumeStore>((set, get) => ({
+  userInput: defaultUserInput,
+  currentStep: "input",
+  isAnalyzing: false,
+  hasPendingAnalysis: false,
+  isOptimizing: false,
+  analysisResult: null,
+  analysisCheckpoint: {},
+  optimizationCheckpoint: {},
+  runningStage: null,
+  stageErrors: {},
+  optimizationCache: {},
+  analysisError: null,
+  perfectionPlan: null,
+  isGeneratingPerfection: false,
+  perfectionError: null,
+  aiMode: null,
+  exampleMode: false,
+  optimizeStyle: "professional-match",
+  copied: false,
+
+  setUserInput: (input) =>
+    set((state) => ({
+      userInput: { ...state.userInput, ...input },
+    })),
+
+  loadExampleData: () =>
+    set({
+      userInput: {
+        targetRole: "AI 产品经理",
+        industry: "企业服务 / SaaS / AI",
+        companyType: "中型公司",
+        jobStage: "转行",
+        highlightSkills: "AI 产品规划、Prompt 设计、数据驱动、ToB 需求分析、跨团队协作",
+        jobDescription: `【岗位职责】
+1. 负责 AI 功能的产品规划与迭代，包括智能问答、文档理解、工作流自动化等模块
+2. 深入理解 B 端客户业务场景，将 AI 能力转化为可落地的产品方案
+3. 与算法、工程团队协作，推动 AI 功能从 POC 到规模化上线
+4. 建立 AI 产品效果评估体系，通过数据驱动持续优化
+5. 跟踪 AI 行业趋势，输出竞品分析与产品策略
+
+【任职要求】
+1. 3年以上产品经理经验，有 ToB SaaS 或企业服务产品经验
+2. 了解 LLM 基本原理，有 AI 产品或智能化功能落地经验者优先
+3. 具备优秀的需求分析和逻辑思维能力，能将复杂业务抽象为产品方案
+4. 有数据报表、ERP/WMS 等系统产品经验者优先
+5. 良好的跨部门沟通能力和项目管理能力
+6. 本科及以上学历，计算机或相关专业优先`,
+        originalResume: `张明 | 产品经理 | 3.5年经验
+
+【个人信息】
+电话：138****5678 | 邮箱：zhangming@email.com | 上海
+
+【职业摘要】
+3.5年 B 端产品经理经验，主导 ERP 库存管理、WMS 仓储系统及经营数据报表平台的产品设计与迭代。擅长需求调研、流程梳理与跨部门协作，具备从 0 到 1 搭建数据产品的经验。
+
+【工作经历】
+某 SaaS 公司 | 产品经理 | 2021.06 - 至今
+• 负责 WMS 仓储管理系统核心模块，服务 50+ 企业客户
+• 主导库存盘点功能重构，盘点效率提升 40%
+• 设计经营数据报表平台，支持 20+ 自定义报表模板
+• 协调研发、测试、实施团队，按时交付 3 个 major 版本
+
+某软件公司 | 产品助理 | 2020.07 - 2021.05
+• 参与 ERP 采购模块需求分析与原型设计
+• 编写 PRD 文档，跟进开发进度与 UAT 测试
+• 收集客户反馈，优化订单审批流程
+
+【项目经历】
+经营数据报表平台 | 产品负责人 | 2022.03 - 2023.06
+• 从 0 到 1 搭建 BI 报表平台，覆盖销售、库存、财务三大主题
+• 设计拖拽式报表配置器，降低业务人员使用门槛
+• 上线后月活用户 200+，报表生成效率提升 60%
+
+WMS 智能补货 | 产品经理 | 2023.01 - 2023.09
+• 基于历史销售数据设计补货策略模型
+• 推动补货建议功能上线，缺货率下降 25%
+
+【技能】
+Axure、Figma、SQL、Jira、Confluence、数据分析
+
+【教育】
+某大学 | 信息管理与信息系统 | 本科 | 2016-2020`,
+        additionalInfo: "最近自学了 Prompt Engineering 和 LangChain 基础，做过一个内部文档问答 Demo。希望突出数据产品背景和 ToB 经验，弱化纯执行类描述。",
+      },
+    }),
+
+  setCurrentStep: (step) => set({ currentStep: step }),
+
+  setAnalyzing: (analyzing, reset = false) =>
+    set(
+      analyzing && reset
+        ? {
+            isAnalyzing: true,
+            isOptimizing: false,
+            analysisResult: null,
+            analysisCheckpoint: {},
+            optimizationCheckpoint: {},
+            runningStage: null,
+            stageErrors: {},
+            optimizationCache: {},
+            perfectionPlan: null,
+            perfectionError: null,
+            copied: false,
+          }
+        : { isAnalyzing: analyzing }
+    ),
+
+  setHasPendingAnalysis: (pending) => set({ hasPendingAnalysis: pending }),
+
+  setOptimizing: (optimizing) => set({ isOptimizing: optimizing }),
+
+  setRunningStage: (stage) => set({ runningStage: stage }),
+
+  setStageError: (stage, error) =>
+    set((state) => {
+      const stageErrors = { ...state.stageErrors };
+      if (error) stageErrors[stage] = error;
+      else delete stageErrors[stage];
+      return { stageErrors };
+    }),
+
+  setAnalysisCheckpoint: (checkpoint) =>
+    set((state) => {
+      const analysisCheckpoint = { ...state.analysisCheckpoint, ...checkpoint };
+      return {
+        analysisCheckpoint,
+        analysisResult: buildCompleteResult(
+          analysisCheckpoint,
+          state.optimizationCheckpoint
+        ),
+      };
+    }),
+
+  setOptimizationCheckpoint: (checkpoint, style) =>
+    set((state) => {
+      const optimizationCheckpoint = { ...state.optimizationCheckpoint, ...checkpoint };
+      const resultStyle = style ?? state.optimizeStyle;
+      const analysisResult = buildCompleteResult(
+        state.analysisCheckpoint,
+        optimizationCheckpoint
+      );
+      return {
+        optimizationCheckpoint,
+        analysisResult,
+        optimizeStyle: resultStyle,
+        optimizationCache: analysisResult
+          ? {
+              ...state.optimizationCache,
+              [resultStyle]: optimizationCheckpoint as OptimizationVariant,
+            }
+          : state.optimizationCache,
+      };
+    }),
+
+  setAnalysisResult: (result, style) =>
+    set((state) => {
+      const resultStyle = style ?? state.optimizeStyle;
+      const { analysisCheckpoint, optimizationCheckpoint } = splitResult(result);
+      return {
+        analysisResult: result,
+        analysisCheckpoint,
+        optimizationCheckpoint,
+        optimizeStyle: resultStyle,
+        optimizationCache: {
+          [resultStyle]: {
+            optimizedItems: result.optimizedItems,
+            finalResume: result.finalResume,
+            finalResumeScore: result.finalResumeScore,
+            interviewPrep: result.interviewPrep,
+          },
+        },
+        analysisError: null,
+        perfectionPlan: null,
+        perfectionError: null,
+      };
+    }),
+
+  resetAnalysisProgress: () =>
+    set({
+      currentStep: "input",
+      isAnalyzing: false,
+      hasPendingAnalysis: false,
+      isOptimizing: false,
+      analysisResult: null,
+      analysisCheckpoint: {},
+      optimizationCheckpoint: {},
+      runningStage: null,
+      stageErrors: {},
+      optimizationCache: {},
+      analysisError: null,
+      perfectionPlan: null,
+      isGeneratingPerfection: false,
+      perfectionError: null,
+      aiMode: null,
+      exampleMode: false,
+      copied: false,
+    }),
+
+  applyOptimizationVariant: (style, variant) =>
+    set((state) => {
+      const analysisResult = buildCompleteResult(state.analysisCheckpoint, variant);
+      return {
+        optimizeStyle: style,
+        optimizationCheckpoint: variant,
+        optimizationCache: {
+          ...state.optimizationCache,
+          [style]: variant,
+        },
+        analysisResult,
+        perfectionPlan: null,
+        perfectionError: null,
+      };
+    }),
+
+  setAnalysisError: (error) => set({ analysisError: error }),
+
+  setPerfectionPlan: (plan) => set({ perfectionPlan: plan, perfectionError: null }),
+
+  setGeneratingPerfection: (generating) => set({ isGeneratingPerfection: generating }),
+
+  setPerfectionError: (error) => set({ perfectionError: error }),
+
+  setAiMode: (mode) => set({ aiMode: mode }),
+
+  setExampleMode: (enabled) => {
+    if (enabled) get().loadExampleData();
+    set({
+      exampleMode: enabled,
+      currentStep: "input",
+      analysisResult: null,
+      analysisCheckpoint: {},
+      optimizationCheckpoint: {},
+      runningStage: null,
+      stageErrors: {},
+      hasPendingAnalysis: false,
+      isOptimizing: false,
+      optimizationCache: {},
+      analysisError: null,
+      perfectionPlan: null,
+      perfectionError: null,
+      copied: false,
+    });
+  },
+
+  setOptimizeStyle: (style) => set({ optimizeStyle: style }),
+
+  updateFollowUpAnswer: (id, answer) =>
+    set((state) => {
+      if (!state.analysisCheckpoint.followUpQuestions) return state;
+      const followUpQuestions = state.analysisCheckpoint.followUpQuestions.map((q) =>
+        q.id === id ? { ...q, userAnswer: answer } : q
+      );
+      const analysisCheckpoint = { ...state.analysisCheckpoint, followUpQuestions };
+      return {
+        analysisCheckpoint,
+        analysisResult: null,
+        optimizationCheckpoint: {},
+        optimizationCache: {},
+        perfectionPlan: null,
+        perfectionError: null,
+      };
+    }),
+
+  setFollowUpBullet: (id, bullet) =>
+    set((state) => {
+      if (!state.analysisCheckpoint.followUpQuestions) return state;
+      const followUpQuestions = state.analysisCheckpoint.followUpQuestions.map((q) =>
+        q.id === id ? { ...q, generatedBullet: bullet } : q
+      );
+      const analysisCheckpoint = { ...state.analysisCheckpoint, followUpQuestions };
+      return {
+        analysisCheckpoint,
+        analysisResult: null,
+        optimizationCheckpoint: {},
+        optimizationCache: {},
+        perfectionPlan: null,
+        perfectionError: null,
+      };
+    }),
+
+  setExperienceDecision: (experienceId, decision) =>
+    set((state) => {
+      if (!state.analysisCheckpoint.experienceAssessments) return state;
+      const experienceAssessments = state.analysisCheckpoint.experienceAssessments.map((item) =>
+        item.experienceId === experienceId ? { ...item, userDecision: decision } : item
+      );
+      return {
+        analysisCheckpoint: { ...state.analysisCheckpoint, experienceAssessments },
+        analysisResult: null,
+        optimizationCheckpoint: {},
+        optimizationCache: {},
+        perfectionPlan: null,
+        perfectionError: null,
+      };
+    }),
+
+  getStepStatus: (step) => {
+    const {
+      currentStep,
+      analysisCheckpoint,
+      optimizationCheckpoint,
+      runningStage,
+      stageErrors,
+    } = get();
+
+    if (step === "input") {
+      if (currentStep === "input") return "active";
+      return Object.keys(analysisCheckpoint).length > 0 ? "completed" : "pending";
+    }
+
+    const available: Record<Exclude<StepId, "input">, boolean> = {
+      "jd-analysis": Boolean(analysisCheckpoint.jdAnalysis),
+      diagnosis: Boolean(analysisCheckpoint.diagnosis),
+      match: Boolean(analysisCheckpoint.matchItems),
+      "follow-up": Boolean(
+        analysisCheckpoint.experienceAssessments && analysisCheckpoint.followUpQuestions
+      ),
+      optimize: Boolean(optimizationCheckpoint.optimizedItems),
+      "final-resume": Boolean(optimizationCheckpoint.finalResume),
+      interview: Boolean(optimizationCheckpoint.interviewPrep),
+      export: Boolean(optimizationCheckpoint.finalResume),
+      perfection: Boolean(optimizationCheckpoint.finalResume),
+    };
+
+    if (available[step]) return step === currentStep ? "active" : "completed";
+
+    const stageStep: Partial<Record<AnalysisStage | OptimizationStage, StepId>> = {
+      jd: "jd-analysis",
+      "diagnosis-match": "diagnosis",
+      "experience-inventory": "follow-up",
+      "follow-ups": "follow-up",
+      "optimized-items": "optimize",
+      "final-resume": "final-resume",
+      "final-score": "export",
+      interview: "interview",
+    };
+
+    if (runningStage && stageStep[runningStage] === step) return "running";
+    const hasError = Object.entries(stageErrors).some(
+      ([stage]) => stageStep[stage as AnalysisStage | OptimizationStage] === step
+    );
+    if (hasError) return "error";
+
+    return "disabled";
+  },
+
+  setCopied: (copied) => set({ copied }),
+}));

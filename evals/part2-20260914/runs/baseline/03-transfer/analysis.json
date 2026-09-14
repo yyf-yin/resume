@@ -1,0 +1,329 @@
+{
+  "jdAnalysis": {
+    "responsibilities": [
+      "面向企业订单与审批场景探索LLM应用，识别可落地的AI产品机会",
+      "梳理复杂业务流程，并将其抽象为产品需求与解决方案",
+      "定义产品原型和验收标准，明确功能范围与交付边界",
+      "推动业务、研发等跨团队协作，确保方案按期交付",
+      "说明AI场景的验证思路，并设计人工兜底方案",
+      "了解大模型应用边界，结合业务约束选择合适的大模型能力"
+    ],
+    "hardRequirements": [
+      "本科及以上学历",
+      "具备3年以上ToB产品经验",
+      "能够梳理复杂业务流程",
+      "能够定义产品原型和验收标准",
+      "能够推动跨团队交付",
+      "了解大模型应用边界",
+      "能说明AI场景的验证思路和人工兜底方案"
+    ],
+    "implicitRequirements": [
+      "理解企业订单、审批等业务流程，具备企业软件或ERP领域认知",
+      "具备较强的需求分析与业务抽象能力",
+      "能够与研发、业务等多角色高效沟通并推动落地",
+      "对大模型能力边界有务实认知，不夸大或包装AI能力",
+      "能从业务价值和风险控制角度设计验证路径与人工兜底机制",
+      "实际AI项目经验优先，转行候选人需展示可迁移的产品能力"
+    ],
+    "keywords": [
+      "AI应用产品经理",
+      "LLM应用",
+      "企业订单",
+      "审批场景",
+      "ToB产品",
+      "复杂业务流程",
+      "需求分析",
+      "原型设计",
+      "验收标准",
+      "跨团队交付",
+      "大模型应用边界",
+      "验证思路",
+      "人工兜底",
+      "企业软件",
+      "ERP"
+    ],
+    "idealCandidate": "具备3年以上ToB产品经验，熟悉订单、审批等企业业务流程，能够梳理并抽象复杂业务需求，定义原型与验收标准，并推动跨团队交付；了解大模型应用边界与验证方法，能设计人工兜底方案，有实际AI项目经验优先，也接受具备强可迁移产品能力的转行候选人。",
+    "coreCompetencies": [
+      {
+        "name": "业务流程抽象与需求分析",
+        "importance": "high",
+        "description": "能够梳理订单、审批等复杂业务流程，识别关键节点与规则，并抽象为清晰的产品需求。"
+      },
+      {
+        "name": "ToB产品交付能力",
+        "importance": "high",
+        "description": "具备3年以上ToB产品经验，能够定义原型、验收标准并推动跨团队完成交付。"
+      },
+      {
+        "name": "LLM应用理解与边界认知",
+        "importance": "high",
+        "description": "了解大模型在订单和审批场景中的能力边界，能够判断哪些需求适合用AI解决。"
+      },
+      {
+        "name": "AI场景验证与人工兜底设计",
+        "importance": "high",
+        "description": "能够说明AI场景的验证思路，并设计人工审核、兜底或回退机制保障业务可控。"
+      },
+      {
+        "name": "跨团队协作与推动力",
+        "importance": "medium",
+        "description": "能够协调业务、研发等角色，推动方案从需求到上线的高效落地。"
+      },
+      {
+        "name": "企业软件领域理解",
+        "importance": "medium",
+        "description": "对企业软件、ERP、订单和审批场景有基本认知，能够快速理解业务语言与约束。"
+      }
+    ]
+  },
+  "diagnosis": {
+    "overallScore": 60,
+    "dimensionScores": [
+      {
+        "dimension": "JD 硬性条件匹配",
+        "score": 78,
+        "comment": "学历为工业工程本科，满足本科及以上要求；在ERP服务商任产品经理约5年，超过3年ToB产品经验门槛，行业属企业软件，硬性条件基本达标。但简历未体现所服务客户的规模与产品线层级，年资与行业匹配的证明力仍有可补充空间。"
+      },
+      {
+        "dimension": "核心职责与项目证据",
+        "score": 58,
+        "comment": "具备订单与审批模块的流程梳理、需求评审、PRD编写与配合上线等职责证据，与目标岗位的业务流程抽象、需求分析有一定可迁移性。但AI应用侧只有一次未落地的个人规划研究，缺少LLM应用场景定义、验证与交付的直接项目证据。"
+      },
+      {
+        "dimension": "成果与证据强度",
+        "score": 40,
+        "comment": "全篇无量化结果，'改善了审批流程''配合研发完成版本上线'均为结论性描述，缺少订单处理时长、审批节点减少、配置化覆盖规则数、上线版本节奏等可验证数据，个人贡献与决策过程也不清晰。"
+      },
+      {
+        "dimension": "JD 关键词与专业能力覆盖",
+        "score": 45,
+        "comment": "有效覆盖流程梳理、PRD、原型、需求评审等产品关键词；但大模型应用边界、AI场景验证思路、人工兜底方案、验收标准定义等JD关键词基本缺失，RAG与Transformer仅停留在概念学习层面，未形成能力证据。"
+      },
+      {
+        "dimension": "表达质量与信息结构",
+        "score": 65,
+        "comment": "模块划分清晰、时间线连续、信息无冗余，但每段经历仅一两句概括，动词笼统，未按'背景—目标—行动—结果'展开，重点顺序也未向目标岗位能力倾斜。"
+      }
+    ],
+    "mainIssues": [
+      "无任何商业AI项目落地证据，AI相关经历仅为个人规划阶段的资料阅读与需求/原型整理，未开发、未测试、未上线",
+      "缺少可量化的交付成果，订单与审批经历全部为职责和动作描述，无效率、质量或规模类数据支撑",
+      "未体现大模型应用边界判断、AI场景验证思路与人工兜底方案这三项JD明确关注的能力",
+      "项目描述粒度粗，'改善审批流程''跟进交付'无法体现个人具体贡献、决策依据与协作难点",
+      "'审批规则配置化'这一与规则抽象/建模高度相关的能力未被提炼，与目标岗位'业务流程抽象'的关联未显式建立",
+      "转行定位未在简历中说明，缺乏从ERP产品经理迁移到AI应用产品经理的可迁移能力论证"
+    ],
+    "prioritySuggestions": [
+      "为'订单助手方案研究'补充AI能力边界判断（哪些订单查询可用LLM、哪些仍需规则或SQL）、验证思路（评测集构建、准确率与召回口径、灰度放量）与人工兜底设计（置信阈值、转人工触发、审计日志），并明确标注为规划阶段成果，不虚构开发与上线",
+      "为ERP订单与审批经历补充量化结果，例如异常订单处理时长变化、审批节点或角色数减少、配置化覆盖的规则数量、版本上线频次与覆盖用户范围",
+      "用'业务流程抽象'语言重构现有经历：把异常订单处理流程梳理与审批规则配置化改写为业务规则抽象、可配置建模、角色权限模型设计",
+      "新增一段转行说明，明确工业工程+ERP流程分析的背景如何迁移到AI应用产品岗位，并如实声明不具备模型训练与商业AI落地经验",
+      "整理技能栏，保留SQL、Axure、ERP流程分析、需求分析与原型等可验证能力，将RAG、Transformer等概念学习归入学习/研究项，避免与真实项目能力混淆"
+    ]
+  },
+  "matchItems": [
+    {
+      "jdRequirement": "本科及以上学历",
+      "resumeEvidence": "江南工程大学｜工业工程本科｜2017.09—2021.06，满足本科要求",
+      "evidenceStrength": "strong",
+      "needsSupplement": false,
+      "optimizationSuggestion": "保持学历信息置顶，可补充与产品设计、数据分析或AI相关的课程、证书与自学成果，增强与目标岗位的关联度"
+    },
+    {
+      "jdRequirement": "3年以上ToB产品经验，具备企业软件行业背景",
+      "resumeEvidence": "汇程系统（ERP服务商）产品经理 2021.07—2026.08，约5年ToB企业软件产品经验，负责ERP订单与审批模块",
+      "evidenceStrength": "strong",
+      "needsSupplement": false,
+      "optimizationSuggestion": "补充所负责产品线名称、服务的客户类型与规模、覆盖的行业，突出ToB属性与年资的连续性，便于招聘方快速确认硬性门槛"
+    },
+    {
+      "jdRequirement": "能够梳理复杂业务流程",
+      "resumeEvidence": "负责ERP订单与审批模块，访谈客户并绘制流程图；梳理异常订单处理流程，推动角色权限和审批规则配置化",
+      "evidenceStrength": "medium",
+      "needsSupplement": true,
+      "optimizationSuggestion": "补充流程复杂度证据，如涉及角色数、审批节点数、跨部门链路长度、异常场景类型，并把'绘制流程图'升级为'流程抽象与规则建模'，直接对应JD的业务流程抽象能力"
+    },
+    {
+      "jdRequirement": "定义原型和验收标准",
+      "resumeEvidence": "编写PRD、组织需求评审；订单助手方案研究整理需求文档与原型；技能含Axure",
+      "evidenceStrength": "medium",
+      "needsSupplement": true,
+      "optimizationSuggestion": "原型能力有间接证据，但验收标准未提及，建议写明在PRD中如何定义验收口径、上线判定标准与需求变更控制方式，最好给出一个具体场景的验收标准示例"
+    },
+    {
+      "jdRequirement": "推动跨团队交付",
+      "resumeEvidence": "组织需求评审，配合研发完成版本上线；审批流程重构项目收集业务部门问题、组织方案讨论并跟进交付",
+      "evidenceStrength": "medium",
+      "needsSupplement": true,
+      "optimizationSuggestion": "补充交付节奏与结果，如上线版本数、协作团队构成与人数、遇到的需求冲突或排期阻塞及个人推动方式，把'跟进交付'替换为可验证的交付事实"
+    },
+    {
+      "jdRequirement": "了解大模型应用边界（不要求自研模型）",
+      "resumeEvidence": "阅读大模型应用资料，学习过RAG、Transformer与多头注意力概念",
+      "evidenceStrength": "weak",
+      "needsSupplement": true,
+      "optimizationSuggestion": "把概念学习转化为边界判断能力，明确写出哪些订单与审批场景适合LLM（如非结构化文本意图识别、知识问答）、哪些不适合（如强规则计算、权限判定），并给出取舍依据，避免停留在名词罗列"
+    },
+    {
+      "jdRequirement": "实际 AI 项目经验（优先项）",
+      "resumeEvidence": "订单助手方案研究｜个人规划项目｜2026.05—2026.06，仅完成需求文档与原型，无开发、测试或上线",
+      "evidenceStrength": "none",
+      "needsSupplement": true,
+      "optimizationSuggestion": "如实标注为规划阶段研究，不包装为已落地项目；如需增强说服力，可用公开API做小范围可验证原型并记录验证过程与结论，同时明确不将传统规则引擎冒充AI能力"
+    },
+    {
+      "jdRequirement": "能说明 AI 场景的验证思路和人工兜底方案",
+      "resumeEvidence": "简历中无相关描述，未涉及验证指标、灰度策略或人工兜底机制",
+      "evidenceStrength": "none",
+      "needsSupplement": true,
+      "optimizationSuggestion": "以订单查询助手为例补写验证思路（意图与槽位评测集、答案准确率与召回口径、灰度放量与回滚条件）和人工兜底方案（置信阈值触发转人工、无答案时的兜底话术、审计与反馈回流），形成可讨论的方案细节"
+    }
+  ],
+  "experienceAssessments": [
+    {
+      "experienceId": "exp-1",
+      "experienceType": "work",
+      "experienceTitle": "产品经理（ERP订单与审批模块）",
+      "organization": "汇程系统（ERP服务商）",
+      "role": "产品经理",
+      "period": "2021.07—2026.08",
+      "originalBullets": [
+        "负责ERP订单与审批模块，访谈客户并绘制流程图，组织需求评审，编写PRD，配合研发完成版本上线。",
+        "梳理异常订单处理流程，推动角色权限和审批规则配置化。"
+      ],
+      "directRelevance": "low",
+      "transferableValue": "medium",
+      "evidenceCompleteness": "partial",
+      "missingDimensions": [],
+      "suggestedAction": "retain",
+      "removalReason": "",
+      "userDecision": "retain"
+    },
+    {
+      "experienceId": "exp-2",
+      "experienceType": "project",
+      "experienceTitle": "审批流程重构",
+      "organization": "",
+      "role": "产品负责人",
+      "period": "2024.04—2024.11",
+      "originalBullets": [
+        "收集业务部门问题，组织方案讨论并跟进交付，改善了审批流程。"
+      ],
+      "directRelevance": "low",
+      "transferableValue": "medium",
+      "evidenceCompleteness": "partial",
+      "missingDimensions": [],
+      "suggestedAction": "retain",
+      "removalReason": "",
+      "userDecision": "retain"
+    },
+    {
+      "experienceId": "exp-3",
+      "experienceType": "project",
+      "experienceTitle": "订单助手方案研究",
+      "organization": "",
+      "role": "个人规划项目",
+      "period": "2026.05—2026.06",
+      "originalBullets": [
+        "阅读大模型应用资料，整理订单查询助手的需求文档与原型；仅完成规划，没有开发、测试或上线。"
+      ],
+      "directRelevance": "low",
+      "transferableValue": "medium",
+      "evidenceCompleteness": "partial",
+      "missingDimensions": [],
+      "suggestedAction": "retain",
+      "removalReason": "",
+      "userDecision": "retain"
+    }
+  ],
+  "followUpQuestions": [
+    {
+      "id": "fu-1",
+      "experienceId": "exp-1",
+      "experienceType": "work",
+      "experienceTitle": "产品经理（ERP订单与审批模块）",
+      "evidenceDimension": "action",
+      "question": "在汇程系统负责ERP订单与审批模块期间，你把异常订单处理流程梳理成角色权限与审批规则配置化时，具体做了哪些抽象步骤？例如如何拆解异常场景类型、定义规则字段与角色权限矩阵？",
+      "purpose": "补充业务流程抽象与规则建模的具体做法，对应JD的复杂业务流程梳理与流程抽象能力",
+      "userAnswer": "",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-2",
+      "experienceId": "exp-1",
+      "experienceType": "work",
+      "experienceTitle": "产品经理（ERP订单与审批模块）",
+      "evidenceDimension": "collaboration",
+      "question": "推动角色权限和审批规则配置化落地时，你与业务部门、研发之间的分歧或排期冲突是什么，你具体用什么方式推动各方达成一致并完成上线？",
+      "purpose": "补充跨团队推动交付的真实协作过程，对应JD的推动跨团队交付要求",
+      "userAnswer": "",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-3",
+      "experienceId": "exp-1",
+      "experienceType": "work",
+      "experienceTitle": "产品经理（ERP订单与审批模块）",
+      "evidenceDimension": "result",
+      "question": "角色权限与审批规则配置化上线后，有哪些可核实的口径变化？例如异常订单处理时长、审批节点或角色数量的减少、可配置覆盖的规则条数、覆盖的客户或用户范围？",
+      "purpose": "补充量化或可验证的业务结果，弥补简历全篇缺少交付结果证据的问题",
+      "userAnswer": "",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-4",
+      "experienceId": "exp-2",
+      "experienceType": "project",
+      "experienceTitle": "审批流程重构",
+      "evidenceDimension": "action",
+      "question": "在审批流程重构项目中，你作为产品负责人具体做了哪些事？包括如何收集业务部门问题、形成的重构方案涉及哪些审批环节改动、哪部分是你个人独立决策的？",
+      "purpose": "补充个人具体行动与职责边界，避免只停留在“组织讨论、跟进交付”的笼统描述",
+      "userAnswer": "",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-5",
+      "experienceId": "exp-2",
+      "experienceType": "project",
+      "experienceTitle": "审批流程重构",
+      "evidenceDimension": "result",
+      "question": "这次审批流程重构最终交付了什么（新流程是否上线、落地了多少条审批规则或表单），业务部门的正式反馈或可观察到的变化是什么？",
+      "purpose": "补充项目的真实结果与验收情况，对应JD对验收标准定义与交付结果的要求",
+      "userAnswer": "",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-6",
+      "experienceId": "exp-3",
+      "experienceType": "project",
+      "experienceTitle": "订单助手方案研究",
+      "evidenceDimension": "action",
+      "question": "在订单助手方案研究中，你在需求文档和原型里具体界定了哪些订单查询场景适合用大模型、哪些仍必须依赖规则或SQL处理？你划分这条边界的依据是什么？",
+      "purpose": "把概念学习转化为大模型应用边界判断能力，对应JD对了解大模型应用边界的要求",
+      "userAnswer": "",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-7",
+      "experienceId": "exp-3",
+      "experienceType": "project",
+      "experienceTitle": "订单助手方案研究",
+      "evidenceDimension": "challenge",
+      "question": "这份规划中你设计了怎样的人工兜底与验证思路（如置信阈值触发转人工、无答案兜底话术、意图与答案准确率的评测口径、灰度放量条件）？其中你认为最难处理、风险最大的环节是什么？",
+      "purpose": "补充AI场景验证思路与人工兜底方案，对应JD明确关注的这两项能力",
+      "userAnswer": "",
+      "generatedBullet": ""
+    },
+    {
+      "id": "fu-8",
+      "experienceId": "exp-3",
+      "experienceType": "project",
+      "experienceTitle": "订单助手方案研究",
+      "evidenceDimension": "result",
+      "question": "订单助手方案研究最终产出了哪些可核实的内容（需求文档、原型页面数量、场景清单等），是否给他人看过或获得过反馈？请同时说明它确实只停留在规划阶段、没有开发与上线。",
+      "purpose": "如实界定规划阶段的真实成果，避免被误读为已落地的商业AI项目",
+      "userAnswer": "",
+      "generatedBullet": ""
+    }
+  ]
+}

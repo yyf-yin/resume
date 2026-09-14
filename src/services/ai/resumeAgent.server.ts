@@ -30,6 +30,7 @@ import type {
   OptimizeStyle,
   PerfectionPlan,
   ResumeDiagnosis,
+  ResumeTargetingContext,
   UserInput,
 } from "@/types/resume";
 
@@ -59,7 +60,8 @@ export async function optimizeResumeStageServer(
   experienceAssessments: ExperienceAssessment[],
   stage: OptimizationStage,
   forceMock = false,
-  checkpoint: OptimizationCheckpoint = {}
+  checkpoint: OptimizationCheckpoint = {},
+  targetingContext?: ResumeTargetingContext
 ): Promise<{ checkpoint: OptimizationCheckpoint; mode: AIMode }> {
   const mode = currentMode(forceMock);
   const nextCheckpoint =
@@ -71,7 +73,8 @@ export async function optimizeResumeStageServer(
           followUpQuestions,
           experienceAssessments,
           stage,
-          checkpoint
+          checkpoint,
+          targetingContext
         )
       : await runMockResumeOptimizationStage(
           input,
@@ -107,7 +110,8 @@ export async function regenerateOptimizedItemsServer(
   followUpQuestions: FollowUpQuestion[] = [],
   experienceAssessments: ExperienceAssessment[] = [],
   forceMock = false,
-  checkpoint: OptimizationCheckpoint = {}
+  checkpoint: OptimizationCheckpoint = {},
+  targetingContext?: ResumeTargetingContext
 ): Promise<{
   optimizedItems: AnalysisResult["optimizedItems"];
   finalResume: AnalysisResult["finalResume"];
@@ -124,7 +128,8 @@ export async function regenerateOptimizedItemsServer(
       diagnosis,
       followUpQuestions,
       experienceAssessments,
-      checkpoint
+      checkpoint,
+      targetingContext
     );
     return { ...result, mode };
   }

@@ -1,0 +1,24 @@
+{
+  "stage": "jd",
+  "startedAt": "2026-09-13T16:51:21.805Z",
+  "elapsedMs": 230,
+  "request": {
+    "model": "deepseek-v4-flash",
+    "temperature": 0.3,
+    "max_tokens": 12000,
+    "response_format": {
+      "type": "json_object"
+    },
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是「简历专家」，一位 JD 定制简历优化 Agent。\n你的任务是基于目标岗位 JD 与用户原始简历，输出结构化 JSON 分析结果。\n要求：\n1. 所有内容使用中文\n2. 分析必须基于用户提供的 JD 与简历，不得编造无法从材料推断的虚假经历\n3. 对缺失证据要明确标注 needsSupplement 或 evidenceStrength 为 weak/none\n4. followUpQuestions 必须按简历中的独立经历及其证据缺口生成；每段与目标岗位相关的经历生成 0-3 条，不设置固定总题数，id 格式 fu-1, fu-2...\n5. optimizedItems 通常生成 5 条左右，id 格式 opt-1, opt-2...；真实材料不足时允许更少，不得为凑数量虚构或重复内容\n6. interviewPrep.likelyQuestions 恰好 10 条\n7. overallScore 与各 dimensionScores.score 必须是 0-100 范围内的整数；即使证据不足也必须给出保守评分，不得省略或返回 null\n8. 当前任务指定的所有顶层字段、嵌套字段和数组元素字段均为必填项，任何情况下都不得省略或返回 null\n9. 没有内容的数组返回 []，无法从材料确定的字符串返回 \"\"，但字段本身必须保留\n10. 只输出一个合法 JSON 对象，不要 markdown 代码块、解释、思考过程或前后缀文本\n11. 不得增加 result、data、analysis、output 等额外包裹层\n12. 输出前逐项检查任务列出的所有必填字段，确认完整后再输出"
+      },
+      {
+        "role": "user",
+        "content": "请完成 JD 解析（第一部分）。\n【目标岗位】AI 应用产品经理\n【行业】企业软件\n【公司类型】中型公司\n【求职阶段】转行\n【希望突出能力】业务流程抽象、需求分析\n\n【目标 JD】\n融景软件招聘 AI 应用产品经理：为企业订单和审批场景探索 LLM 应用。必须本科及以上、3年以上 ToB 产品经验，能够梳理复杂业务流程、定义原型和验收标准，推动跨团队交付。要求了解大模型应用边界，实际 AI 项目经验优先；不要求自研模型。能说明 AI 场景的验证思路和人工兜底方案。\n\n【原始简历】\n陈航｜苏州｜chen.hang@example.com｜13800000003\n工作经历：汇程系统（ERP服务商）｜产品经理｜2021.07—2026.08\n负责ERP订单与审批模块，访谈客户并绘制流程图，组织需求评审，编写PRD，配合研发完成版本上线。\n梳理异常订单处理流程，推动角色权限和审批规则配置化。\n项目经历：审批流程重构｜产品负责人｜2024.04—2024.11\n收集业务部门问题，组织方案讨论并跟进交付，改善了审批流程。\n项目经历：订单助手方案研究｜个人规划项目｜2026.05—2026.06\n阅读大模型应用资料，整理订单查询助手的需求文档与原型；仅完成规划，没有开发、测试或上线。\n技能：SQL、Axure、ERP流程分析；学习过RAG、Transformer与多头注意力概念。\n教育：江南工程大学｜工业工程本科｜2017.09—2021.06\n\n【补充信息】\n没有商业AI项目经历，不会训练模型；希望体现真实的可迁移产品经验，不把传统规则引擎包装成AI。\n\n【强制输出契约】\n- 以下字段全部为必填项，任何情况下都不得省略或返回 null：\n  - jdAnalysis\n  - jdAnalysis.responsibilities\n  - jdAnalysis.hardRequirements\n  - jdAnalysis.implicitRequirements\n  - jdAnalysis.keywords\n  - jdAnalysis.idealCandidate\n  - jdAnalysis.coreCompetencies\n  - jdAnalysis.coreCompetencies[].name\n  - jdAnalysis.coreCompetencies[].importance\n  - jdAnalysis.coreCompetencies[].description\n- 数组没有内容时返回 []；字符串无法确定时返回 \"\"；数值和布尔值必须返回符合要求的有效值\n- 只允许输出一个 JSON 对象，不得添加 result、data、analysis、output 等包裹层\n- 不得输出 Markdown、解释文字或思考过程\n- 下方内容是合法 JSON 结构示例，必须用用户材料生成真实内容，不得照抄示例值\n- 输出前逐项自检上述字段；只有全部存在且 JSON 合法后才能输出\n\n输出结构示例：\n{\n  \"jdAnalysis\": {\n    \"responsibilities\": [\"负责核心产品规划与迭代\"],\n    \"hardRequirements\": [\"具备相关岗位经验\"],\n    \"implicitRequirements\": [\"能够推动跨团队协作\"],\n    \"keywords\": [\"产品规划\", \"数据驱动\"],\n    \"idealCandidate\": \"具备相关行业经验并能独立推动项目落地的候选人\",\n    \"coreCompetencies\": [\n      {\n        \"name\": \"产品规划\",\n        \"importance\": \"high\",\n        \"description\": \"能够完成从需求分析到产品落地的完整工作\"\n      }\n    ]\n  }\n}"
+      }
+    ]
+  },
+  "error": "TypeError: fetch failed"
+}

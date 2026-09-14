@@ -1,0 +1,56 @@
+{
+  "stage": "jd",
+  "startedAt": "2026-09-14T07:26:47.832Z",
+  "elapsedMs": 5674,
+  "httpStatus": 200,
+  "request": {
+    "model": "deepseek-v4-flash",
+    "temperature": 0.3,
+    "max_tokens": 12000,
+    "response_format": {
+      "type": "json_object"
+    },
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是「简历专家」，一位 JD 定制简历优化 Agent。\n你的任务是基于目标岗位 JD 与用户原始简历，输出结构化 JSON 分析结果。\n要求：\n1. 所有内容使用中文\n2. 分析必须基于用户提供的 JD 与简历，不得编造无法从材料推断的虚假经历\n3. 对缺失证据要明确标注 needsSupplement 或 evidenceStrength 为 weak/none\n4. followUpQuestions 必须按简历中的独立经历及其证据缺口生成；每段与目标岗位相关的经历生成 0-3 条，不设置固定总题数，id 格式 fu-1, fu-2...\n5. optimizedItems 通常生成 5 条左右，id 格式 opt-1, opt-2...；真实材料不足时允许更少，不得为凑数量虚构或重复内容\n6. interviewPrep.likelyQuestions 恰好 10 条\n7. overallScore 与各 dimensionScores.score 必须是 0-100 范围内的整数；即使证据不足也必须给出保守评分，不得省略或返回 null\n8. 当前任务指定的所有顶层字段、嵌套字段和数组元素字段均为必填项，任何情况下都不得省略或返回 null\n9. 没有内容的数组返回 []，无法从材料确定的字符串返回 \"\"，但字段本身必须保留\n10. 只输出一个合法 JSON 对象，不要 markdown 代码块、解释、思考过程或前后缀文本\n11. 不得增加 result、data、analysis、output 等额外包裹层\n12. 输出前逐项检查任务列出的所有必填字段，确认完整后再输出"
+      },
+      {
+        "role": "user",
+        "content": "请完成 JD 解析（第一部分）。\n【目标岗位】对公信用风险分析师\n【行业】银行信贷风控\n【公司类型】国企\n【求职阶段】社招-中级\n【希望突出能力】企业财务分析、贷后跟踪、风险信息整理\n\n【目标 JD】\n【模拟招聘JD，仅供简历测试】榕川商业银行招聘对公信用风险分析师。岗位职责：分析企业财务报表与现金流，整理授信调查材料，跟踪贷后经营变化，形成风险提示供审批部门参考。硬性要求：金融、会计或经济相关本科及以上学历，3年以上对公信贷或企业信用分析相关经验，能够清晰说明财务数据口径与个人职责。制造业客户分析经验、SQL数据查询能力为加分项。不要求本人拥有授信审批权限。\n\n【原始简历】\n方泽｜宁波｜fang.ze@example.com｜13800000006\n求职意向：对公信用风险分析师\n工作经历：禾宁银行（区域商业银行）｜对公信贷助理｜2021.07—2026.08\n配合客户经理收集28家制造业企业的经营资料和财务报表，整理收入、应收账款与现金流变化，编写授信分析材料初稿，供部门复核。\n参与12笔授信申请的材料整理，申请额度合计0.9亿元，负责资料校验与补件跟进；本人没有审批或放款决策权限，也没有实际获批及放款金额的数据。\n按季度更新18家存量客户贷后跟踪台账，将经营变化与报表异常整理为风险提示，提交客户经理和风控同事复核。\n项目经历：制造业客户应收账款变化排查｜参与人员｜2025.03—2025.06\n用Excel对照账龄数据和销售回款资料，标记3家客户应收账款增速与收入增速不一致的线索，形成排查清单并提交复核；未确认是否构成违约或损失。\n技能：Excel、财务报表分析、现金流分析、贷后台账维护。未使用SQL做正式业务分析。\n教育：东港财经大学｜金融学本科｜2017.09—2021.06\n\n【补充信息】\n本例不回答追问。本人没有审批权限；0.9亿元仅为申请额度合计，不是实际授信额或放款额，没有风险下降或挽回损失数据。没有投研、量化交易、AI建模或SQL业务实践。\n\n【强制输出契约】\n- 以下字段全部为必填项，任何情况下都不得省略或返回 null：\n  - jdAnalysis\n  - jdAnalysis.responsibilities\n  - jdAnalysis.hardRequirements\n  - jdAnalysis.implicitRequirements\n  - jdAnalysis.keywords\n  - jdAnalysis.idealCandidate\n  - jdAnalysis.coreCompetencies\n  - jdAnalysis.coreCompetencies[].name\n  - jdAnalysis.coreCompetencies[].importance\n  - jdAnalysis.coreCompetencies[].description\n- 数组没有内容时返回 []；字符串无法确定时返回 \"\"；数值和布尔值必须返回符合要求的有效值\n- 只允许输出一个 JSON 对象，不得添加 result、data、analysis、output 等包裹层\n- 不得输出 Markdown、解释文字或思考过程\n- 下方内容是合法 JSON 结构示例，必须用用户材料生成真实内容，不得照抄示例值\n- 输出前逐项自检上述字段；只有全部存在且 JSON 合法后才能输出\n\n输出结构示例：\n{\n  \"jdAnalysis\": {\n    \"responsibilities\": [\"负责核心产品规划与迭代\"],\n    \"hardRequirements\": [\"具备相关岗位经验\"],\n    \"implicitRequirements\": [\"能够推动跨团队协作\"],\n    \"keywords\": [\"产品规划\", \"数据驱动\"],\n    \"idealCandidate\": \"具备相关行业经验并能独立推动项目落地的候选人\",\n    \"coreCompetencies\": [\n      {\n        \"name\": \"产品规划\",\n        \"importance\": \"high\",\n        \"description\": \"能够完成从需求分析到产品落地的完整工作\"\n      }\n    ]\n  }\n}"
+      }
+    ]
+  },
+  "response": {
+    "id": "39eda64c-9840-4920-a202-877f0f33b089",
+    "object": "chat.completion",
+    "created": 1789370808,
+    "model": "deepseek-flash",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n  \"jdAnalysis\": {\n    \"responsibilities\": [\n      \"分析企业财务报表与现金流\",\n      \"整理授信调查材料\",\n      \"跟踪贷后经营变化\",\n      \"形成风险提示供审批部门参考\"\n    ],\n    \"hardRequirements\": [\n      \"金融、会计或经济相关本科及以上学历\",\n      \"3年以上对公信贷或企业信用分析相关经验\",\n      \"能够清晰说明财务数据口径与个人职责\"\n    ],\n    \"implicitRequirements\": [\n      \"具备企业财务报表与现金流的独立分析能力\",\n      \"能够持续跟踪存量客户贷后经营变化并识别异常\",\n      \"能够将复杂经营与财务信息整理为清晰的风险提示\",\n      \"具备严谨的数据口径意识和职责边界意识\",\n      \"能够与客户经理、风控及审批部门进行材料复核与沟通\",\n      \"对制造业客户经营特征有一定理解\",\n      \"具备使用数据工具辅助查询与分析的学习意愿\"\n    ],\n    \"keywords\": [\n      \"对公信用风险\",\n      \"企业财务报表\",\n      \"现金流分析\",\n      \"授信调查材料\",\n      \"贷后跟踪\",\n      \"风险提示\",\n      \"审批参考\",\n      \"制造业客户\",\n      \"SQL数据查询\",\n      \"数据口径\",\n      \"个人职责\"\n    ],\n    \"idealCandidate\": \"具备3年以上对公信贷或企业信用分析经验，能独立分析企业财务报表与现金流，熟练整理授信调查材料，持续跟踪贷后经营变化，并能将异常信息转化为供审批部门参考的风险提示；同时能够清晰说明财务数据口径与个人职责边界，有制造业客户分析经验或SQL数据查询能力者更佳。\",\n    \"coreCompetencies\": [\n      {\n        \"name\": \"企业财务与现金流分析\",\n        \"importance\": \"high\",\n        \"description\": \"能够阅读和分析企业财务报表，重点识别收入、应收账款、现金流等关键科目的变化与异常。\"\n      },\n      {\n        \"name\": \"授信调查材料整理\",\n        \"importance\": \"high\",\n        \"description\": \"能够按照授信流程收集、校验和整理企业调查材料，保证材料完整、口径清晰，可供复核和审批参考。\"\n      },\n      {\n        \"name\": \"贷后经营变化跟踪\",\n        \"importance\": \"high\",\n        \"description\": \"能够按季度或既定周期更新存量客户贷后跟踪台账，持续关注经营变化和报表异常。\"\n      },\n      {\n        \"name\": \"风险信息整理与提示\",\n        \"importance\": \"high\",\n        \"description\": \"能够将财务数据、经营变化和排查线索整理为简明风险提示，提交客户经理、风控或审批部门复核参考。\"\n      },\n      {\n        \"name\": \"数据口径与职责说明\",\n        \"importance\": \"high\",\n        \"description\": \"能够准确说明财务数据来源、统计口径和个人在材料整理、分析及跟踪中的具体职责，不混淆申请额度与实际授信、放款金额。\"\n      },\n      {\n        \"name\": \"制造业客户分析\",\n        \"importance\": \"medium\",\n        \"description\": \"具备制造业客户经营资料和财务报表分析经验，能够理解制造业收入、应收账款与回款特征，属于加分能力。\"\n      },\n      {\n        \"name\": \"SQL数据查询\",\n        \"importance\": \"medium\",\n        \"description\": \"能够使用SQL进行数据查询和辅助分析，提升贷后跟踪与风险信息整理效率，属于加分能力而非硬性要求。\"\n      }\n    ]\n  }\n}",
+          "reasoning_content": "We need answer only JSON object. Need parse JD. Must include fields. Need all required. No extra wrapper. Chinese. Need importance maybe high/medium/low. Let's craft.\n\nNeed jdAnalysis responsibilities, hardRequirements, implicitRequirements, keywords, idealCandidate, coreCompetencies array each name importance description.\n\nNeed based on JD and maybe简历? Task says JD解析（第一部分）. We parse target JD. Include mention制造业客户分析经验、SQL加分, no approval authority. Hard requirements: 本科及以上金融会计经济相关, 3年以上对公信贷或企业信用分析相关经验, 能清晰说明财务数据口径与个人职责. Implicit: 财务分析能力, 贷后跟踪敏锐, 风险信息整理表达, 数据口径严谨, 跨部门沟通? 制造业客户理解, 可能SQL加分. Keywords: 对公信用风险, 企业财务报表, 现金流, 授信调查材料, 贷后跟踪, 风险提示, 审批参考, 制造业客户, SQL, 数据口径. Ideal candidate: 3年以上对公信贷/企业信用分析，能独立分析财报现金流，整理授信材料，跟踪贷后，形成风险提示，有制造业客户经验，SQL加分，清楚职责边界。\n\nCore competencies maybe 5: 企业财务与现金流分析 high; 授信调查材料整理 high; 贷后经营变化跟踪 high; 风险信息整理与提示 medium/high; 数据口径与职责说明 high; 制造业客户分析 medium; SQL数据查询 low/medium加分. Need importance likely high/medium. Could include 7. Ensure fields.\n\nOutput JSON only."
+        },
+        "logprobs": null,
+        "finish_reason": "stop"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1246,
+      "completion_tokens": 1074,
+      "total_tokens": 2320,
+      "prompt_tokens_details": {
+        "cached_tokens": 256
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 342
+      },
+      "prompt_cache_hit_tokens": 256,
+      "prompt_cache_miss_tokens": 990
+    },
+    "system_fingerprint": "aeb56401ca74e127821c4f9126dcb669"
+  }
+}

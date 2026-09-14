@@ -1,0 +1,134 @@
+export const STYLE_LABELS = {
+  "professional-match": "更高匹配度与更强专业性",
+  concise: "更简洁",
+  "reduce-exaggeration": "降低夸张",
+  "ai-product": "更偏 AI 产品",
+  "tob-saas": "更偏 ToB SaaS",
+} as const;
+
+export type AIMode = "mock" | "llm";
+
+export interface AIStatus {
+  mode: AIMode;
+  model?: string;
+  provider?: string;
+  reason?: "missing_api_key" | "forced";
+}
+
+export interface AnalyzeRequestBody {
+  input: import("@/types/resume").UserInput;
+  optimizeStyle?: import("@/types/resume").OptimizeStyle;
+  exampleMode?: boolean;
+  checkpoint?: AnalysisCheckpoint;
+}
+
+export type AnalysisCheckpoint = Partial<import("@/types/resume").AnalysisResult>;
+
+export type AnalysisStage =
+  | "jd"
+  | "diagnosis-match"
+  | "experience-inventory"
+  | "follow-ups";
+
+export interface AnalyzeStageRequestBody {
+  input: import("@/types/resume").UserInput;
+  stage: AnalysisStage;
+  exampleMode?: boolean;
+  checkpoint?: AnalysisCheckpoint;
+}
+
+export interface AnalyzeStageResponseBody {
+  stage: AnalysisStage;
+  checkpoint: AnalysisCheckpoint;
+  mode: AIMode;
+}
+
+export interface OptimizeRequestBody {
+  targetingContext?: import("@/types/resume").ResumeTargetingContext;
+  input: import("@/types/resume").UserInput;
+  style: import("@/types/resume").OptimizeStyle;
+  followUpQuestions?: import("@/types/resume").FollowUpQuestion[];
+  experienceAssessments?: import("@/types/resume").ExperienceAssessment[];
+  diagnosis: import("@/types/resume").ResumeDiagnosis;
+  exampleMode?: boolean;
+  checkpoint?: OptimizationCheckpoint;
+}
+
+export type OptimizationCheckpoint = Partial<
+  import("@/types/resume").OptimizationVariant
+>;
+
+export type OptimizationStage =
+  | "optimized-items"
+  | "final-resume"
+  | "final-score"
+  | "interview";
+
+export interface OptimizeStageRequestBody {
+  targetingContext?: import("@/types/resume").ResumeTargetingContext;
+  input: import("@/types/resume").UserInput;
+  style: import("@/types/resume").OptimizeStyle;
+  stage: OptimizationStage;
+  diagnosis: import("@/types/resume").ResumeDiagnosis;
+  followUpQuestions?: import("@/types/resume").FollowUpQuestion[];
+  experienceAssessments?: import("@/types/resume").ExperienceAssessment[];
+  exampleMode?: boolean;
+  checkpoint?: OptimizationCheckpoint;
+}
+
+export interface OptimizeStageResponseBody {
+  stage: OptimizationStage;
+  checkpoint: OptimizationCheckpoint;
+  mode: AIMode;
+}
+
+export interface FollowUpBulletRequestBody {
+  input: import("@/types/resume").UserInput;
+  question: string;
+  purpose: string;
+  userAnswer: string;
+  exampleMode?: boolean;
+}
+
+export interface PerfectionRequestBody {
+  input: import("@/types/resume").UserInput;
+  diagnosis: import("@/types/resume").ResumeDiagnosis;
+  matchItems: import("@/types/resume").MatchItem[];
+  followUpQuestions?: import("@/types/resume").FollowUpQuestion[];
+  exampleMode?: boolean;
+}
+
+export interface APIErrorResponse {
+  error: string;
+}
+
+export interface AnalyzeResponseBody {
+  result: import("@/types/resume").AnalysisResult;
+  mode: AIMode;
+}
+
+export interface AnalyzeErrorResponse extends APIErrorResponse {
+  checkpoint?: AnalysisCheckpoint;
+}
+
+export interface OptimizeResponseBody {
+  optimizedItems: import("@/types/resume").OptimizedItem[];
+  finalResume: import("@/types/resume").FinalResume;
+  finalResumeScore: number;
+  interviewPrep: import("@/types/resume").InterviewPrep;
+  mode: AIMode;
+}
+
+export interface OptimizeErrorResponse extends APIErrorResponse {
+  checkpoint?: OptimizationCheckpoint;
+}
+
+export interface FollowUpBulletResponseBody {
+  bullet: string;
+  mode: AIMode;
+}
+
+export interface PerfectionResponseBody {
+  plan: import("@/types/resume").PerfectionPlan;
+  mode: AIMode;
+}

@@ -34,6 +34,7 @@ import {
   buildOptimizeUserPrompt,
   normalizeAnalysisResult,
   normalizeFollowUpQuestions,
+  normalizeInterviewPrep,
   normalizeOptimizedItems,
 } from "@/lib/ai/prompts";
 import type {
@@ -43,6 +44,7 @@ import type {
   OptimizeStyle,
   PerfectionPlan,
   ResumeDiagnosis,
+  ResumeTargetingContext,
   UserInput,
 } from "@/types/resume";
 
@@ -60,6 +62,11 @@ function buildCoreSummary(parts: DiagnosisMatchResult): string {
     `匹配度：${parts.diagnosis.overallScore}/100`,
     `主要问题：${parts.diagnosis.mainIssues.slice(0, 3).join("；") || "无"}`,
     `优先建议：${parts.diagnosis.prioritySuggestions.slice(0, 3).join("；") || "无"}`,
+    `已有优势证据：${parts.matchItems
+      .filter((item) => item.evidenceStrength === "strong" || item.evidenceStrength === "medium")
+      .slice(0, 5)
+      .map((item) => `${item.jdRequirement}：${item.resumeEvidence}`)
+      .join("；") || "暂无充分证据"}`,
     `关键缺口：${parts.matchItems
       .filter((item) => item.needsSupplement)
       .slice(0, 4)
@@ -105,7 +112,7 @@ export async function runLLMResumeAnalysisStage(
         const raw = await chatCompletionJSON<DiagnosisMatchResult>({
           operation: "analyze:diagnosis-match",
           system: RESUME_AGENT_SYSTEM_PROMPT,
-          user: buildAnalyzeDiagnosisPrompt(input),
+          user: buildAnalyzeDiagnosisPrompt(input, checkpoint.jdAnalysis),
           maxTokens: 16000,
         });
         const normalized = normalizeAnalysisResult(raw as AnalysisResult, input);
@@ -127,7 +134,8 @@ export async function runLLMResumeAnalysisStage(
           user: buildAnalyzeExperienceInventoryPrompt(
             input,
             checkpoint.diagnosis,
-            checkpoint.matchItems
+            checkpoint.matchItems,
+            checkpoint.jdAnalysis
           ),
           temperature: 0,
           maxTokens: 12000,
@@ -152,7 +160,8 @@ export async function runLLMResumeAnalysisStage(
           input,
           checkpoint.diagnosis,
           checkpoint.matchItems,
-          checkpoint.experienceAssessments
+          checkpoint.experienceAssessments,
+          checkpoint.jdAnalysis
         ),
         maxTokens: 10000,
       });
@@ -198,7 +207,7 @@ export async function runLLMResumeAnalysis(
       chatCompletionJSON<DiagnosisMatchResult>({
         operation: "analyze:diagnosis-match",
         system: RESUME_AGENT_SYSTEM_PROMPT,
-        user: buildAnalyzeDiagnosisPrompt(input),
+        user: buildAnalyzeDiagnosisPrompt(input, checkpoint.jdAnalysis),
         maxTokens: 16000,
       })
     );
@@ -214,7 +223,8 @@ export async function runLLMResumeAnalysis(
         user: buildAnalyzeExperienceInventoryPrompt(
           input,
           checkpoint.diagnosis!,
-          checkpoint.matchItems!
+          checkpoint.matchItems!,
+          checkpoint.jdAnalysis
         ),
         temperature: 0,
         maxTokens: 12000,
@@ -240,7 +250,8 @@ export async function runLLMResumeAnalysis(
           input,
           checkpoint.diagnosis!,
           checkpoint.matchItems!,
-          checkpoint.experienceAssessments!
+          checkpoint.experienceAssessments!,
+          checkpoint.jdAnalysis
         ),
         maxTokens: 10000,
       })
@@ -261,6 +272,10 @@ export async function runLLMResumeAnalysis(
   };
 
   const coreSummary = buildCoreSummary(diagnosisMatch);
+  const targetingContext: ResumeTargetingContext = {
+    jdAnalysis: checkpoint.jdAnalysis,
+    matchItems: checkpoint.matchItems,
+  };
 
   if (!checkpoint.optimizedItems) {
     const optimize = await runAnalysisStage(checkpoint, () =>
@@ -271,7 +286,8 @@ export async function runLLMResumeAnalysis(
           input,
           optimizeStyle,
           coreSummary,
-          checkpoint.experienceAssessments
+          checkpoint.experienceAssessments,
+          targetingContext
         ),
         maxTokens: 12000,
       })
@@ -290,7 +306,8 @@ export async function runLLMResumeAnalysis(
           coreSummary,
           checkpoint.optimizedItems!,
           checkpoint.followUpQuestions,
-          checkpoint.experienceAssessments
+          checkpoint.experienceAssessments,
+          targetingContext
         ),
         maxTokens: 16000,
       })
@@ -322,7 +339,8 @@ export async function runLLMResumeAnalysis(
           user: buildFinalResumeScorePrompt(
             input,
             checkpoint.finalResume,
-            diagnosisMatch.diagnosis
+            diagnosisMatch.diagnosis,
+            checkpoint.followUpQuestions
           ),
           temperature: 0,
           maxTokens: 4500,
@@ -336,7 +354,9 @@ export async function runLLMResumeAnalysis(
           input,
           coreSummary,
           checkpoint.finalResume,
-          checkpoint.optimizedItems
+          checkpoint.optimizedItems,
+          checkpoint.followUpQuestions,
+          targetingContext
         ),
         maxTokens: 12000,
       });
@@ -350,7 +370,7 @@ export async function runLLMResumeAnalysis(
     checkpoint.finalResumeScore = scoreResult.value.overallScore;
   }
   if (interviewResult.status === "fulfilled" && interviewResult.value) {
-    checkpoint.interviewPrep = interviewResult.value.interviewPrep;
+    checkpoint.interviewPrep = normalizeInterviewPrep(interviewResult.value.interviewPrep);
   }
 
   const finalStageError =
@@ -388,7 +408,8 @@ export async function runLLMResumeOptimizationStage(
   followUpQuestions: FollowUpQuestion[] = [],
   experienceAssessments: AnalysisResult["experienceAssessments"] = [],
   stage: OptimizationStage,
-  savedCheckpoint: OptimizationCheckpoint = {}
+  savedCheckpoint: OptimizationCheckpoint = {},
+  targetingContext?: ResumeTargetingContext
 ): Promise<OptimizationCheckpoint> {
   const checkpoint: OptimizationCheckpoint = { ...savedCheckpoint };
 
@@ -404,7 +425,8 @@ export async function runLLMResumeOptimizationStage(
             input,
             style,
             followUpQuestions,
-            experienceAssessments
+            experienceAssessments,
+            targetingContext
           ),
           temperature: 0.5,
           maxTokens: 12000,
@@ -429,7 +451,8 @@ export async function runLLMResumeOptimizationStage(
             "",
             checkpoint.optimizedItems,
             followUpQuestions,
-            experienceAssessments
+            experienceAssessments,
+            targetingContext
           ),
           maxTokens: 16000,
         });
@@ -455,7 +478,7 @@ export async function runLLMResumeOptimizationStage(
         const raw = await chatCompletionJSON<FinalResumeScoreResult>({
           operation: "regenerate:final-score",
           system: RESUME_AGENT_SYSTEM_PROMPT,
-          user: buildFinalResumeScorePrompt(input, checkpoint.finalResume, diagnosis),
+          user: buildFinalResumeScorePrompt(input, checkpoint.finalResume, diagnosis, followUpQuestions),
           temperature: 0,
           maxTokens: 4500,
         });
@@ -476,11 +499,12 @@ export async function runLLMResumeOptimizationStage(
           "",
           checkpoint.finalResume,
           checkpoint.optimizedItems,
-          followUpQuestions
+          followUpQuestions,
+          targetingContext
         ),
         maxTokens: 12000,
       });
-      checkpoint.interviewPrep = raw.interviewPrep;
+      checkpoint.interviewPrep = normalizeInterviewPrep(raw.interviewPrep);
     }
     return checkpoint;
   } catch (error) {
@@ -494,7 +518,8 @@ export async function runLLMRegenerateOptimizedItems(
   diagnosis: ResumeDiagnosis,
   followUpQuestions: FollowUpQuestion[] = [],
   experienceAssessments: AnalysisResult["experienceAssessments"] = [],
-  savedCheckpoint: OptimizationCheckpoint = {}
+  savedCheckpoint: OptimizationCheckpoint = {},
+  targetingContext?: ResumeTargetingContext
 ): Promise<
   Pick<AnalysisResult, "optimizedItems" | "finalResume" | "finalResumeScore" | "interviewPrep">
 > {
@@ -511,7 +536,8 @@ export async function runLLMRegenerateOptimizedItems(
           input,
           style,
           followUpQuestions,
-          experienceAssessments
+          experienceAssessments,
+          targetingContext
         ),
         temperature: 0.5,
         maxTokens: 12000,
@@ -529,7 +555,8 @@ export async function runLLMRegenerateOptimizedItems(
           "",
           checkpoint.optimizedItems,
           followUpQuestions,
-          experienceAssessments
+          experienceAssessments,
+          targetingContext
         ),
         maxTokens: 16000,
       });
@@ -561,7 +588,7 @@ export async function runLLMRegenerateOptimizedItems(
       : chatCompletionJSON<FinalResumeScoreResult>({
           operation: "regenerate:final-score",
           system: RESUME_AGENT_SYSTEM_PROMPT,
-          user: buildFinalResumeScorePrompt(input, checkpoint.finalResume, diagnosis),
+          user: buildFinalResumeScorePrompt(input, checkpoint.finalResume, diagnosis, followUpQuestions),
           temperature: 0,
           maxTokens: 4500,
         });
@@ -575,7 +602,8 @@ export async function runLLMRegenerateOptimizedItems(
           "",
           checkpoint.finalResume,
           checkpoint.optimizedItems,
-          followUpQuestions
+          followUpQuestions,
+          targetingContext
         ),
         maxTokens: 12000,
       });
@@ -588,7 +616,7 @@ export async function runLLMRegenerateOptimizedItems(
     checkpoint.finalResumeScore = scoreResult.value.overallScore;
   }
   if (interviewResult.status === "fulfilled" && interviewResult.value) {
-    checkpoint.interviewPrep = interviewResult.value.interviewPrep;
+    checkpoint.interviewPrep = normalizeInterviewPrep(interviewResult.value.interviewPrep);
   }
 
   const finalStageError =

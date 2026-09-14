@@ -1,0 +1,170 @@
+{
+  "averages": {
+    "baseline": 84.1,
+    "optimized-final": 89.3
+  },
+  "rows": [
+    {
+      "id": "06-finance-credit",
+      "name": "金融／对公信用风险分析（完全跳过追问）",
+      "quality": {
+        "baseline": 83.1,
+        "optimized-final": 89.6
+      },
+      "difference": 6.5,
+      "scores": {
+        "baseline": {
+          "original": 69,
+          "raw": 69,
+          "displayed": 72
+        },
+        "optimized-final": {
+          "original": 68,
+          "raw": 69,
+          "displayed": 69
+        }
+      },
+      "rounds": [
+        {
+          "optimized": 91.7,
+          "baseline": 80.6
+        },
+        {
+          "baseline": 85.5,
+          "optimized": 87.5
+        }
+      ],
+      "checks": {
+        "baseline": [],
+        "optimized-final": []
+      },
+      "counts": {
+        "baseline": {
+          "questions": 5,
+          "interviews": 10
+        },
+        "optimized-final": {
+          "questions": 2,
+          "interviews": 10
+        }
+      }
+    },
+    {
+      "id": "07-accounting-gl",
+      "name": "财会／总账会计（补充事实与资格边界）",
+      "quality": {
+        "baseline": 86.5,
+        "optimized-final": 88
+      },
+      "difference": 1.5,
+      "scores": {
+        "baseline": {
+          "original": 72,
+          "raw": 77,
+          "displayed": 77
+        },
+        "optimized-final": {
+          "original": 73,
+          "raw": 79,
+          "displayed": 79
+        }
+      },
+      "rounds": [
+        {
+          "baseline": 86.9,
+          "optimized": 84.9
+        },
+        {
+          "optimized": 91,
+          "baseline": 86.1
+        }
+      ],
+      "checks": {
+        "baseline": [],
+        "optimized-final": []
+      },
+      "counts": {
+        "baseline": {
+          "questions": 6,
+          "interviews": 10
+        },
+        "optimized-final": {
+          "questions": 6,
+          "interviews": 10
+        }
+      }
+    },
+    {
+      "id": "08-audit-campus",
+      "name": "审计／校招审计助理（实习职责与审计结论边界）",
+      "quality": {
+        "baseline": 82.8,
+        "optimized-final": 90.4
+      },
+      "difference": 7.6,
+      "scores": {
+        "baseline": {
+          "original": 79,
+          "raw": 79,
+          "displayed": 82
+        },
+        "optimized-final": {
+          "original": 75,
+          "raw": 80,
+          "displayed": 80
+        }
+      },
+      "rounds": [
+        {
+          "optimized": 92.1,
+          "baseline": 83.4
+        },
+        {
+          "baseline": 82.2,
+          "optimized": 88.6
+        }
+      ],
+      "checks": {
+        "baseline": [],
+        "optimized-final": []
+      },
+      "counts": {
+        "baseline": {
+          "questions": 2,
+          "interviews": 10
+        },
+        "optimized-final": {
+          "questions": 7,
+          "interviews": 10
+        }
+      }
+    }
+  ],
+  "stats": {
+    "baseline": {
+      "requests": 24,
+      "success": 24,
+      "repairs": 0,
+      "failures": 0,
+      "promptTokens": 76537,
+      "completionTokens": 73620,
+      "responseModels": [
+        "deepseek-flash"
+      ]
+    },
+    "optimized-final": {
+      "requests": 28,
+      "success": 28,
+      "repairs": 3,
+      "failures": 0,
+      "promptTokens": 133746,
+      "completionTokens": 103109,
+      "responseModels": [
+        "deepseek-flash"
+      ]
+    }
+  },
+  "sourceUnchanged": true,
+  "sourceSuite": "part2-20260914",
+  "caseCount": 3
+}
