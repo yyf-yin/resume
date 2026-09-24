@@ -40,11 +40,11 @@ export function DiagnosisStep() {
             {diagnosis.dimensionScores.map((d) => (
               <div key={d.dimension}>
                 <div className="mb-1.5 flex items-center justify-between text-sm">
-                  <span className="font-medium">{d.dimension}</span>
+                  <span className="font-semibold text-primary">{d.dimension}</span>
                   <span className="tabular-nums text-neutral-500">{d.score}</span>
                 </div>
                 <Progress value={d.score} className="mb-1" />
-                <p className="text-xs text-neutral-500">{d.comment}</p>
+                <p className="copy-soft text-xs leading-relaxed">{d.comment}</p>
               </div>
             ))}
           </CardContent>

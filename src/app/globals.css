@@ -4,44 +4,50 @@
 
 @layer base {
   :root {
-    --background: 0 0% 98%;
-    --foreground: 0 0% 9%;
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
-    --accent: 0 0% 96%;
-    --accent-foreground: 0 0% 9%;
+    --card-foreground: 222 47% 11%;
+    --primary: 209 100% 52%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 100% 97%;
+    --secondary-foreground: 212 100% 36%;
+    --muted: 214 55% 97%;
+    --muted-foreground: 218 17% 45%;
+    --accent: 209 100% 96%;
+    --accent-foreground: 211 100% 42%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 0 0% 63%;
-    --radius: 0.5rem;
+    --border: 214 42% 90%;
+    --input: 214 42% 86%;
+    --ring: 209 100% 52%;
+    --radius: 0.75rem;
+    --surface: 0 0% 100%;
+    --surface-raised: 210 100% 99%;
+    --grid-color: 209 100% 52%;
   }
 
   .dark {
-    --background: 240 10% 4%;
-    --foreground: 0 0% 95%;
-    --card: 240 6% 10%;
-    --card-foreground: 0 0% 95%;
-    --primary: 0 0% 95%;
-    --primary-foreground: 240 6% 10%;
-    --secondary: 240 5% 16%;
-    --secondary-foreground: 0 0% 95%;
-    --muted: 240 5% 16%;
-    --muted-foreground: 240 5% 65%;
-    --accent: 240 5% 18%;
-    --accent-foreground: 0 0% 95%;
+    --background: 0 0% 2%;
+    --foreground: 210 40% 96%;
+    --card: 220 38% 6%;
+    --card-foreground: 210 40% 96%;
+    --primary: 203 100% 55%;
+    --primary-foreground: 222 70% 7%;
+    --secondary: 215 52% 12%;
+    --secondary-foreground: 203 100% 72%;
+    --muted: 218 32% 10%;
+    --muted-foreground: 215 17% 66%;
+    --accent: 211 58% 13%;
+    --accent-foreground: 203 100% 70%;
     --destructive: 0 63% 45%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 4% 22%;
-    --input: 240 4% 22%;
-    --ring: 240 5% 54%;
+    --border: 215 38% 18%;
+    --input: 214 38% 22%;
+    --ring: 203 100% 55%;
+    --surface: 220 38% 6%;
+    --surface-raised: 218 36% 8%;
+    --grid-color: 203 100% 55%;
   }
 
   * {
@@ -51,80 +57,176 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", system-ui, -apple-system, sans-serif;
+    min-width: 320px;
+    background-image:
+      radial-gradient(circle at 14% -8%, hsl(var(--primary) / 0.11), transparent 30rem),
+      radial-gradient(circle at 96% 18%, hsl(var(--primary) / 0.06), transparent 24rem);
+    background-attachment: fixed;
+  }
+
+  ::selection {
+    background: hsl(var(--primary) / 0.24);
+    color: hsl(var(--foreground));
+  }
+
+  :focus-visible {
+    outline-color: hsl(var(--ring));
+  }
+}
+
+@layer components {
+  .app-shell {
+    background:
+      linear-gradient(hsl(var(--grid-color) / 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--grid-color) / 0.035) 1px, transparent 1px);
+    background-size: 30px 30px;
+  }
+
+  .app-header {
+    background: hsl(var(--surface) / 0.88);
+    border-color: hsl(var(--primary) / 0.16);
+    box-shadow: 0 1px 0 hsl(var(--primary) / 0.08), 0 10px 36px hsl(214 100% 50% / 0.05);
+    backdrop-filter: blur(18px) saturate(140%);
+  }
+
+  .brand-mark {
+    background: linear-gradient(145deg, hsl(var(--primary)), hsl(220 100% 58%));
+    border-color: hsl(var(--primary) / 0.55);
+    box-shadow: 0 0 0 3px hsl(var(--primary) / 0.1), 0 7px 18px hsl(var(--primary) / 0.28);
+  }
+
+  .brand-title {
+    background: linear-gradient(92deg, hsl(var(--foreground)) 15%, hsl(var(--primary)) 105%);
+    background-clip: text;
+    color: transparent;
+  }
+
+  .workflow-sidebar {
+    background: hsl(var(--surface) / 0.82);
+    border-color: hsl(var(--primary) / 0.14);
+    backdrop-filter: blur(18px) saturate(135%);
+  }
+
+  .workspace-main {
+    background: linear-gradient(135deg, hsl(var(--background) / 0.2), hsl(var(--primary) / 0.025));
+  }
+
+  .site-footer {
+    background: hsl(var(--surface) / 0.9);
+    border-color: hsl(var(--primary) / 0.13);
+    backdrop-filter: blur(16px);
+  }
+
+  .glass-control {
+    background: hsl(var(--muted) / 0.72);
+    border-color: hsl(var(--primary) / 0.15);
+    box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.65);
+  }
+
+  .dark .glass-control {
+    box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.06);
+  }
+
+  .copy-body {
+    color: hsl(217 31% 28%);
+  }
+
+  .copy-soft {
+    color: hsl(217 20% 43%);
+  }
+
+  .copy-accent {
+    color: hsl(211 100% 38%);
+  }
+
+  .dark .copy-body {
+    color: hsl(211 32% 82%);
+  }
+
+  .dark .copy-soft {
+    color: hsl(214 20% 66%);
+  }
+
+  .dark .copy-accent {
+    color: hsl(var(--primary) / 0.92);
   }
 }
 
 @layer utilities {
+  .dark .bg-background {
+    background-color: hsl(var(--background));
+  }
+
   .dark .bg-white {
     background-color: hsl(var(--card));
   }
 
   .dark .bg-neutral-50,
   .dark .bg-neutral-50\/50 {
-    background-color: rgb(24 24 27);
+    background-color: hsl(218 32% 9%);
   }
 
   .dark .bg-neutral-100 {
-    background-color: rgb(39 39 42);
+    background-color: hsl(216 34% 12%);
   }
 
   .dark .bg-neutral-200 {
-    background-color: rgb(63 63 70);
+    background-color: hsl(215 32% 18%);
   }
 
   .dark .bg-neutral-800 {
-    background-color: rgb(228 228 231);
+    background-color: hsl(203 100% 48%);
   }
 
   .dark .bg-neutral-900 {
-    background-color: rgb(244 244 245);
+    background-color: hsl(var(--primary));
   }
 
   .dark .text-neutral-950,
   .dark .text-neutral-900 {
-    color: rgb(250 250 250);
+    color: hsl(210 40% 98%);
   }
 
   .dark .text-neutral-800,
   .dark .text-neutral-700 {
-    color: rgb(228 228 231);
+    color: hsl(213 30% 88%);
   }
 
   .dark .text-neutral-600,
   .dark .text-neutral-500 {
-    color: rgb(161 161 170);
+    color: hsl(215 18% 68%);
   }
 
   .dark .text-neutral-400 {
-    color: rgb(113 113 122);
+    color: hsl(215 16% 56%);
   }
 
   .dark .text-neutral-300 {
-    color: rgb(82 82 91);
+    color: hsl(215 16% 43%);
   }
 
   .dark .text-neutral-50 {
-    color: rgb(24 24 27);
+    color: hsl(222 70% 7%);
   }
 
   .dark .border-neutral-100,
   .dark .border-neutral-200 {
-    border-color: rgb(63 63 70);
+    border-color: hsl(var(--border));
   }
 
   .dark .hover\:bg-neutral-50:hover,
   .dark .hover\:bg-neutral-100:hover,
   .dark .hover\:bg-neutral-50\/50:hover,
   .dark .data-\[state\=selected\]\:bg-neutral-50[data-state="selected"] {
-    background-color: rgb(39 39 42);
+    background-color: hsl(212 46% 13%);
   }
 
   .dark .hover\:bg-neutral-200:hover {
-    background-color: rgb(63 63 70);
+    background-color: hsl(212 44% 17%);
   }
 
   .dark .hover\:bg-neutral-800:hover {
-    background-color: rgb(212 212 216);
+    background-color: hsl(203 100% 63%);
   }
 
   .dark .hover\:text-neutral-900:hover,

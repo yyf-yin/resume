@@ -33,7 +33,7 @@ export function ThemeToggle() {
     <div
       role="group"
       aria-label="界面主题"
-      className="flex h-7 items-center rounded-md border border-neutral-200 bg-neutral-50 p-0.5"
+      className="glass-control flex h-8 items-center rounded-lg border p-0.5"
     >
       <button
         type="button"
@@ -43,8 +43,8 @@ export function ThemeToggle() {
         className={cn(
           "flex h-5 w-6 items-center justify-center gap-1 rounded text-[10px] font-medium transition-colors sm:w-auto sm:px-1.5",
           theme === "light"
-            ? "bg-white text-neutral-900 shadow-sm"
-            : "text-neutral-400 hover:text-neutral-700"
+            ? "bg-card text-primary shadow-sm ring-1 ring-primary/15"
+            : "text-muted-foreground hover:text-primary"
         )}
       >
         <Sun className="h-3 w-3" />
@@ -58,8 +58,8 @@ export function ThemeToggle() {
         className={cn(
           "flex h-5 w-6 items-center justify-center gap-1 rounded text-[10px] font-medium transition-colors sm:w-auto sm:px-1.5",
           theme === "dark"
-            ? "bg-white text-neutral-900 shadow-sm"
-            : "text-neutral-400 hover:text-neutral-700"
+            ? "bg-card text-primary shadow-sm ring-1 ring-primary/15"
+            : "text-muted-foreground hover:text-primary"
         )}
       >
         <Moon className="h-3 w-3" />

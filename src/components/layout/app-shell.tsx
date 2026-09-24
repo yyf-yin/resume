@@ -82,22 +82,22 @@ export function AppShell() {
   }, []);
 
   return (
-    <div className="flex h-[100dvh] min-h-[100dvh] flex-col overflow-hidden">
+    <div className="app-shell flex h-[100dvh] min-h-[100dvh] flex-col overflow-hidden bg-background">
       <TopNav />
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden md:flex-row">
         <StepSidebar />
-        <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-          <div className="mx-auto max-w-5xl p-3 pb-6 sm:p-6">
+        <main className="workspace-main min-h-0 flex-1 overflow-y-auto overscroll-contain">
+          <div className="mx-auto max-w-6xl p-3 pb-8 sm:p-6 lg:p-8">
             <StepContent />
           </div>
         </main>
       </div>
-      <footer className="flex shrink-0 flex-col items-center justify-center gap-1 border-t border-neutral-200 bg-white px-3 pb-[calc(0.25rem+env(safe-area-inset-bottom))] pt-1 text-[10px] leading-none text-neutral-500 sm:px-4 sm:text-[11px]">
+      <footer className="site-footer flex shrink-0 flex-col items-center justify-center gap-1 border-t px-3 pb-[calc(0.35rem+env(safe-area-inset-bottom))] pt-1.5 text-[10px] leading-none text-muted-foreground sm:flex-row sm:gap-3 sm:px-4 sm:text-[11px]">
         <a
           href="https://beian.miit.gov.cn/"
           target="_blank"
           rel="noreferrer"
-          className="transition-colors hover:text-neutral-900"
+          className="transition-colors hover:text-primary"
         >
           苏ICP备2026058202号
         </a>
@@ -105,7 +105,7 @@ export function AppShell() {
           href="https://beian.mps.gov.cn/#/query/webSearch?code=32011602010755"
           target="_blank"
           rel="noreferrer"
-          className="inline-flex items-center gap-1 transition-colors hover:text-neutral-900"
+          className="inline-flex items-center gap-1 transition-colors hover:text-primary"
         >
           <Image
             src="/beian-icon.png"

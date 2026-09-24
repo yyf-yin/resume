@@ -26,7 +26,7 @@ export function InterviewStep() {
           <CardTitle className="text-sm">自我介绍</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm leading-relaxed text-neutral-700">{interviewPrep.selfIntroduction}</p>
+          <p className="copy-body text-sm leading-7">{interviewPrep.selfIntroduction}</p>
         </CardContent>
       </Card>
 
@@ -36,16 +36,16 @@ export function InterviewStep() {
         </CardHeader>
         <CardContent className="space-y-4">
           {interviewPrep.likelyQuestions.map((q, i) => (
-            <div key={i} className="rounded-md border border-neutral-100 p-4">
-              <p className="mb-2 text-sm font-medium">
+            <div key={i} className="rounded-lg border border-primary/10 bg-primary/[0.02] p-4">
+              <p className="mb-2 text-sm font-semibold text-primary">
                 Q{i + 1}. {q.question}
               </p>
-              <p className="mb-2 text-sm text-neutral-600">
-                <span className="font-medium text-neutral-700">建议回答：</span>
+              <p className="copy-body mb-2 text-sm leading-relaxed">
+                <span className="font-semibold text-primary">建议回答：</span>
                 {q.suggestedAnswer}
               </p>
               {q.evidenceNeeded.length > 0 && (
-                <p className="text-xs text-neutral-500">
+                <p className="copy-soft text-xs leading-relaxed">
                   <span className="font-medium">需准备证据：</span>
                   {q.evidenceNeeded.join("；")}
                 </p>

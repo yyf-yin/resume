@@ -65,7 +65,7 @@ export function StepContent() {
   return (
     <>
       {runningStage && (
-        <div className="mb-4 flex items-center gap-2 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700">
+        <div className="mb-5 flex items-center gap-2 rounded-xl border border-primary/25 bg-primary/10 px-4 py-3 text-sm font-medium text-primary shadow-[0_8px_24px_hsl(var(--primary)/0.08)]">
           <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
           <span>{stageLabels[runningStage]}…</span>
         </div>

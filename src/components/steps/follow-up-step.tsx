@@ -220,7 +220,7 @@ export function FollowUpStep() {
                 <Badge variant="secondary" className="font-normal">
                   {EXPERIENCE_TYPE_LABELS[group.experienceType]}
                 </Badge>
-                <h3 id={`group-${group.id}`} className="text-sm font-semibold text-neutral-800">
+                <h3 id={`group-${group.id}`} className="text-sm font-semibold text-primary">
                   {group.experienceTitle}
                 </h3>
                 <span className="text-xs text-neutral-400">
@@ -312,7 +312,7 @@ export function FollowUpStep() {
                             </Badge>
                           )}
                         </div>
-                        <CardTitle className="text-sm font-medium leading-snug">
+                        <CardTitle className="text-sm font-semibold leading-snug text-foreground">
                           {q.question}
                         </CardTitle>
                       </div>
@@ -363,7 +363,7 @@ export function FollowUpStep() {
                         <p className="mb-1 text-xs font-medium text-emerald-700">
                           生成的 bullet
                         </p>
-                        <p className="text-sm leading-relaxed text-neutral-700">
+                        <p className="copy-accent text-sm font-medium leading-relaxed">
                           {q.generatedBullet}
                         </p>
                       </div>

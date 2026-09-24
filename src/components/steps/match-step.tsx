@@ -49,8 +49,8 @@ export function MatchStep() {
             <TableBody>
               {matchItems.map((item, i) => (
                 <TableRow key={i}>
-                  <TableCell className="font-medium">{item.jdRequirement}</TableCell>
-                  <TableCell className="text-neutral-600">{item.resumeEvidence}</TableCell>
+                  <TableCell className="font-semibold text-primary">{item.jdRequirement}</TableCell>
+                  <TableCell className="copy-soft leading-relaxed">{item.resumeEvidence}</TableCell>
                   <TableCell>
                     <EvidenceBadge strength={item.evidenceStrength} />
                   </TableCell>
@@ -59,7 +59,7 @@ export function MatchStep() {
                       {item.needsSupplement ? "需补充" : "已覆盖"}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-neutral-600">{item.optimizationSuggestion}</TableCell>
+                  <TableCell className="copy-accent font-medium leading-relaxed">{item.optimizationSuggestion}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

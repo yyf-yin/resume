@@ -79,7 +79,7 @@ export function JDAnalysisStep() {
           <CardTitle className="text-sm">理想候选人画像</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm leading-relaxed text-neutral-600">{jdAnalysis.idealCandidate}</p>
+          <p className="copy-body text-sm leading-7">{jdAnalysis.idealCandidate}</p>
         </CardContent>
       </Card>
 
@@ -99,11 +99,11 @@ export function JDAnalysisStep() {
             <TableBody>
               {jdAnalysis.coreCompetencies.map((c) => (
                 <TableRow key={c.name}>
-                  <TableCell className="font-medium">{c.name}</TableCell>
+                  <TableCell className="font-semibold text-primary">{c.name}</TableCell>
                   <TableCell>
                     <ImportanceBadge importance={c.importance} />
                   </TableCell>
-                  <TableCell className="text-neutral-600">{c.description}</TableCell>
+                  <TableCell className="copy-body leading-relaxed">{c.description}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

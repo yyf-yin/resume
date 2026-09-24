@@ -70,8 +70,8 @@ export function OptimizeStep() {
       />
 
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-neutral-600">
-          优化目标：<span className="font-medium text-neutral-900">更高匹配度 · 更强专业性</span>
+        <p className="copy-soft text-sm">
+          优化目标：<span className="font-semibold text-primary">更高匹配度 · 更强专业性</span>
         </p>
         <Button
           variant="outline"
@@ -113,10 +113,10 @@ export function OptimizeStep() {
               <TableBody>
                 {optimizedItems.map((item) => (
                   <TableRow key={item.id}>
-                    <TableCell className="font-medium">{item.section}</TableCell>
-                    <TableCell className="text-neutral-500">{item.before}</TableCell>
-                    <TableCell className="text-neutral-900">{item.after}</TableCell>
-                    <TableCell className="text-neutral-600">{item.reason}</TableCell>
+                    <TableCell className="font-semibold text-primary">{item.section}</TableCell>
+                    <TableCell className="copy-soft leading-relaxed">{item.before}</TableCell>
+                    <TableCell className="copy-accent font-medium leading-relaxed">{item.after}</TableCell>
+                    <TableCell className="copy-body leading-relaxed">{item.reason}</TableCell>
                     <TableCell>
                       <span className="text-amber-700">{item.riskWarning}</span>
                     </TableCell>

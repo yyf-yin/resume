@@ -79,16 +79,16 @@ export function PerfectionStep() {
 
       <Card className="mb-6">
         <CardContent className="py-5">
-          <p className="mb-3 text-sm font-medium text-neutral-900">当前简历弱项：</p>
+          <p className="mb-3 text-sm font-semibold text-primary">当前简历弱项：</p>
           <ul className="mb-5 space-y-2">
             {resumeWeaknesses.map((weakness) => (
-              <li key={weakness} className="flex gap-2 text-sm text-neutral-600">
-                <span className="text-neutral-300">•</span>
+              <li key={weakness} className="copy-body flex gap-2 text-sm">
+                <span className="text-primary/65">•</span>
                 <span>{weakness}</span>
               </li>
             ))}
           </ul>
-          <p className="mb-4 text-sm text-neutral-700">
+          <p className="copy-accent mb-4 text-sm font-medium">
             补强后简历会有更强竞争力，立刻生成专属补强建议
           </p>
           <Button size="sm" onClick={handleGenerate} disabled={isGeneratingPerfection}>
@@ -122,7 +122,7 @@ export function PerfectionStep() {
         <>
           <Card className="mb-4 border-emerald-200 bg-emerald-50/30">
             <CardContent className="py-4">
-              <p className="text-sm leading-relaxed text-neutral-700">{perfectionPlan.summary}</p>
+              <p className="copy-accent text-sm font-medium leading-7">{perfectionPlan.summary}</p>
             </CardContent>
           </Card>
 
@@ -143,7 +143,7 @@ export function PerfectionStep() {
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <p className="mb-1 text-xs text-neutral-400">针对弱项：{recommendation.targetGap}</p>
-                      <CardTitle className="text-base">{recommendation.title}</CardTitle>
+                      <CardTitle className="text-base text-primary">{recommendation.title}</CardTitle>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <Badge variant="outline">{recommendation.category}</Badge>
@@ -154,13 +154,13 @@ export function PerfectionStep() {
                 <CardContent className="space-y-3">
                   <div>
                     <p className="mb-1 text-xs font-medium text-neutral-500">建议</p>
-                    <p className="text-sm leading-relaxed text-neutral-700">
+                    <p className="copy-body text-sm leading-relaxed">
                       {recommendation.suggestion}
                     </p>
                   </div>
                   <div className="rounded-md bg-neutral-50 p-3">
                     <p className="mb-1 text-xs font-medium text-neutral-500">推荐理由</p>
-                    <p className="text-sm leading-relaxed text-neutral-600">
+                    <p className="copy-soft text-sm leading-relaxed">
                       {recommendation.reason}
                     </p>
                   </div>

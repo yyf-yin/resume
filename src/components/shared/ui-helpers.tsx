@@ -48,9 +48,9 @@ export function SectionTitle({
   description?: string;
 }) {
   return (
-    <div className="mb-4 sm:mb-6">
-      <h2 className="text-lg font-semibold tracking-tight text-neutral-900">{title}</h2>
-      {description && <p className="mt-1 text-sm text-neutral-500">{description}</p>}
+    <div className="mb-5 border-l-2 border-primary pl-3 sm:mb-7 sm:pl-4">
+      <h2 className="text-xl font-bold tracking-tight text-primary sm:text-2xl">{title}</h2>
+      {description && <p className="mt-1.5 text-sm text-muted-foreground">{description}</p>}
     </div>
   );
 }
@@ -59,12 +59,12 @@ export function ListSection({ title, items }: { title: string; items: string[] }
   return (
     <div>
       {title ? (
-        <h3 className="mb-2 text-sm font-medium text-neutral-900">{title}</h3>
+        <h3 className="mb-2 text-sm font-semibold text-primary">{title}</h3>
       ) : null}
       <ul className="space-y-1.5">
         {items.map((item, i) => (
-          <li key={i} className="flex gap-2 text-sm text-neutral-600">
-            <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-neutral-400" />
+          <li key={i} className="copy-body flex gap-2 text-sm leading-relaxed">
+            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary/65 shadow-[0_0_7px_hsl(var(--primary)/0.35)]" />
             <span>{item}</span>
           </li>
         ))}

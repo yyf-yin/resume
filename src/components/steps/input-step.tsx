@@ -244,10 +244,10 @@ export function InputStep() {
           </CardHeader>
           <CardContent className="space-y-3">
             <div
-              className={`relative flex min-h-28 flex-col items-center justify-center overflow-hidden rounded-lg border-2 border-dashed px-4 py-5 text-center transition-colors focus-within:ring-2 focus-within:ring-neutral-400 focus-within:ring-offset-2 ${
+              className={`relative flex min-h-32 flex-col items-center justify-center overflow-hidden rounded-xl border-2 border-dashed px-4 py-6 text-center transition-all duration-200 focus-within:ring-4 focus-within:ring-primary/10 ${
                 isDraggingResume
-                  ? "border-neutral-900 bg-neutral-100"
-                  : "border-neutral-300 bg-neutral-50 hover:border-neutral-500 hover:bg-neutral-100"
+                  ? "scale-[1.01] border-primary bg-primary/10 shadow-[0_10px_30px_hsl(var(--primary)/0.12)]"
+                  : "border-primary/25 bg-primary/[0.035] hover:border-primary/55 hover:bg-primary/[0.07]"
               } ${uploadDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
             >
               <input
@@ -275,9 +275,9 @@ export function InputStep() {
                 onDrop={handleResumeDrop}
               />
               {isParsingResume ? (
-                <Loader2 className="mb-2 h-6 w-6 animate-spin text-neutral-600" />
+                <Loader2 className="mb-2 h-6 w-6 animate-spin text-primary" />
               ) : (
-                <Upload className="mb-2 h-6 w-6 text-neutral-600" />
+                <Upload className="mb-2 h-6 w-6 text-primary" />
               )}
               <span className="text-sm font-medium">
                 {isParsingResume

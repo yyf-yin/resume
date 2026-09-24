@@ -20,22 +20,22 @@ function EntrySection({ title, entries }: { title: string; entries: ResumeEntry[
 
   return (
     <section className="mb-5">
-      <h4 className="mb-3 text-xs font-medium uppercase tracking-wider text-neutral-400">
+      <h4 className="mb-3 text-xs font-bold uppercase tracking-[0.16em] text-primary">
         {title}
       </h4>
       <div className="space-y-4">
         {entries.map((entry) => (
           <div key={`${entry.name}-${entry.period}`}>
             <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <p className="text-sm font-medium">
+              <p className="text-sm font-semibold text-foreground">
                 {entry.name} · {entry.role}
               </p>
               <span className="text-xs text-neutral-400">{entry.period}</span>
             </div>
             <ul className="mt-2 space-y-1">
               {entry.bullets.map((bullet, index) => (
-                <li key={index} className="flex gap-2 text-sm text-neutral-600">
-                  <span className="text-neutral-300">•</span>
+                <li key={index} className="copy-body flex gap-2 text-sm leading-relaxed">
+                  <span className="text-primary/65">•</span>
                   <span>{bullet}</span>
                 </li>
               ))}
@@ -54,10 +54,10 @@ function EducationSection({
 }) {
   return (
     <section className="mb-5">
-      <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-neutral-400">
+      <h4 className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-primary">
         教育背景
       </h4>
-      <p className="text-sm">
+      <p className="copy-body text-sm">
         {education.school} · {education.degree} · {education.period}
       </p>
     </section>
@@ -69,7 +69,7 @@ function SkillsSection({ title, skills }: { title: string; skills: string[] }) {
 
   return (
     <section className="mb-5">
-      <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-neutral-400">
+      <h4 className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-primary">
         {title}
       </h4>
       <div className="flex flex-wrap gap-1.5">
@@ -161,7 +161,7 @@ export function FinalResumeStep() {
       <Card className="mb-6">
         <CardContent className="p-4 sm:p-6">
           <div className="mb-4">
-            <h3 className="text-xl font-semibold">{personalInfo.name}</h3>
+            <h3 className="text-xl font-bold text-primary">{personalInfo.name}</h3>
             <p className="mt-1 text-sm text-neutral-500">
               {personalInfo.email} · {personalInfo.phone} · {personalInfo.location}
             </p>
@@ -170,20 +170,20 @@ export function FinalResumeStep() {
           <Separator className="my-4" />
 
           <section className="mb-5">
-            <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-neutral-400">
+            <h4 className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-primary">
               求职意向
             </h4>
-            <p className="text-sm">{finalResume.jobIntent}</p>
+            <p className="copy-accent text-sm font-medium">{finalResume.jobIntent}</p>
           </section>
 
           {isCampusTemplate && <EducationSection education={finalResume.education} />}
 
           {!isCampusTemplate && finalResume.summary && (
             <section className="mb-5">
-              <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-neutral-400">
+              <h4 className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-primary">
                 职业摘要
               </h4>
-              <p className="text-sm leading-relaxed text-neutral-700">{finalResume.summary}</p>
+              <p className="copy-body text-sm leading-7">{finalResume.summary}</p>
             </section>
           )}
 
@@ -203,13 +203,13 @@ export function FinalResumeStep() {
 
           {isCampusTemplate && finalResume.awardsAndCertificates.length > 0 && (
             <section className="mb-5">
-              <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-neutral-400">
+              <h4 className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-primary">
                 获奖证书
               </h4>
               <ul className="space-y-1">
                 {finalResume.awardsAndCertificates.map((award) => (
-                  <li key={award} className="flex gap-2 text-sm text-neutral-600">
-                    <span className="text-neutral-300">•</span>
+                  <li key={award} className="copy-body flex gap-2 text-sm">
+                    <span className="text-primary/65">•</span>
                     <span>{award}</span>
                   </li>
                 ))}
@@ -218,10 +218,10 @@ export function FinalResumeStep() {
           )}
 
           <section className="mb-5">
-            <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-neutral-400">
+            <h4 className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-primary">
               技能工具
             </h4>
-            <p className="text-sm text-neutral-600">{finalResume.skillsAndTools.join(" · ")}</p>
+            <p className="copy-accent text-sm font-medium">{finalResume.skillsAndTools.join(" · ")}</p>
           </section>
 
           {!isCampusTemplate && <EducationSection education={finalResume.education} />}

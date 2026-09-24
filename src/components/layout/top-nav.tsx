@@ -37,21 +37,21 @@ export function TopNav() {
   };
 
   return (
-    <header className="grid shrink-0 grid-cols-1 border-b border-neutral-200 bg-white lg:grid-cols-[minmax(0,1fr)_auto]">
-      <div className="flex h-12 min-w-0 items-center gap-1.5 px-2.5 sm:gap-2.5 sm:px-4">
-        <div className="flex h-7 w-7 items-center justify-center rounded-md border border-neutral-200 bg-neutral-50">
-          <FileText className="h-3.5 w-3.5 text-neutral-700" />
+    <header className="app-header relative z-20 grid shrink-0 grid-cols-1 border-b lg:grid-cols-[minmax(0,1fr)_auto]">
+      <div className="flex h-14 min-w-0 items-center gap-2 px-3 sm:gap-3 sm:px-5">
+        <div className="brand-mark flex h-8 w-8 items-center justify-center rounded-lg border">
+          <FileText className="h-4 w-4 text-white" />
         </div>
         <div>
-          <h1 className="text-sm font-semibold tracking-tight text-neutral-900">简历助手</h1>
+          <h1 className="brand-title text-sm font-bold tracking-tight sm:text-base">简历助手</h1>
         </div>
-        <span className="hidden rounded-md border border-neutral-200 px-1.5 py-0.5 text-[10px] font-medium text-neutral-500 sm:inline-flex">
+        <span className="hidden rounded-full border border-primary/20 bg-primary/5 px-2 py-1 text-[10px] font-semibold tracking-wide text-primary sm:inline-flex">
           JD 定制简历优化 Agent
         </span>
         <div
           role="group"
           aria-label="示例模式"
-          className="flex h-7 shrink-0 items-center gap-0.5 rounded-md border border-neutral-200 bg-neutral-50 p-0.5 sm:gap-1 sm:pl-2"
+          className="glass-control flex h-8 shrink-0 items-center gap-0.5 rounded-lg border p-0.5 sm:gap-1 sm:pl-2"
         >
           <span className="hidden text-[10px] font-medium text-neutral-500 sm:inline">示例模式：</span>
           <button
@@ -64,8 +64,8 @@ export function TopNav() {
               workflowRunning
                 ? "cursor-not-allowed text-neutral-300"
                 : exampleMode
-                ? "bg-white text-neutral-900 shadow-sm"
-                : "text-neutral-400 hover:text-neutral-700"
+                ? "bg-card text-primary shadow-sm ring-1 ring-primary/15"
+                : "text-muted-foreground hover:text-primary"
             )}
           >
             开
@@ -80,8 +80,8 @@ export function TopNav() {
               workflowRunning
                 ? "cursor-not-allowed text-neutral-300"
                 : !exampleMode
-                ? "bg-white text-neutral-900 shadow-sm"
-                : "text-neutral-400 hover:text-neutral-700"
+                ? "bg-card text-primary shadow-sm ring-1 ring-primary/15"
+                : "text-muted-foreground hover:text-primary"
             )}
           >
             关
@@ -89,7 +89,7 @@ export function TopNav() {
         </div>
         <ThemeToggle />
       </div>
-      <div className="flex h-11 items-center justify-end gap-4 border-t border-neutral-200 px-2.5 sm:px-4 lg:h-12 lg:border-t-0 lg:pl-0">
+      <div className="flex h-12 items-center justify-end gap-4 border-t border-primary/10 px-3 sm:px-5 lg:h-14 lg:border-t-0 lg:pl-0">
         <p className="hidden text-xs text-neutral-400 2xl:block">
           基于目标岗位 JD · 诊断 · 匹配 · 优化 · 面试准备
         </p>
